@@ -8,12 +8,12 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
-using KeraLuaEx;
+//using KeraLuaEx;
 
 
 namespace KeraLuaEx.Test
 {
-    // This is copied from the KeraLua tests as regression.
+    // These are copied from the KeraLua tests as regression.
     [TestFixture]
     public class RegressionTests
     {

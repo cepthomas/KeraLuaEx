@@ -20,23 +20,15 @@ namespace KeraLuaEx
         /// <summary>Main execution context.</summary>
         readonly Lua? _lMain;
 
-        /// <summary>Errors cause exceptions. TODO1 make option.</summary>
-        readonly bool _throwOnError = true;
-
         /// <summary>Error info if not throwing on error.</summary>
         string _serror = "";
         #endregion
 
         #region Properties
-        /// <summary>
-        /// Internal Lua handle pointer.
-        /// </summary>
+        /// <summary>Internal Lua handle pointer.</summary>
         public IntPtr LuaState { get { return _luaState; } }
 
-        /// <summary>
-        /// Encoding for the string conversions.
-        /// ASCII by default.
-        /// </summary>
+        /// <summary>Encoding for the string conversions. ASCII by default.</summary>
         public Encoding Encoding { get; set; } = Encoding.ASCII;
 
         /// <summary>
@@ -44,13 +36,13 @@ namespace KeraLuaEx
         /// The application can use this area for any purpose; Lua does not use it for anything.
         /// Each new thread has this area initialized with a copy of the area of the main thread. 
         /// </summary>
-        /// <returns></returns>
         public IntPtr ExtraSpace { get { return _luaState - IntPtr.Size; } }
 
-        /// <summary>
-        /// Get the context on the main thread. Will be this if only one.
-        /// </summary>
+        /// <summary>Get the context on the main thread. Will be this if only one.</summary>
         public Lua LMain { get { return _lMain ?? this; } }
+
+        /// <summary>Errors cause exceptions.</summary>
+        public bool ThrowOnError { get; set; } = true;
         #endregion        
 
         #region Lifecycle
@@ -94,14 +86,14 @@ namespace KeraLuaEx
         /// </summary>
         /// <param name="luaThread"></param>
         /// <param name="mainState"></param>
-        Lua(IntPtr luaThread, Lua mainState)
+        private Lua(IntPtr luaThread, Lua mainState)
         {
             _lMain = mainState;
             _luaState = luaThread;
             Encoding = mainState.Encoding;
 
             SetExtraObject(this, false);
-            //TODO2 why? GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -158,14 +150,16 @@ namespace KeraLuaEx
             {
                 NativeMethods.lua_close(_luaState);
                 _luaState = IntPtr.Zero;
-                //TODO2 why? GC.SuppressFinalize(this);
+                GC.SuppressFinalize(this);
             }
         }
 
         /// <summary>
         /// Dispose the lua context (calling Close).
         /// </summary>
+#pragma warning disable CA1063 // Implement IDisposable Correctly TODO2 lifecycle?
         public void Dispose()
+#pragma warning restore CA1063 // Implement IDisposable Correctly
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -464,7 +458,7 @@ namespace KeraLuaEx
         /// <param name="what"></param>
         /// <param name="ar"></param>
         /// <returns>This function returns false on error (for instance, an invalid option in what). </returns>
-        public bool GetInfo(string what, ref LuaDebug ar) //TODO1 overload?
+        public bool GetInfo(string what, ref LuaDebug ar)
         {
             bool ret = false;
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
@@ -501,7 +495,7 @@ namespace KeraLuaEx
         /// <param name="ar"></param>
         /// <param name="n"></param>
         /// <returns></returns>
-        public string? GetLocal(LuaDebug ar, int n) //TODO1 overloads?
+        public string? GetLocal(LuaDebug ar, int n)
         {
             string? ret = string.Empty;
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
@@ -547,7 +541,7 @@ namespace KeraLuaEx
         /// <param name="level"></param>
         /// <param name="ar"></param>
         /// <returns></returns>
-        public int GetStack(int level, ref LuaDebug ar) //TODO1 overloads?
+        public int GetStack(int level, ref LuaDebug ar)
         {
             int ret = 0;
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
@@ -1291,7 +1285,7 @@ namespace KeraLuaEx
         /// <param name="ar"></param>
         /// <param name="n"></param>
         /// <returns>Returns NULL (and pops nothing) when the index is greater than the number of active local variables. </returns>
-        public string? SetLocal(LuaDebug ar, int n) //TODO1 overloads?
+        public string? SetLocal(LuaDebug ar, int n)
         {
             string? ret = null;
             IntPtr pDebug = Marshal.AllocHGlobal(Marshal.SizeOf(ar));
@@ -1485,12 +1479,12 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Converts the Lua value at the given index to a C# string.
+        /// Converts the Lua value at the given index to a C# string. TODO2 Careful not to confuse with ToString().
         /// </summary>
         /// <param name="index"></param>
         /// <param name="callMetamethod">Calls __tostring field if present</param>
         /// <returns></returns>
-        public string? ToString(int index, bool callMetamethod = true)//TODO1 fights with ToString()
+        public string? ToString(int index, bool callMetamethod = true)
         {
             byte[]? buffer = ToBuffer(index, callMetamethod);
             return buffer == null ? null : Encoding.GetString(buffer);
@@ -2205,7 +2199,7 @@ namespace KeraLuaEx
         /// Convert a table from the lua stack. Note that this pops the table.
         /// </summary>
         /// <returns>Minty fresh table.</returns>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="SyntaxException"></exception>
         public DataTable ToDataTable()
         {
             DataTable table = new();
@@ -2236,7 +2230,7 @@ namespace KeraLuaEx
                    LuaType.Number => DetermineNumber(-1),
                    LuaType.Boolean => ToBoolean(-1),
                    LuaType.Table => ToDataTable(), // recursion!
-                   _ => null // ignore others TODO2 or arg option?
+                    _ => throw new SyntaxException($"Unsupported value type {valType} for {ToString(-2)}")
                 };
 
                 if (val is not null)
@@ -2250,7 +2244,7 @@ namespace KeraLuaEx
 
             object? DetermineNumber(int index)
             {
-                //return l.IsInteger(index) ? ToInteger(index) : ToNumber(index); //TODO2 ternary op doesn't work!?
+                //return l.IsInteger(index) ? ToInteger(index) : ToNumber(index); //TODO2 ternary op doesn't work! why?
                 if (IsInteger(index)) { return ToInteger(index); }
                 else { return ToNumber(index); }
             }
@@ -2262,7 +2256,7 @@ namespace KeraLuaEx
         /// Push onto lua stack.
         /// </summary>
         /// <param name="table"></param>
-        public void PushDataTable(DataTable table)//TODO1 finish/test
+        public void PushDataTable(DataTable table) // TODO1 finish/test
         {
             switch (table.Type)
             {
@@ -2353,7 +2347,7 @@ namespace KeraLuaEx
                 }
                 _serror = string.Join(Environment.NewLine, ls);
 
-                if (_throwOnError)
+                if (ThrowOnError)
                 {
                     throw lstat == LuaStatus.ErrFile ? new FileNotFoundException(_serror) : new LuaException(_serror);
                 }

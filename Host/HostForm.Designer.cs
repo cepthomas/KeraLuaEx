@@ -17,17 +17,15 @@
         {
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             btnOpen = new System.Windows.Forms.ToolStripButton();
-            btnGoJson = new System.Windows.Forms.ToolStripButton();
+            toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             btnGoMain = new System.Windows.Forms.ToolStripButton();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             rtbScript = new System.Windows.Forms.RichTextBox();
             rtbOutput = new System.Windows.Forms.RichTextBox();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             splitContainer3 = new System.Windows.Forms.SplitContainer();
             rtbStack = new System.Windows.Forms.RichTextBox();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
-            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -45,7 +43,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnOpen, toolStripSeparator2, btnGoJson, toolStripSeparator3, btnGoMain, toolStripSeparator1 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnOpen, toolStripSeparator3, btnGoMain, toolStripSeparator1 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1286, 27);
@@ -61,14 +59,10 @@
             btnOpen.Text = "Open";
             btnOpen.Click += Open_Click;
             // 
-            // btnGoJson
+            // toolStripSeparator3
             // 
-            btnGoJson.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            btnGoJson.ImageTransparentColor = System.Drawing.Color.Magenta;
-            btnGoJson.Name = "btnGoJson";
-            btnGoJson.Size = new System.Drawing.Size(63, 24);
-            btnGoJson.Text = "Go json";
-            btnGoJson.Click += GoJson_Click;
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new System.Drawing.Size(6, 27);
             // 
             // btnGoMain
             // 
@@ -78,6 +72,11 @@
             btnGoMain.Size = new System.Drawing.Size(69, 24);
             btnGoMain.Text = "Go Main";
             btnGoMain.Click += GoMain_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
             // 
             // rtbScript
             // 
@@ -161,21 +160,6 @@
             splitContainer2.SplitterDistance = 385;
             splitContainer2.TabIndex = 0;
             // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
-            // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(6, 27);
-            // 
-            // toolStripSeparator3
-            // 
-            toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new System.Drawing.Size(6, 27);
-            // 
             // HostForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -216,8 +200,6 @@
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.RichTextBox rtbStack;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.ToolStripButton btnGoJson;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }

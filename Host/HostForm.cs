@@ -6,11 +6,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.Json.Nodes;
 using System.ComponentModel;
-//using KeraLuaEx;
 
 
 //TODO2 need line numbers
@@ -25,16 +21,8 @@ namespace KeraLuaEx.Host
         #endregion
 
         #region Fields
-        /// <summary>lua context.</summary>
+        /// <summary>Lua context.</summary>
         Lua _l = new();
-
-        /// <summary>Needed to bind static lua functions.</summary>
-        static HostForm _mf;
-
-        /// <summary>Bound lua function.</summary>
-        readonly LuaFunction _funcPrint = PrintEx;
-        /// <summary>Bound lua function.</summary>
-        readonly LuaFunction _funcTimer = Timer;
 
         /// <summary>Detect file edited externally.</summary>
         readonly FileSystemWatcher _watcher = new();
@@ -44,10 +32,6 @@ namespace KeraLuaEx.Host
 
         /// <summary>File has been edited.</summary>
         bool _dirty = false;
-
-        /// <summary>Metrics.</summary>
-        readonly Stopwatch _sw = new();
-        long _startTicks = 0;
 
         /// <summary>Current file.</summary>
         string _fn = "";
@@ -65,7 +49,6 @@ namespace KeraLuaEx.Host
             InitializeComponent();
 
             _l = new(); // Shut up compiler.
-            _mf = this;
         }
 
         /// <summary>
@@ -81,7 +64,6 @@ namespace KeraLuaEx.Host
             rtbScript.Clear();
             rtbOutput.Clear();
 
-            // Settings - fixed for now.
             _logColors = new()
             {
                 { Level.ERR, Color.Pink },
@@ -89,13 +71,20 @@ namespace KeraLuaEx.Host
                 { Level.DBG, Color.LightGreen },
                 { Level.SCR, Color.Magenta },
             };
+            Test.Common.LogMessage += (object? sender, string e) => Log(Level.SCR, e);
+
+            Log(Level.INF, "============================ Starting up ===========================");
 
             var font = new Font("Consolas", 10);
             rtbScript.Font = font;
             rtbOutput.Font = font;
             rtbStack.Font = font;
 
-            Log(Level.INF, "============================ Starting up ===========================");
+            rtbScript.KeyDown += (object? _, KeyEventArgs __) => _dirty = true;
+
+            _watcher.EnableRaisingEvents = false;
+            _watcher.NotifyFilter = NotifyFilters.LastWrite;
+            _watcher.Changed += Watcher_Changed;
 
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
@@ -106,14 +95,6 @@ namespace KeraLuaEx.Host
                     _scriptsPath = Path.GetDirectoryName(_fn)!;
                 }
             }
-
-            rtbScript.KeyDown += (object? _, KeyEventArgs __) => _dirty = true;
-
-            _watcher.EnableRaisingEvents = true;
-            _watcher.NotifyFilter = NotifyFilters.LastWrite;
-            _watcher.Changed += Watcher_Changed;
-
-            _sw.Start();
 
             base.OnLoad(e);
         }
@@ -145,7 +126,6 @@ namespace KeraLuaEx.Host
         {
             if (disposing)
             {
-                _sw.Stop();
                 components?.Dispose();
             }
 
@@ -192,6 +172,7 @@ namespace KeraLuaEx.Host
         {
             string ret = "";
             rtbScript.Clear();
+            _watcher.EnableRaisingEvents = false;
 
             try
             {
@@ -202,6 +183,7 @@ namespace KeraLuaEx.Host
 
                 _watcher.Path = Path.GetDirectoryName(fn)!;
                 _watcher.Filter = Path.GetFileName(fn);
+                _watcher.EnableRaisingEvents = true;
                 _fn = fn;
             }
             catch (Exception ex)
@@ -242,175 +224,30 @@ namespace KeraLuaEx.Host
         }
         #endregion
 
-        #region Lua calls C# function
+        #region Run tests
         /// <summary>
-        /// Called by lua script.
-        /// </summary>
-        /// <param name="p"></param>
-        /// <returns></returns>
-        static int PrintEx(IntPtr p)
-        {
-            var l = Lua.FromIntPtr(p)!;
-            // args
-            string msg = l.ToString(-1)!;
-            // work
-            _mf.Log(Level.SCR, $"printex:{msg}");
-            // return
-            return 0;
-        }
-
-        /// <summary>
-        /// Called by lua script.
-        /// </summary>
-        /// <param name="p"></param>
-        /// <returns></returns>
-        static int Timer(IntPtr p)
-        {
-            var l = Lua.FromIntPtr(p)!;
-            // args
-            bool on = l.ToBoolean(-1);
-            // work
-            var msec = _mf.Timer(on);
-            // return
-            l.PushNumber(msec);
-            return 1;
-        }
-        #endregion
-
-        #region C# calls Lua function
-
-        public string Calculate(List<long> addends, string suffix)
-        {
-            // Get the function to be called.
-            LuaType gtype = _l.GetGlobal("calc");
-            // Push the arguments to the call.
-            DataTable table = new(addends);
-            _l.PushDataTable(table);
-            _l.PushString(suffix);
-            // Do the actual call.
-            LuaStatus lstat = _l.PCall(2, 1, 0);
-            // Get the results from the stack.
-            var res = _l.ToString(-1);
-            _l.Pop(1); // Clean up returned value.
-            return res!;
-        }
-        #endregion
-
-        /// <summary>
-        /// 
+        /// Do something.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         void GoMain_Click(object sender, EventArgs e)
         {
-            Setup();
+            Test.LuaExTests tests = new();
             try
             {
-                string s = rtbScript.Text;
-                _l.LoadString(s);
-                _l.PCall(0, -1, 0);
-
-                List<string>? ls = new();
-
-                ShowStack();
-
-                //ls = Utils.DumpStack(_l);
-                //Log(Level.INF, FormatDump("Stack", ls, true));
-
-                var x = Utils.GetGlobalValue(_l, "g_table");
-                var table = (DataTable)x.val!;
-                Log(Level.INF, table.Format("g_table"));
-                //g_table:
-                //  dev_type(String):bing_bong
-                //  abool(Boolean):true
-                //  channel(Number):10
-
-                x = Utils.GetGlobalValue(_l, "g_number");
-                Log(Level.INF, Utils.FormatCsharpVal("g_number", x.val));
-
-                x = Utils.GetGlobalValue(_l, "g_int");
-                Log(Level.INF, Utils.FormatCsharpVal("g_int", x.val));
-
-                //x = Utils.GetGlobalValue(_l, "_G");
-                //table = x.val as Table;
-                //Log(Level.INF, table.Format("_G"));
-                //public static List<string> DumpGlobals(Lua l)
-                //{
-                //    // Get global table.
-                //    l.PushGlobalTable();
-                //    var ls = DumpTable(l);
-                //    // Remove global table(-1).
-                //    l.Pop(1);
-                //    return ls;
-                //}
-
-                x = Utils.GetGlobalValue(_l, "g_list_int");
-                table = (DataTable)x.val!;
-                Log(Level.INF, table.Format("g_list_int"));
-                //g_list_int:
-                //  1(Number):2
-                //  2(Number):56
-                //  3(Number):98
-                //  4(Number):2
-
-                x = Utils.GetGlobalValue(_l, "things");
-                table = (DataTable)x.val!;
-                Log(Level.INF, table.Format("things"));
-
-
-                ///// Execute a lua function.
-                LuaType gtype = _l.GetGlobal("g_func");
-                // Push the arguments to the call.
-                _l.PushString("az9011 birdie");
-                // Do the actual call.
-                _l.PCall(1, 1, 0);
-                // Get result.
-                var res = _l.ToInteger(-1);
-                Log(Level.DBG, $"Function returned {res} should be 13");
-
-
-                // DataTable create and access tests TODO1
-
-
-                // Json TODO1  From json.lua:
-                // json.encode(value)
-                // Returns a string representing value encoded in JSON.
-                // json.encode({ 1, 2, 3, { x = 10 } }) -- Returns '[1,2,3,{"x":10}]'
-                //
-                // json.decode(str)
-                // Returns a value representing the decoded JSON string.
-                // json.decode('[1,2,3,{"x":10}]') -- Returns { 1, 2, 3, { x = 10 } }
-                // {"TUNE":{"channel":1,"dev_type":"midi_in"},"WHIZ":{"channel":10,"abool":true,"dev_type":"bing_bong"},"TRIG":{"channel":2,"adouble":1.234,"dev_type":"virt_key"}}
+                tests.Setup();
+                tests.Basic();
             }
             catch (Exception ex)
             {
                 Log(Level.ERR, $"{ex}");
             }
-
-            TearDown();
+            finally
+            {
+                tests.TearDown();
+            }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void GoJson_Click(object sender, EventArgs e)
-        {
-            Setup();
-
-            string s = rtbScript.Text;
-            _l.LoadString(s);
-            _l.PCall(0, -1, 0);
-
-            //List<string>? ls = new();
-
-            var sjson = @"{""TUNE"":{""channel"":1,""dev_type"":""midi_in""},""WHIZ"":{""channel"":10,""alist"":[2,56,98,2],""dev_type"":""bing_bong""},""TRIG"":{""channel"":2,""adouble"":1.234,""dev_type"":""virt_key""}}";
-            var table = DataTable.FromJson(sjson);
-            // Do some tests. Also ToJson().
-
-            TearDown();
-        }
+        #endregion
 
         #region Internal functions
         /// <summary>
@@ -420,7 +257,7 @@ namespace KeraLuaEx.Host
         /// <param name="msg"></param>
         void Log(Level level, string msg)
         {
-            string text = $"> {msg}{Environment.NewLine}";
+            string text = $">{level} {msg}{Environment.NewLine}";
             int _maxText = 5000;
 
             // Trim buffer.
@@ -442,52 +279,6 @@ namespace KeraLuaEx.Host
         {
             var s = Utils.DumpStack(_l);
             rtbStack.Text = s;
-        }
-
-        /// <summary>
-        /// Stop the elapsed timer and return msec.
-        /// </summary>
-        /// <param name="on">Start or stop.</param>
-        /// <returns></returns>
-        double Timer(bool on)
-        {
-            double totalMsec = 0;
-            if (on)
-            {
-                _startTicks = _sw.ElapsedTicks; // snap
-            }
-            else
-            {
-                if (_startTicks > 0)
-                {
-                    long t = _sw.ElapsedTicks; // snap
-                    totalMsec = (t - _startTicks) * 1000D / Stopwatch.Frequency;
-                }
-            }
-            return totalMsec;
-        }
-
-        /// <summary>
-        /// Pretend unit test function.
-        /// </summary>
-        void Setup()
-        {
-            rtbOutput.Clear();
-
-            _l.Close();
-            _l = new Lua();
-            _l.Register("printex", _funcPrint);
-            _l.Register("timer", _funcTimer);
-
-            Utils.SetLuaPath(_l, new() { _scriptsPath });
-        }
-
-        /// <summary>
-        /// Pretend unit test function.
-        /// </summary>
-        void TearDown()
-        {
-            _l.Close();
         }
         #endregion
     }

@@ -19,11 +19,6 @@
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
     </PropertyGroup>
     <ItemGroup>
-      <Compile Remove="Test\**" />
-      <EmbeddedResource Remove="Test\**" />
-      <None Remove="Test\**" />
-    </ItemGroup>
-    <ItemGroup>
       <None Update="lua54.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

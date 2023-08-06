@@ -1,10 +1,11 @@
 
-json = require "json"
-
 -- Function implemented in C#.
 printex("Loading luaex.lua!")
 
 math.randomseed(os.time())
+
+-- C# timer.
+timer(true)
 
 -- Locals.
 local tune_string = "tune" 
@@ -43,18 +44,19 @@ function calc(addends, suffix)
     return string.format('>>>%d_%s<<<', sum, suffix)
 end
 
--- Json test encode.
-timer(true)
-things_json = json.encode(things)
-msec = timer(false) -- impl C#
-printex('encode things took ' .. msec .. ' msec')
-
-
--- Json test decode.
-timer(true)
-things_list = json.encode(g_list_int)
+-- do something...
 msec = timer(false)
-printex('encode g_list_int took ' .. msec .. ' msec')
+printex("this took " .. msec .. " msec")
+
+
+local index = 1
+
+function g_func(s)
+  index = index + 1
+  printex("g_func " .. #s .. " " .. index)
+  return #s
+end
+
 
 
 --[[
@@ -90,14 +92,3 @@ drums   seq_DrumsChorus seq_DrumsChorus seq_DrumsChorus seq_DrumsChorus
 bass    seq_BassChorus  seq_BassChorus  seq_BassChorus  seq_BassChorus
 synth   seq_Algo        nil             seq_Algo        seq_Dynamic     nil
 --]]
-
-
-
-local index = 1
-
-function g_func(s)
-  printex(#s .. "," .. index)
-  index = index + 1
-  return #s
-end
-

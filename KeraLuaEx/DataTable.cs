@@ -2,9 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Xml.Linq;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Linq;
 
 
@@ -48,6 +46,9 @@ namespace KeraLuaEx
         #region Properties
         /// <summary>Representation of a lua table.</summary>
         public TableType Type { get; private set; } = TableType.Unknown;
+
+        /// <summary>How many elements.</summary>
+        public int Count { get { return _tableFields.Count; } }
         #endregion
 
         #region Lifecycle
@@ -140,7 +141,7 @@ namespace KeraLuaEx
                     }
                     else
                     {
-                        serr = $"Mismatched table key type:{key.GetType()}";//TODO1 needs more info - table name
+                        serr = $"Mismatched table key type:{key.GetType()} for key:{key}";
                     }
                     break;
 
@@ -151,7 +152,7 @@ namespace KeraLuaEx
                     }
                     else
                     {
-                        serr = $"Mismatched table key type:{key.GetType()} for key:{key}";//TODO1 needs more info - table name
+                        serr = $"Mismatched table key type:{key.GetType()} for key:{key}";
                     }
                     break;
 
@@ -179,10 +180,7 @@ namespace KeraLuaEx
 
             if (Type == TableType.List)
             {
-                foreach (var v in _tableFields)
-                {
-                    ret.Add(v.Value);
-                }
+                _tableFields.ForEach(kv => ret.Add(kv.Value));
             }
             else
             {
@@ -269,94 +267,6 @@ namespace KeraLuaEx
 
             return string.Join(Environment.NewLine, ls);
         }
-
-        /// <summary>
-        /// Create a table from json.
-        /// </summary>
-        /// <param name="sjson">Json string</param>
-        /// <returns>New DataTable</returns>
-        public static DataTable FromJson(string sjson)//TODO1
-        {
-            DataTable table = new();
-
-            // Uses Utf8JsonReader directly. https://marcroussy.com/2020/08/17/deserialization-with-system-text-json/
-
-            var options = new JsonReaderOptions
-            {
-                AllowTrailingCommas = true,
-                CommentHandling = JsonCommentHandling.Skip
-            };
-            var bytes = Encoding.ASCII.GetBytes(sjson);
-            var reader = new Utf8JsonReader(bytes, options);
-            while (reader.Read())
-            {
-                //Debug.Write(reader.GetString());
-                Debug.WriteLine($"{reader.TokenType}:{reader.TokenStartIndex}");
-
-                switch (reader.TokenType)
-                {
-                    case JsonTokenType.PropertyName:
-                        var str = reader.GetString();
-                        Debug.WriteLine($"PropertyName({reader.TokenStartIndex}):{str}");
-                        break;
-
-                    case JsonTokenType.String:
-                        str = reader.GetString();
-                        Debug.WriteLine($"String({reader.TokenStartIndex}):{str}");
-                        //Console.Write(text);
-                        break;
-
-                    case JsonTokenType.Number:
-                        if (reader.TryGetInt64(out long value))
-                        {
-                            Debug.WriteLine($"Long({reader.TokenStartIndex}):{value}");
-                        }
-                        else
-                        {
-                            double dblValue = reader.GetDouble();
-                            Debug.WriteLine($"Double({reader.TokenStartIndex}):{dblValue}");
-                        }
-                        break;
-
-                        // etc....
-                        // None = 0,
-                        //    There is no value (as distinct from System.Text.Json.JsonTokenType.Null). This is the default token type if no data has been read.
-                        // StartObject = 1,
-                        //    The token type is the start of a JSON object.
-                        // EndObject = 2,
-                        //    The token type is the end of a JSON object.
-                        // StartArray = 3,
-                        //    The token type is the start of a JSON array.
-                        // EndArray = 4,
-                        //    The token type is the end of a JSON array.
-                        // PropertyName = 5,
-                        //    The token type is a JSON property name.
-                        // Comment = 6,
-                        //    The token type is a comment string.
-                        // String = 7,
-                        //    The token type is a JSON string.
-                        // Number = 8,
-                        //    The token type is a JSON number.
-                        // True = 9,
-                        //    The token type is the JSON literal true.
-                        // False = 10,
-                        //    The token type is the JSON literal false.
-                        // Null = 11
-                        //    The token type is the JSON literal null.
-                }
-            }
-
-            return table;
-        }
-
-        /// <summary>
-        /// Create json from table.
-        /// </summary>
-        /// <returns>Json string</returns>
-        public string ToJson()
-        {
-            return "TODO1";
-        }        
         #endregion
     }
 }

@@ -12,57 +12,6 @@ namespace KeraLuaEx.Host
     public class Utils
     {
         /// <summary>
-        /// Generic get a simple stack value. Restores stack.
-        /// </summary>
-        /// <param name="l"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static (object? val, Type? type) GetGlobalValue(Lua l, string name)
-        {
-            object? val = null;
-            Type? type = null;
-
-            LuaType t = l.GetGlobal(name);
-            switch (t)
-            {
-                case LuaType.Nil:
-                    // Return defaults.
-                    break;
-                case LuaType.String:
-                    val = l.ToString(-1);
-                    type = val!.GetType();
-                    break;
-                case LuaType.Boolean:
-                    val = l.ToBoolean(-1);
-                    type = val.GetType();
-                    break;
-                case LuaType.Number:
-                    if (l.IsInteger(-1))
-                    {
-                        val = l.ToInteger(-1)!;
-                        type = val.GetType();
-                    }
-                    else
-                    {
-                        val = l.ToNumber(-1)!;
-                        type = val.GetType();
-                    }
-                    break;
-                case LuaType.Table:
-                    val = l.ToDataTable();
-                    type = val.GetType();
-                    break;
-                default:
-                    throw new ArgumentException($"Unsupported type {t} for {name}");
-            }
-
-            // Restore stack from get.
-            l.Pop(1);
-
-            return (val, type);
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
@@ -107,17 +56,16 @@ namespace KeraLuaEx.Host
         public static string FormatCsharpVal(string name, object? val)
         {
             string s = "???";
-            //as "val_name(type):12345
 
             s = val switch
             {
-                int _    => $"{name}(int):{val}",
-                long _   => $"{name}(long):{val}",
+                int _ => $"{name}(int):{val}",
+                long _ => $"{name}(long):{val}",
                 double _ => $"{name}(double):{val}",
-                bool _   => $"{name}(bool):{val}",
+                bool _ => $"{name}(bool):{val}",
                 string _ => $"{name}(string):{val}",
-                null     => $"{name}:null",
-                //case table: sval = $"{name}(table):{val}"; break; // TODO1?
+                DataTable _ => $"{name}(table):{val}",
+                null => $"{name}:null",
                 _ => throw new SyntaxException($"Unsupported type:{val.GetType()} for {name}"),
             };
             ;
@@ -128,22 +76,17 @@ namespace KeraLuaEx.Host
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="l"></param>
-        /// <param name="paths"></param>
-        public static void SetLuaPath(Lua l, List<string> paths)
+        /// <param name="name"></param>
+        /// <param name="lsin"></param>
+        /// <param name="indent"></param>
+        /// <returns></returns>
+        public static string FormatDump(string name, List<string> lsin, bool indent)
         {
-            List<string> parts = new() { "?", "?.lua" };
-
-            paths.ForEach(p => parts.Add(Path.Join(p, "?.lua").Replace('\\', '/')));
-            string luapath = string.Join(';', parts);
-            string s = $"package.path = \"{luapath}\"";
-            l.DoString(s);
-
-            // Other way.
-            //paths.ForEach(p => parts.Add(Path.Join(p, "?.lua")));
-            //parts.AddRange(paths);
-            //string luapath = string.Join(';', parts);
-            //Environment.SetEnvironmentVariable("LUA_PATH", luapath);
+            string sindent = indent ? "    " : "";
+            var lines = new List<string> { $"{name}:" };
+            lsin.ForEach(s => lines.Add($"{sindent}{s}"));
+            var s = string.Join(Environment.NewLine, lines);
+            return s;
         }
     }
 
