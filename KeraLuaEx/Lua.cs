@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Linq;
 
 
 namespace KeraLuaEx
@@ -143,10 +144,7 @@ namespace KeraLuaEx
         /// </summary>
         public void Close()
         {
-            if (_luaState == IntPtr.Zero || _lMain != null)
-            {
-            }
-            else
+            if (!(_luaState == IntPtr.Zero || _lMain != null))
             {
                 NativeMethods.lua_close(_luaState);
                 _luaState = IntPtr.Zero;
@@ -177,10 +175,10 @@ namespace KeraLuaEx
             bool err;
 
             LuaStatus lstat = LoadFile(file);
-            err = CheckLuaStatus(lstat);
+            err = EvalLuaStatus(lstat);
 
             lstat = PCall(0, -1, 0);
-            err |= CheckLuaStatus(lstat);
+            err |= EvalLuaStatus(lstat);
 
             return err;
         }
@@ -195,10 +193,10 @@ namespace KeraLuaEx
             bool err;
 
             LuaStatus lstat = LoadString(chunk);
-            err = CheckLuaStatus(lstat);
+            err = EvalLuaStatus(lstat);
 
             lstat = PCall(0, -1, 0);
-            err |= CheckLuaStatus(lstat);
+            err |= EvalLuaStatus(lstat);
 
             return err;
         }
@@ -845,7 +843,7 @@ namespace KeraLuaEx
         public LuaStatus PCall(int arguments, int results, int errorFunctionIndex)
         {
             LuaStatus lstat = (LuaStatus)NativeMethods.lua_pcallk(_luaState, arguments, results, errorFunctionIndex, IntPtr.Zero, IntPtr.Zero);
-            CheckLuaStatus(lstat);
+            EvalLuaStatus(lstat);
             return lstat;
         }
 
@@ -860,7 +858,7 @@ namespace KeraLuaEx
         public LuaStatus PCallK(int arguments, int results, int errorFunctionIndex, int context, LuaKFunction k)
         {
             LuaStatus lstat = (LuaStatus)NativeMethods.lua_pcallk(_luaState, arguments, results, errorFunctionIndex, (IntPtr)context, k.ToFunctionPointer());
-            CheckLuaStatus(lstat);
+            EvalLuaStatus(lstat);
             return lstat;
         }
 
@@ -1170,7 +1168,7 @@ namespace KeraLuaEx
         public LuaStatus Resume(Lua? from, int arguments, out int results)
         {
             LuaStatus lstat = (LuaStatus)NativeMethods.lua_resume(_luaState, from?._luaState ?? IntPtr.Zero, arguments, out results);
-            CheckLuaStatus(lstat);
+            EvalLuaStatus(lstat);
             return lstat;
         }
 
@@ -1920,7 +1918,7 @@ namespace KeraLuaEx
         public LuaStatus LoadBuffer(byte[] buffer, string? name = null, string? mode = null)
         {
             LuaStatus lstat = (LuaStatus)NativeMethods.luaL_loadbufferx(_luaState, buffer, (UIntPtr)buffer.Length, name, mode);
-            CheckLuaStatus(lstat);
+            EvalLuaStatus(lstat);
             return lstat;
         }
 
@@ -1934,7 +1932,7 @@ namespace KeraLuaEx
         {
             byte[] buffer = Encoding.GetBytes(chunk);
             LuaStatus lstat = (LuaStatus)NativeMethods.luaL_loadbufferx(_luaState, buffer, (UIntPtr)buffer.Length, name, null);
-            CheckLuaStatus(lstat);
+            EvalLuaStatus(lstat);
             return lstat;
         }
 
@@ -1947,7 +1945,7 @@ namespace KeraLuaEx
         public LuaStatus LoadFile(string file, string? mode = null)
         {
             LuaStatus lstat = (LuaStatus)NativeMethods.luaL_loadfilex(_luaState, file, mode);
-            CheckLuaStatus(lstat);
+            EvalLuaStatus(lstat);
             return lstat;
         }
 
@@ -2261,61 +2259,104 @@ namespace KeraLuaEx
             switch (table.Type)
             {
                 case DataTable.TableType.List:
-
+                    // Create a new empty table and push it onto the stack.
+                    NewTable();
+                    // Add the values from the source.
+                    var list = table.AsList();
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        PushInteger(i + 1);
+                        switch (list[i])
+                        {
+                            case null: PushNil(); break;
+                            case string s: PushString(s); break;
+                            case bool b: PushBoolean(b); break;
+                            //case int i: PushInteger(i); break;
+                            case long l: PushInteger(l); break;
+                            case double d: PushNumber(d); break;
+                            case DataTable t: PushDataTable(t); break; // recursion!
+                            default: throw new InvalidOperationException($"Unsupported type {list[i].GetType()} for {i}"); // should never happen
+                        }
+                        SetTable(-3);
+                    }
                     break;
 
                 case DataTable.TableType.Dictionary:
                     // Create a new empty table and push it onto the stack.
-
-                    //void lua_newtable(lua_State* L);
-                    //Creates a new empty table and pushes it onto the stack.It is equivalent to lua_createtable(L, 0, 0).
-
-                    //lua_newtable(L);
-
-                    //lua_pushstring(L, "val");
-                    //lua_pushinteger(L, din->val);
-                    //lua_settable(L, -3);
-
                     NewTable();
-
-                    //foreach (var v in table._tableFields)
-                    //{
-                    //    ...
-                    //}
+                    // Add the values from the source.
+                    var dict = table.AsDict();
+                    foreach (var f in dict)
+                    {
+                        PushString(f.Key);
+                        switch (f.Value)
+                        {
+                            case null: PushNil(); break;
+                            case string s: PushString(s); break;
+                            case bool b: PushBoolean(b); break;
+                            //case int i: PushInteger(i); break;
+                            case long l: PushInteger(l); break;
+                            case double d: PushNumber(d); break;
+                            case DataTable t: PushDataTable(t); break; // recursion!
+                            default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
+                        }
+                        SetTable(-3);
+                    }
                     break;
 
                 default:
                     throw new InvalidOperationException($"Type:{Type}");
             }
 
+            // ///// Get the function to be called.
+            // int gtype = lua_getglobal(L, "structinator");
 
-            /*
-            ///// Get the function to be called.
-            int gtype = lua_getglobal(L, "structinator");
+            // ///// Package the input.
+            // // Create a new empty table and push it onto the stack.
+            // lua_newtable(L);
 
-            ///// Package the input.
-            // Create a new empty table and push it onto the stack.
-            lua_newtable(L);
+            // lua_pushstring(L, "val");
+            // lua_pushinteger(L, din->val);
+            // lua_settable(L, -3);
 
-            lua_pushstring(L, "val");
-            lua_pushinteger(L, din->val);
-            lua_settable(L, -3);
+            // lua_pushstring(L, "state");
+            // lua_pushinteger(L, din->state);
+            // lua_settable(L, -3);
 
-            lua_pushstring(L, "state");
-            lua_pushinteger(L, din->state);
-            lua_settable(L, -3);
+            // lua_pushstring(L, "text");
+            // lua_pushstring(L, din->text);
+            // lua_settable(L, -3);
 
-            lua_pushstring(L, "text");
-            lua_pushstring(L, din->text);
-            lua_settable(L, -3);
+            // ///// Use lua_pcall to do the actual call.
+            // lstat = lua_pcall(L, 1, 1, 0);
+
+            // PROCESS_LUA_ERROR(L, lstat, "lua_pcall structinator() failed");
+
+            // ///// Get the results from the stack.
+            // if(lua_istable(L, -1) > 0)
+            // {
+            //     gtype = lua_getfield(L, -1, "val");
+            //     lstat = luautils_GetArgInt(L, -1, &dout->val);
+            //     lua_pop(L, 1); // remove field
+
+            //     gtype = lua_getfield(L, -1, "state"); // LUA_TNUMBER
+            //     lstat = luautils_GetArgInt(L, -1, (int*)&dout->state);
+            //     lua_pop(L, 1); // remove field
+
+            //     gtype = lua_getfield(L, -1, "text");
+            //     lstat = luautils_GetArgStr(L, -1, &dout->text);
+            //     lua_pop(L, 1); // remove field
+            // }
+            // else
+            // {
+            //     int index = -1;
+            //     PROCESS_LUA_ERROR(L, LUA_ERRRUN, "Invalid table argument at index %d", index);
+            // }
+
+            // // Remove the table.
+            // lua_pop(L, 1);
 
 
-            void lua_settable(lua_State* L, int index);
-            Does the equivalent to t[k] = v, where t is the value at the given index, v is the value on the top of the stack,
-            and k is the value just below the top.
-            This function pops both the key and the value from the stack. As in Lua, this function may trigger a metamethod
-            for the "newindex" event (see §2.4).
-            */
         }
 
         /// <summary>
@@ -2327,7 +2368,7 @@ namespace KeraLuaEx
         /// <returns>True means error</returns>
         /// <exception cref="FileNotFoundException"></exception>
         /// <exception cref="LuaException"></exception>
-        public bool CheckLuaStatus(LuaStatus lstat, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public bool EvalLuaStatus(LuaStatus lstat, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             bool hasError = false;
             _serror = "";
@@ -2341,11 +2382,48 @@ namespace KeraLuaEx
                     $"Caller:{Path.GetFileName(file)}({line})"
                 };
 
+
+                // Get trace info.
+                // Traceback(this, "TODO1 info");
+
+                // When an error happens during lua_pcall, it returns a different value of LUA_OK and puts the error on the top of the stack.
+                // We are able to get this error using lua_tostring(L, lua_gettop(L)).
+                // char * code = "print(return)"; // intentional error
+                // if (luaL_dostring(L, code) != LUA_OK)
+                // {
+                //     puts(lua_tostring(L, lua_gettop(L)));
+                //     lua_pop(L, lua_gettop(L));
+                // }
+
+
+                string GetDebugTraceback()
+                {
+                    int oldTop = GetTop();
+                    GetGlobal("debug"); // stack: debug
+                    GetField(-1, "traceback"); // stack: debug,traceback
+                    Remove(-2); // stack: traceback
+                    PCall(0, -1, 0);
+                    string s = ToString(-1);
+                    SetTop(oldTop);
+                    return s;
+                }
+
+
+
+                GetGlobal("debug");
+                //GetGlobal("traceback");
+
+                //var s = GetDebugTraceback();
+
+
+                // Add the stack.
                 for (int i = GetTop(); i >= 1; i--)
                 {
                     ls.Add(ToString(i)!);
                 }
                 _serror = string.Join(Environment.NewLine, ls);
+
+                Pop(1); // clean up.
 
                 if (ThrowOnError)
                 {

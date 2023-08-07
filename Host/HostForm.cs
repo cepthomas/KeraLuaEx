@@ -9,8 +9,6 @@ using System.Text;
 using System.ComponentModel;
 
 
-//TODO2 need line numbers
-
 namespace KeraLuaEx.Host
 {
     public partial class HostForm : Form
@@ -81,6 +79,7 @@ namespace KeraLuaEx.Host
             rtbStack.Font = font;
 
             rtbScript.KeyDown += (object? _, KeyEventArgs __) => _dirty = true;
+            rtbScript.MouseDown += Script_MouseDown;
 
             _watcher.EnableRaisingEvents = false;
             _watcher.NotifyFilter = NotifyFilters.LastWrite;
@@ -97,6 +96,23 @@ namespace KeraLuaEx.Host
             }
 
             base.OnLoad(e);
+        }
+
+        /// <summary>
+        /// Where are we?
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Script_MouseDown(object? sender, MouseEventArgs e)
+        {
+            var index = rtbScript.SelectionStart;
+            var row = rtbScript.GetLineFromCharIndex(index);
+
+            // Get the column.
+            int firstChar = rtbScript.GetFirstCharIndexFromLine(row);
+            int col = index - firstChar;
+
+            txtPos.Text = $"R:{row + 1} C:{col + 1}";
         }
 
         /// <summary>
@@ -197,7 +213,7 @@ namespace KeraLuaEx.Host
         }
 
         /// <summary>
-        /// File changed externally.
+        /// File changed externally. TODO1 not working
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -272,14 +288,14 @@ namespace KeraLuaEx.Host
             rtbOutput.ScrollToCaret();
         }
 
-        /// <summary>
-        /// Show the contents of the stack.
-        /// </summary>
-        void ShowStack()
-        {
-            var s = Utils.DumpStack(_l);
-            rtbStack.Text = s;
-        }
+        ///// <summary>
+        ///// Show the contents of the stack.
+        ///// </summary>
+        //void ShowStack()
+        //{
+        //    var s = Utils.DumpStack(_l);
+        //    rtbStack.Text = s;
+        //}
         #endregion
     }
 }

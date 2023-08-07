@@ -20,6 +20,7 @@
             toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             btnGoMain = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            txtPos = new System.Windows.Forms.ToolStripTextBox();
             rtbScript = new System.Windows.Forms.RichTextBox();
             rtbOutput = new System.Windows.Forms.RichTextBox();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -43,7 +44,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnOpen, toolStripSeparator3, btnGoMain, toolStripSeparator1 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnOpen, toolStripSeparator3, btnGoMain, toolStripSeparator1, txtPos });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1286, 27);
@@ -77,6 +78,15 @@
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
+            // 
+            // txtPos
+            // 
+            txtPos.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            txtPos.AutoSize = false;
+            txtPos.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            txtPos.Name = "txtPos";
+            txtPos.ReadOnly = true;
+            txtPos.Size = new System.Drawing.Size(70, 20);
             // 
             // rtbScript
             // 
@@ -202,6 +212,7 @@
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripTextBox txtPos;
     }
 }
 

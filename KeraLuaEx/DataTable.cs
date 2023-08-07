@@ -100,6 +100,67 @@ namespace KeraLuaEx
         }
         #endregion
 
+        #region Indexing, iteration, etc
+        // Indexer for string fields of the table
+        // Client screwups will gen exceptions
+        public object? this[string field]
+        {
+            get
+            {
+                if (Type != TableType.Dictionary)
+                {
+                    throw new InvalidOperationException($"This is not a dictionary table");
+                }
+
+                // If key exists return it else null.
+                var match = _tableFields.Where(f => f.Key as string == field);
+                return match.Any() ? match.First().Value : null;
+            }
+            set
+            {
+                if (Type != TableType.Dictionary)
+                {
+                    throw new InvalidOperationException($"This is not a dictionary table");
+                }
+
+                // If key exists replace else add.
+                var match = _tableFields.Where(f => f.Key as string == field);
+                if (match.Any())
+                {
+                    //match.First().Value = field;
+
+                }
+                else
+                {
+
+                }
+            }
+        }
+
+         // Indexer for numeric fields of the table
+        public object this[long field]
+        {
+            get
+            {
+                if (Type != TableType.Dictionary)
+                {
+                    throw
+                }
+
+                // if key exists return it else throw.
+            }
+            set
+            {
+                if (Type != TableType.Dictionary)
+                {
+                    throw
+                }
+
+                // if key exists replace else add.
+            }
+        }
+        #endregion
+
         #region Public functions
         /// <summary>
         /// Add a value to the table. Checks consistency on the fly.
@@ -239,16 +300,13 @@ namespace KeraLuaEx
                     {
                         switch (f.Value)
                         {
-                            case null:     ls.Add($"{Indent(indent)}{f.Key}(null):");      break;
-                            case string s: ls.Add($"{Indent(indent)}{f.Key}(string):{s}"); break;
-                            case bool b:   ls.Add($"{Indent(indent)}{f.Key}(bool):{b}");   break;
-                            case int i:    ls.Add($"{Indent(indent)}{f.Key}(int):{i}");    break;
-                            case long l:   ls.Add($"{Indent(indent)}{f.Key}(long):{l}");   break;
-                            case double d: ls.Add($"{Indent(indent)}{f.Key}(double):{d}"); break;
-                            case DataTable t:
-                                //ls.Add($"{Indent(indent)}{key.ToString()}(dict):");
-                                ls.Add($"{t.Format($"{f.Key}", indent)}");
-                                break; // recursion!
+                            case null:          ls.Add($"{Indent(indent)}{f.Key}(null):");      break;
+                            case string s:      ls.Add($"{Indent(indent)}{f.Key}(string):{s}"); break;
+                            case bool b:        ls.Add($"{Indent(indent)}{f.Key}(bool):{b}");   break;
+                            //case int i:       ls.Add($"{Indent(indent)}{f.Key}(int):{i}");    break;
+                            case long l:        ls.Add($"{Indent(indent)}{f.Key}(long):{l}");   break;
+                            case double d:      ls.Add($"{Indent(indent)}{f.Key}(double):{d}"); break;
+                            case DataTable t:   ls.Add($"{t.Format($"{f.Key}", indent)}");      break; // recursion!
                             default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
                         }
                     }

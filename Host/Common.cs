@@ -12,41 +12,6 @@ namespace KeraLuaEx.Host
     public class Utils
     {
         /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static string DumpStack(Lua l)
-        {
-            List<string> ls = new();
-            int num = l.GetTop();
-
-            if (num > 0)
-            {
-                for (int i = num; i >= 1; i--)
-                {
-                    LuaType t = l.Type(i);
-                    string tinfo = $"[{i}]({t}):";
-                    string s = t switch
-                    {
-                        LuaType.String => $"{tinfo}{l.ToString(i)}",
-                        LuaType.Boolean => $"{tinfo}{l.ToBoolean(i)}",
-                        LuaType.Number => $"{tinfo}{(l.IsInteger(i) ? l.ToInteger(i) : l.ToNumber(i))}",
-                        LuaType.Nil => $"{tinfo}nil",
-                        LuaType.Table => $"{tinfo}{l.ToString(i) ?? "null"}",
-                        _ => $"{tinfo}{l.ToPointer(i)}",
-                    };
-                    ls.Add(s);
-                }
-            }
-            else
-            {
-                ls.Add("Empty");
-            }
-
-            return string.Join(Environment.NewLine, ls);
-        }
-
-        /// <summary>
         /// Format value for display.
         /// </summary>
         /// <param name="name"></param>
@@ -68,24 +33,7 @@ namespace KeraLuaEx.Host
                 null => $"{name}:null",
                 _ => throw new SyntaxException($"Unsupported type:{val.GetType()} for {name}"),
             };
-            ;
 
-            return s;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="lsin"></param>
-        /// <param name="indent"></param>
-        /// <returns></returns>
-        public static string FormatDump(string name, List<string> lsin, bool indent)
-        {
-            string sindent = indent ? "    " : "";
-            var lines = new List<string> { $"{name}:" };
-            lsin.ForEach(s => lines.Add($"{sindent}{s}"));
-            var s = string.Join(Environment.NewLine, lines);
             return s;
         }
     }
@@ -168,7 +116,6 @@ namespace KeraLuaEx.Host
                     case int x:     l.PushInteger(x);   break;
                     case double x:  l.PushNumber(x);    break;
                     case float x:   l.PushNumber(x);    break;
-
                     //case List<int> x:
                     //case List<double> d:
                     //case List<string> s:
@@ -183,7 +130,7 @@ namespace KeraLuaEx.Host
             // Do the actual call.
             LuaStatus lstat = l.PCall(numArgs, retType is null ? 0 : 1, 0);
 
-            l.CheckLuaStatus(lstat);
+            l.EvalLuaStatus(lstat);
 
             // Get the results from the stack. Make generic???
             //object val = retType switch

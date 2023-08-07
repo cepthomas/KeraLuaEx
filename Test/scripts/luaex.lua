@@ -10,6 +10,7 @@ timer(true)
 -- Locals.
 local tune_string = "tune" 
 local const_string <const> = "trig" 
+local index = 1
 
 -- Misc globals.
 g_string = "booga booga"
@@ -35,27 +36,27 @@ things =
 -- Mixed type array.
 invalid_table = { 1, 2, 3, "ppp", 88.22 }
 
--- Function called from C#.
-function calc(addends, suffix)
-    sum = 0
-    for a in addends do
-        sum = sum + a
-    end
-    return string.format('>>>%d_%s<<<', sum, suffix)
-end
 
--- do something...
-msec = timer(false)
-printex("this took " .. msec .. " msec")
-
-
-local index = 1
-
+-- Functions called from C#.
 function g_func(s)
   index = index + 1
   printex("g_func " .. #s .. " " .. index)
-  return #s
+  return #s + 3
 end
+
+function calc(addends, suffix)
+  sum = 0
+  for k, v in pairs(addends) do
+    printex(k .. ":" .. v)
+    sum = sum + v
+  end
+  return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
+end
+
+-- How long?
+msec = timer(false)
+printex("this took " .. msec .. " msec")
+
 
 
 
