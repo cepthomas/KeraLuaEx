@@ -24,9 +24,6 @@ namespace KeraLuaEx.Test
         static readonly Stopwatch _sw = new();
         static long _startTicks = 0;
 
-        /// <summary>Needed to bind static lua functions.</summary>
-        static LuaExTests _tests;
-
         [SetUp]
         public void Setup()
         {
@@ -36,7 +33,6 @@ namespace KeraLuaEx.Test
             _l.Register("timer", _funcTimer);
             _startTicks = 0;
             _sw.Start();
-            _tests = this;
         }
 
         [TearDown]
@@ -63,8 +59,7 @@ namespace KeraLuaEx.Test
             var table = x.val as DataTable;
             Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
             Assert.AreEqual(3, table.Count);
-            var dict = table.AsDict();
-            Assert.AreEqual("bing_bong", dict["dev_type"]);
+            Assert.AreEqual("bing_bong", table["dev_type"]);
 
             x = Common.GetGlobalValue(_l, "g_number");
             Assert.AreEqual(7.654, x.val);
@@ -74,20 +69,27 @@ namespace KeraLuaEx.Test
 
             x = Common.GetGlobalValue(_l, "g_list_int");
             table = x.val as DataTable;
-            var ls = table.AsList();
-            Assert.AreEqual(98, ls[2]);
+            Assert.AreEqual(98, table[2]);
 
-            x = Common.GetGlobalValue(_l, "things"); //TODO1 too much casting? impl []?
+            var ls = table.AsList();
+            Assert.AreEqual(4, ls.Count);
+            Assert.AreEqual(98, ls[2]);
+            //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
+
+            x = Common.GetGlobalValue(_l, "things");
             table = x.val as DataTable;
             Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
             Assert.AreEqual(4, table.Count);
 
-            dict = table.AsDict();
-            var whiz = dict["whiz"] as DataTable;
+            var whiz = table["whiz"] as DataTable;
             Assert.AreEqual(3, whiz.Count);
 
-            dict = whiz.AsDict();
-            var dblt = dict["double_table"] as DataTable;
+            var dict = whiz.AsDict();
+            Assert.AreEqual(3, dict.Count);
+            Assert.AreEqual(99, dict["channel"]);
+            //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = dict["booga"]; });
+
+            var dblt = whiz["double_table"] as DataTable;
             Assert.AreEqual(DataTable.TableType.List, dblt.Type);
             Assert.AreEqual(3, dblt.Count);
 
@@ -96,38 +98,33 @@ namespace KeraLuaEx.Test
 
             ///// Execute a simple lua function.
             _l.GetGlobal("g_func");
-            // Push the arguments to the call.
+            ///// Push the arguments.
             var s = "az9011 birdie";
             _l.PushString(s);
-            // Do the call.
+            ///// Do the call.
             _l.PCall(1, 1, 0);
-            // Get result.
+            ///// Get result.
             var res = _l.ToInteger(-1);
             Assert.AreEqual(s.Length + 3, res);
             _l.Pop(1); // Clean up returned value.
 
             ///// Execute a more complex lua function.
-            //Debug.WriteLine(Common.DumpStack(_l, "1"));
             _l.GetGlobal("calc");
-            //Debug.WriteLine(Common.DumpStack(_l, "2"));
-            // Push the arguments to the call.
+            ///// Push the arguments.
             var addends = new List<long>() { 3901, 488, 922, 1578, 2406 };
             var suffix = "__the_end__";
             table = new(addends);
             _l.PushDataTable(table);
-            //Debug.WriteLine(Common.DumpStack(_l, "3"));
             _l.PushString(suffix);
-            //Debug.WriteLine(Common.DumpStack(_l, "4"));
-            // Do the call.
+            ///// Do the call.
             _l.PCall(2, 1, 0); //attempt to call a number value
-            // Get the results from the stack.
+            ///// Get the results from the stack.
             table = _l.ToDataTable();
             //_l.Pop(1); // Clean up returned value. ... not for table
             Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
             Assert.AreEqual(2, table.Count);
-            dict = table.AsDict();
-            Assert.AreEqual(">>>9295___the_end__<<<", dict["str"]);
-            Assert.AreEqual(9295, dict["sum"]);
+            Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
+            Assert.AreEqual(9295, table["sum"]);
 
             Common.Log($"Finished test:Basic");
         }
@@ -141,11 +138,11 @@ namespace KeraLuaEx.Test
         static int PrintEx(IntPtr p)
         {
             var l = Lua.FromIntPtr(p)!;
-            // args
-            var s = l.ToString(-1);
-            // work
+            ///// Get arguments.
+            var s = l.ToStringL(-1);
+            ///// Do the work.
             Common.Log($"printex:{s}");
-            // return
+            ///// Return results.
             return 0;
         }
 
@@ -157,9 +154,9 @@ namespace KeraLuaEx.Test
         static int Timer(IntPtr p)
         {
             var l = Lua.FromIntPtr(p)!;
-            // args
+            ///// Get arguments.
             bool on = l.ToBoolean(-1);
-            // work
+            ///// Do the work.
             double totalMsec = 0;
             if (on)
             {
@@ -170,7 +167,7 @@ namespace KeraLuaEx.Test
                 long t = _sw.ElapsedTicks; // snap
                 totalMsec = (t - _startTicks) * 1000D / Stopwatch.Frequency;
             }
-            // return
+            ///// Return results.
             l.PushNumber(totalMsec);
             return 1;
         }

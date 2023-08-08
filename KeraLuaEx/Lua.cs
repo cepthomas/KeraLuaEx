@@ -111,7 +111,7 @@ namespace KeraLuaEx
                 Lua? state = GetExtraObject<Lua>(luaState);
                 if (state != null)
                 {
-                    l = state._luaState == luaState ? state : new Lua(luaState, state._lMain);
+                    l = state._luaState == luaState ? state : new Lua(luaState, state.LMain);
                 }
             }
 
@@ -155,9 +155,7 @@ namespace KeraLuaEx
         /// <summary>
         /// Dispose the lua context (calling Close).
         /// </summary>
-#pragma warning disable CA1063 // Implement IDisposable Correctly TODO2 lifecycle?
         public void Dispose()
-#pragma warning restore CA1063 // Implement IDisposable Correctly
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -1477,12 +1475,12 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Converts the Lua value at the given index to a C# string. TODO2 Careful not to confuse with ToString().
+        /// Converts the Lua value at the given index to a C# string. Renamed to avoid conflict with builtin.
         /// </summary>
         /// <param name="index"></param>
         /// <param name="callMetamethod">Calls __tostring field if present</param>
         /// <returns></returns>
-        public string? ToString(int index, bool callMetamethod = true)
+        public string? ToStringL(int index, bool callMetamethod = true)
         {
             byte[]? buffer = ToBuffer(index, callMetamethod);
             return buffer == null ? null : Encoding.GetString(buffer);
@@ -2213,9 +2211,9 @@ namespace KeraLuaEx
 
                 object? key = keyType switch
                 {
-                    LuaType.String => ToString(-2),
+                    LuaType.String => ToStringL(-2),
                     LuaType.Number => DetermineNumber(-2),
-                    _ => throw new SyntaxException($"Unsupported key type {keyType} for {ToString(-2)}")
+                    _ => throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}")
                 };
 
                 // Get type of value(-1).
@@ -2224,11 +2222,11 @@ namespace KeraLuaEx
                 object? val = valType switch
                 {
                    LuaType.Nil => null,
-                   LuaType.String => ToString(-1),
+                   LuaType.String => ToStringL(-1),
                    LuaType.Number => DetermineNumber(-1),
                    LuaType.Boolean => ToBoolean(-1),
                    LuaType.Table => ToDataTable(), // recursion!
-                    _ => throw new SyntaxException($"Unsupported value type {valType} for {ToString(-2)}")
+                    _ => throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
                 };
 
                 if (val is not null)
@@ -2242,7 +2240,7 @@ namespace KeraLuaEx
 
             object? DetermineNumber(int index)
             {
-                //return l.IsInteger(index) ? ToInteger(index) : ToNumber(index); //TODO2 ternary op doesn't work! why?
+                //return IsInteger(index) ? ToInteger(index) : ToNumber(index); // ternary op doesn't work - some subtle typing thing?
                 if (IsInteger(index)) { return ToInteger(index); }
                 else { return ToNumber(index); }
             }
@@ -2254,7 +2252,7 @@ namespace KeraLuaEx
         /// Push onto lua stack.
         /// </summary>
         /// <param name="table"></param>
-        public void PushDataTable(DataTable table) // TODO1 finish/test
+        public void PushDataTable(DataTable table)
         {
             switch (table.Type)
             {
@@ -2307,56 +2305,6 @@ namespace KeraLuaEx
                 default:
                     throw new InvalidOperationException($"Type:{Type}");
             }
-
-            // ///// Get the function to be called.
-            // int gtype = lua_getglobal(L, "structinator");
-
-            // ///// Package the input.
-            // // Create a new empty table and push it onto the stack.
-            // lua_newtable(L);
-
-            // lua_pushstring(L, "val");
-            // lua_pushinteger(L, din->val);
-            // lua_settable(L, -3);
-
-            // lua_pushstring(L, "state");
-            // lua_pushinteger(L, din->state);
-            // lua_settable(L, -3);
-
-            // lua_pushstring(L, "text");
-            // lua_pushstring(L, din->text);
-            // lua_settable(L, -3);
-
-            // ///// Use lua_pcall to do the actual call.
-            // lstat = lua_pcall(L, 1, 1, 0);
-
-            // PROCESS_LUA_ERROR(L, lstat, "lua_pcall structinator() failed");
-
-            // ///// Get the results from the stack.
-            // if(lua_istable(L, -1) > 0)
-            // {
-            //     gtype = lua_getfield(L, -1, "val");
-            //     lstat = luautils_GetArgInt(L, -1, &dout->val);
-            //     lua_pop(L, 1); // remove field
-
-            //     gtype = lua_getfield(L, -1, "state"); // LUA_TNUMBER
-            //     lstat = luautils_GetArgInt(L, -1, (int*)&dout->state);
-            //     lua_pop(L, 1); // remove field
-
-            //     gtype = lua_getfield(L, -1, "text");
-            //     lstat = luautils_GetArgStr(L, -1, &dout->text);
-            //     lua_pop(L, 1); // remove field
-            // }
-            // else
-            // {
-            //     int index = -1;
-            //     PROCESS_LUA_ERROR(L, LUA_ERRRUN, "Invalid table argument at index %d", index);
-            // }
-
-            // // Remove the table.
-            // lua_pop(L, 1);
-
-
         }
 
         /// <summary>
@@ -2382,48 +2330,16 @@ namespace KeraLuaEx
                     $"Caller:{Path.GetFileName(file)}({line})"
                 };
 
-
-                // Get trace info.
-                // Traceback(this, "TODO1 info");
-
-                // When an error happens during lua_pcall, it returns a different value of LUA_OK and puts the error on the top of the stack.
-                // We are able to get this error using lua_tostring(L, lua_gettop(L)).
-                // char * code = "print(return)"; // intentional error
-                // if (luaL_dostring(L, code) != LUA_OK)
-                // {
-                //     puts(lua_tostring(L, lua_gettop(L)));
-                //     lua_pop(L, lua_gettop(L));
-                // }
-
-
-                string GetDebugTraceback()
-                {
-                    int oldTop = GetTop();
-                    GetGlobal("debug"); // stack: debug
-                    GetField(-1, "traceback"); // stack: debug,traceback
-                    Remove(-2); // stack: traceback
-                    PCall(0, -1, 0);
-                    string s = ToString(-1);
-                    SetTop(oldTop);
-                    return s;
-                }
-
-
-
                 GetGlobal("debug");
-                //GetGlobal("traceback");
-
-                //var s = GetDebugTraceback();
-
 
                 // Add the stack.
                 for (int i = GetTop(); i >= 1; i--)
                 {
-                    ls.Add(ToString(i)!);
+                    ls.Add(ToStringL(i)!);
                 }
                 _serror = string.Join(Environment.NewLine, ls);
 
-                Pop(1); // clean up.
+                Pop(1); // clean up global.
 
                 if (ThrowOnError)
                 {

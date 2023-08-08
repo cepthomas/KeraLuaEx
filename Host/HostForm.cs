@@ -7,7 +7,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Text;
 using System.ComponentModel;
-
+using KeraLuaEx.Test;
 
 namespace KeraLuaEx.Host
 {
@@ -20,7 +20,7 @@ namespace KeraLuaEx.Host
 
         #region Fields
         /// <summary>Lua context.</summary>
-        Lua _l = new();
+        readonly Lua _l = new();
 
         /// <summary>Detect file edited externally.</summary>
         readonly FileSystemWatcher _watcher = new();
@@ -64,10 +64,10 @@ namespace KeraLuaEx.Host
 
             _logColors = new()
             {
-                { Level.ERR, Color.Pink },
                 { Level.INF, rtbOutput.BackColor },
+                { Level.ERR, Color.HotPink },
                 { Level.DBG, Color.LightGreen },
-                { Level.SCR, Color.Magenta },
+                { Level.SCR, Color.LightBlue },
             };
             Test.Common.LogMessage += (object? sender, string e) => Log(Level.SCR, e);
 
@@ -193,7 +193,7 @@ namespace KeraLuaEx.Host
             try
             {
                 string s = File.ReadAllText(fn);
-                rtbScript.AppendText(s);
+                rtbScript.Text = s;
                 Text = $"Testing {fn}";
                 Log(Level.INF, $"Opening {fn}");
 
@@ -213,30 +213,33 @@ namespace KeraLuaEx.Host
         }
 
         /// <summary>
-        /// File changed externally. TODO1 not working
+        /// File changed externally.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
-            Log(Level.DBG, $"Watcher_Changed");
+            this.InvokeIfRequired(_ =>
+            {
+                Log(Level.DBG, $"Watcher_Changed");
 
-            if (_dirty)
-            {
-                if (MessageBox.Show("File has been edited externally and there are changes locally - do you want to save the changes?", "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                if (_dirty)
                 {
-                    _watcher.EnableRaisingEvents = false;
-                    File.WriteAllText(_fn, rtbScript.Text);
-                    _watcher.EnableRaisingEvents = true;
-                    _dirty = false;
+                    if (MessageBox.Show("File has been edited externally and there are changes locally - do you want to save the changes?", "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        _watcher.EnableRaisingEvents = false;
+                        File.WriteAllText(_fn, rtbScript.Text);
+                        _watcher.EnableRaisingEvents = true;
+                        _dirty = false;
+                    }
                 }
-            }
-            else
-            {
-                // Reload.
-                string s = File.ReadAllText(_fn);
-                rtbScript.AppendText(s);
-            }
+                else
+                {
+                    // Reload.
+                    string s = File.ReadAllText(_fn);
+                    rtbScript.Text = s;
+                }
+            });
         }
         #endregion
 
@@ -248,7 +251,10 @@ namespace KeraLuaEx.Host
         /// <param name="e"></param>
         void GoMain_Click(object sender, EventArgs e)
         {
-            Test.LuaExTests tests = new();
+            rtbOutput.Clear();
+
+            LuaExTests tests = new();
+
             try
             {
                 tests.Setup();
@@ -288,14 +294,14 @@ namespace KeraLuaEx.Host
             rtbOutput.ScrollToCaret();
         }
 
-        ///// <summary>
-        ///// Show the contents of the stack.
-        ///// </summary>
-        //void ShowStack()
-        //{
-        //    var s = Utils.DumpStack(_l);
-        //    rtbStack.Text = s;
-        //}
+        /// <summary>
+        /// Show the contents of the stack.
+        /// </summary>
+        void ShowStack()
+        {
+            var s = Common.DumpStack(_l);
+            rtbStack.Text = s;
+        }
         #endregion
     }
 }

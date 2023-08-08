@@ -54,19 +54,16 @@ namespace KeraLuaEx.Test
         /// <param name="l"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static (object? val, Type? type) GetGlobalValue(Lua l, string name)
+        public static (object val, Type type) GetGlobalValue(Lua l, string name)
         {
-            object? val = null;
-            Type? type = null;
+            object val;
+            Type type;
 
             LuaType t = l.GetGlobal(name);
             switch (t)
             {
-                case LuaType.Nil:
-                    // Return defaults.
-                    break;
                 case LuaType.String:
-                    val = l.ToString(-1);
+                    val = l.ToStringL(-1)!;
                     type = val!.GetType();
                     break;
                 case LuaType.Boolean:
@@ -89,6 +86,7 @@ namespace KeraLuaEx.Test
                     val = l.ToDataTable();
                     type = val.GetType();
                     break;
+                case LuaType.Nil:
                 default:
                     throw new ArgumentException($"Unsupported type {t} for {name}");
             }
@@ -105,7 +103,7 @@ namespace KeraLuaEx.Test
         /// <param name="l"></param>
         /// <param name="info"></param>
         /// <returns></returns>
-        public static string DumpStack(Lua l, string info)
+        public static string DumpStack(Lua l, string info = "")
         {
             List<string> ls = new() { info, "Stack:" };
 
@@ -119,7 +117,7 @@ namespace KeraLuaEx.Test
                     string tinfo = $"[{i}]({t}):";
                     string s = t switch
                     {
-                        LuaType.String => $"{tinfo}{l.ToString(i)}",
+                        LuaType.String => $"{tinfo}{l.ToStringL(i)}",
                         LuaType.Boolean => $"{tinfo}{l.ToBoolean(i)}",
                         LuaType.Number => $"{tinfo}{(l.IsInteger(i) ? l.ToInteger(i) : l.ToNumber(i))}",
                         LuaType.Nil => $"{tinfo}nil",
@@ -138,20 +136,20 @@ namespace KeraLuaEx.Test
             //return string.Join(Environment.NewLine, ls);
         }
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="name"></param>
-        ///// <param name="lsin"></param>
-        ///// <param name="indent"></param>
-        ///// <returns></returns>
-        //public static string FormatDump(string name, List<string> lsin, bool indent)
-        //{
-        //    string sindent = indent ? "    " : "";
-        //    var lines = new List<string> { $"{name}:" };
-        //    lsin.ForEach(s => lines.Add($"{sindent}{s}"));
-        //    var s = string.Join(Environment.NewLine, lines);
-        //    return s;
-        //}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="lsin"></param>
+        /// <param name="indent"></param>
+        /// <returns></returns>
+        public static string FormatDump(string name, List<string> lsin, bool indent)
+        {
+            string sindent = indent ? "    " : "";
+            var lines = new List<string> { $"{name}:" };
+            lsin.ForEach(s => lines.Add($"{sindent}{s}"));
+            var s = string.Join(Environment.NewLine, lines);
+            return s;
+        }
     }
 }

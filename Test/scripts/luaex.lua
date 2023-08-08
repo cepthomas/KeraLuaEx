@@ -59,37 +59,32 @@ printex("this took " .. msec .. " msec")
 
 
 
+-- --------------------------------------------
 
---[[
-
----- TODO1? like sequences ----
--- This is probably the better way to do chordal instruments.
+---- sequences ----
 -- when, named chords, volume, duration(def=0.1)
--- seq_name total-beats
-seq_KeysChorus 8
+seq_KeysChorus = [[
 0.0     F4      0.7     0.2
--- more steps...
+2.0     F5      0.7      0.2
+5.4     B3.m7   KEYS_VOL     0.2
+-- etc...
 7.4     B2.m7   0.7     0.2
+8.0 end?]]
+
 
 -- This is probably the better way to do drums and rhythmic instruments. But could be notes too.
---|........|........|........|........|........|........|........|........|
-seq_DrumsVerse 8
+-- |........|........|........|........|........|........|........|........|
+seq_DrumsVerse = [[
 |8       |        |8       |        |8       |        |8       |        | AcousticBassDrum  DRUM_VOL
 |    8   |        |    8   |    8   |    8   |        |    8   |    8   | AcousticSnare     DRUM_VOL*0.9
 |        |     8 8|        |     8 8|        |     8 8|        |     8 8| ClosedHiHat       DRUM_VOL*1.1
-
-seq_Algo = algo_func
+]]
 
 ---- sections ----
--- sect_name  length???
-sect_Beginning
-keys    seq_KeysVerse   seq_KeysVerse   seq_KeysVerse   seq_KeysVerse
-drums   seq_DrumsVerse  seq_DrumsVerse  seq_DrumsVerse  seq_DrumsVerse
-bass    seq_BassVerse   seq_BassVerse   seq_BassVerse   seq_BassVerse
-
-sect_Middle
+sect_Middle = [[
 keys    seq_KeysChorus  seq_KeysChorus  seq_KeysChorus  seq_KeysChorus
 drums   seq_DrumsChorus seq_DrumsChorus seq_DrumsChorus seq_DrumsChorus
 bass    seq_BassChorus  seq_BassChorus  seq_BassChorus  seq_BassChorus
-synth   seq_Algo        nil             seq_Algo        seq_Dynamic     nil
---]]
+synth   algo_func       nil             algo_func       seq_Dynamic
+end
+]]

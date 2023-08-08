@@ -63,7 +63,7 @@ namespace KeraLuaEx.Test
         private static int TestUnicodeString(IntPtr p)
         {
             var l = Lua.FromIntPtr(p);
-            string param = l!.ToString(1, false)!;
+            string param = l!.ToStringL(1, false)!;
 
             Assert.AreEqual(UnicodeString, param, "#1 ToString()");
 
@@ -341,7 +341,7 @@ main.lua-main.lua:11 (main)
         }
 
         [Test]
-        public void TestCoroutineCallback() //TODO1 broken
+        public void TestCoroutineCallback()
         {
             using var l = new Lua();
 
@@ -376,7 +376,7 @@ main.lua-main.lua:11 (main)
 
             int currentTop = l.GetTop();
 
-            string four = l.ToString(-1)!;
+            string four = l.ToStringL(-1)!;
 
             int newTop = l.GetTop();
 
@@ -434,7 +434,7 @@ main.lua-main.lua:11 (main)
             l.GetGlobal("s");
 
             bool check = l.IsString(-1);
-            string s = l.ToString(-1, false)!;
+            string s = l.ToStringL(-1, false)!;
 
             Assert.IsTrue(check, "#1");
             Assert.AreEqual("bar", s, "#2");
@@ -501,14 +501,14 @@ main.lua-main.lua:11 (main)
             LuaStatus result = l.LoadString(chunk);
 
             if (result != LuaStatus.OK)
-                error = l.ToString(1, false)!;
+                error = l.ToStringL(1, false)!;
 
             Assert.True(result == LuaStatus.OK, "Fail loading string: " + chunk + "ERROR:" + error);
 
             result = l.PCall(0, -1, 0);
 
             if (result != 0)
-                error = l.ToString(1, false)!;
+                error = l.ToStringL(1, false)!;
 
             Assert.True(result == 0, "Fail calling chunk: " + chunk + " ERROR: " + error);
         }

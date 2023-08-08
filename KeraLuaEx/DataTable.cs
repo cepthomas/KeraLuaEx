@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 
 namespace KeraLuaEx
@@ -100,10 +101,10 @@ namespace KeraLuaEx
         }
         #endregion
 
-        #region Indexing, iteration, etc
+        #region Indexing, iteration, etc?
         // Indexer for string fields of the table
         // Client screwups will gen exceptions
-        public object? this[string field]
+        public object? this[string index]
         {
             get
             {
@@ -113,50 +114,23 @@ namespace KeraLuaEx
                 }
 
                 // If key exists return it else null.
-                var match = _tableFields.Where(f => f.Key as string == field);
+                var match = _tableFields.Where(f => f.Key as string == index);
                 return match.Any() ? match.First().Value : null;
             }
-            set
+        }
+         // Indexer for numeric fields of the table
+        public object? this[int index]
+        {
+            get
             {
-                if (Type != TableType.Dictionary)
+                if (Type != TableType.List)
                 {
                     throw new InvalidOperationException($"This is not a dictionary table");
                 }
 
-                // If key exists replace else add.
-                var match = _tableFields.Where(f => f.Key as string == field);
-                if (match.Any())
-                {
-                    //match.First().Value = field;
-
-                }
-                else
-                {
-
-                }
-            }
-        }
-
-         // Indexer for numeric fields of the table
-        public object this[long field]
-        {
-            get
-            {
-                if (Type != TableType.Dictionary)
-                {
-                    throw
-                }
-
-                // if key exists return it else throw.
-            }
-            set
-            {
-                if (Type != TableType.Dictionary)
-                {
-                    throw
-                }
-
-                // if key exists replace else add.
+                // If key exists return it else null.
+                object? res = (index < 0 || index >= _tableFields.Count) ? null : _tableFields[index].Value;
+                return res;
             }
         }
         #endregion
@@ -230,46 +204,38 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Return a list representing the lua table.
+        /// Return a readonly list representing the lua table.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public List<object> AsList()
+        public ReadOnlyCollection<object> AsList()
         {
-            // Convert and return.
-            List<object> ret = new();
-
-            if (Type == TableType.List)
-            {
-                _tableFields.ForEach(kv => ret.Add(kv.Value));
-            }
-            else
+            if (Type != TableType.List)
             {
                 throw new InvalidOperationException($"This is not a list table");
             }
 
+            List<object> list = new();
+            _tableFields.ForEach(kv => list.Add(kv.Value));
+            var ret = new ReadOnlyCollection<object>(list);
             return ret;
         }
 
         /// <summary>
-        /// Return a dict representing the lua table.
+        /// Return a readonly dict representing the lua table.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public Dictionary<string, object> AsDict()
+        public ReadOnlyDictionary<string, object> AsDict()
         {
-            // Clone and return.
-            Dictionary<string, object> ret = new();
-
-            if (Type == TableType.Dictionary)
-            {
-                _tableFields.ForEach(f => ret[f.Key.ToString()!] = f.Value);
-            }
-            else
+            if (Type != TableType.Dictionary)
             {
                 throw new InvalidOperationException($"This is not a dictionary table");
             }
 
+            Dictionary<string, object> dict = new();
+            _tableFields.ForEach(f => dict[f.Key.ToString()!] = f.Value);
+            var ret = new ReadOnlyDictionary<string, object>(dict);
             return ret;
         }
 
