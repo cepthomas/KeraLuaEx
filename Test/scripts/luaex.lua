@@ -1,11 +1,10 @@
 
 -- Function implemented in C#.
 printex("Loading luaex.lua!")
+timer(true)
 
 math.randomseed(os.time())
 
--- C# timer.
-timer(true)
 
 -- Locals.
 local tune_string = "tune" 
@@ -29,7 +28,7 @@ things =
   tune = { dev_type="midi_in", channel=1, long_list={ 44, 77, 101 } },
   trig = { dev_type="virt_key", channel=2, adouble=1.234 },
   whiz = { dev_type="bing_bong", double_table={ 145.89, 71.23, 909.555 }, channel=99 },
-  per = { dev_type="abra", string_table={ 1, 23, 88, 22 }, channel=111, abool=false },
+  pers = { dev_type="abra", string_table={ 1, 23, 88, 22 }, channel=111, abool=false },
   --invalid_table = { atable={ 1, 2, 3, "ppp", 88.22 }, channel=10, abool=true }
 }
 
