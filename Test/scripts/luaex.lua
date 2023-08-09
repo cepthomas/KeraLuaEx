@@ -1,7 +1,8 @@
 
--- Function implemented in C#.
-printex("Loading luaex.lua!")
-timer(true)
+
+-- Functions implemented in C#.
+--api_test.printex("Loading luaex.lua!")
+--api_test.timer(true)
 
 math.randomseed(os.time())
 

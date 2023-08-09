@@ -122,12 +122,17 @@ namespace KeraLuaEx.Host
         {
             if (_dirty)
             {
-                if (MessageBox.Show("File has been edited - do you want to save the changes?", "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                if (MessageBox.Show("File has been edited - do you want to save the changes?", "Hey you!",
+                    MessageBoxButtons.OKCancel) == DialogResult.OK)
                 {
                     _watcher.EnableRaisingEvents = false;
                     File.WriteAllText(_fn, rtbScript.Text);
                     _watcher.EnableRaisingEvents = true;
                     _dirty = false;
+                }
+                else
+                {
+                    e.Cancel = true;
                 }
             }
 
@@ -157,7 +162,8 @@ namespace KeraLuaEx.Host
         {
             if (_dirty)
             {
-                if (MessageBox.Show("File has been edited - do you want to save the changes?", "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                if (MessageBox.Show("File has been edited - do you want to save the changes?",
+                    "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
                 {
                     _watcher.EnableRaisingEvents = false;
                     File.WriteAllText(_fn, rtbScript.Text);
@@ -225,7 +231,8 @@ namespace KeraLuaEx.Host
 
                 if (_dirty)
                 {
-                    if (MessageBox.Show("File has been edited externally and there are changes locally - do you want to save the changes?", "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    if (MessageBox.Show("File has been edited externally and there are changes locally - do you want to save the changes?",
+                        "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     {
                         _watcher.EnableRaisingEvents = false;
                         File.WriteAllText(_fn, rtbScript.Text);
@@ -235,7 +242,7 @@ namespace KeraLuaEx.Host
                 }
                 else
                 {
-                    // Reload.
+                    // Reload from file.
                     string s = File.ReadAllText(_fn);
                     rtbScript.Text = s;
                 }
@@ -258,7 +265,8 @@ namespace KeraLuaEx.Host
             try
             {
                 tests.Setup();
-                tests.Basic();
+                tests.BasicInterop(rtbScript.Text);
+                //tests.CallLuaFunctions();
             }
             catch (Exception ex)
             {

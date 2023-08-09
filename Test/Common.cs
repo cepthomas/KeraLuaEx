@@ -54,47 +54,42 @@ namespace KeraLuaEx.Test
         /// <param name="l"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static (object val, Type type) GetGlobalValue(Lua l, string name)
+        public static object? GetGlobalValue(Lua l, string name)
         {
-            object val;
-            Type type;
+            object? val = null;
 
             LuaType t = l.GetGlobal(name);
             switch (t)
             {
                 case LuaType.String:
                     val = l.ToStringL(-1)!;
-                    type = val!.GetType();
                     break;
                 case LuaType.Boolean:
                     val = l.ToBoolean(-1);
-                    type = val.GetType();
                     break;
                 case LuaType.Number:
                     if (l.IsInteger(-1))
                     {
                         val = l.ToInteger(-1)!;
-                        type = val.GetType();
                     }
                     else
                     {
                         val = l.ToNumber(-1)!;
-                        type = val.GetType();
                     }
                     break;
                 case LuaType.Table:
                     val = l.ToDataTable();
-                    type = val.GetType();
                     break;
-                case LuaType.Nil:
                 default:
-                    throw new ArgumentException($"Unsupported type {t} for {name}");
+                    //throw new ArgumentException($"Unsupported type {t} for {name}");
+                    val = null;
+                    break;
             }
 
             // Restore stack from get.
             l.Pop(1);
 
-            return (val, type);
+            return val;
         }
 
         /// <summary>
@@ -150,6 +145,64 @@ namespace KeraLuaEx.Test
             lsin.ForEach(s => lines.Add($"{sindent}{s}"));
             var s = string.Join(Environment.NewLine, lines);
             return s;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="tableName"></param>
+        /// <param name="indent"></param>
+        /// <returns></returns>
+        public static List<string> DumpRawTable(Lua l, string tableName, int indent = 0)
+        {
+            if (indent > 1)
+            {
+                return null;
+            }
+
+
+
+
+            List<string> ls = new();
+
+            ls.Add($"{Indent(indent)}{tableName}(table):");
+            indent += 1;
+
+            // Put a nil key on stack.
+            l.PushNil();
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (l.Next(-2))
+            {
+                // Get key(-2) info.
+                LuaType keyType = l.Type(-2);
+                string key = l.ToStringL(-2)!;
+
+                // Get type of value(-1).
+                LuaType valType = l.Type(-1);
+                string val = l.ToStringL(-1)!;
+
+                switch (valType)
+                {
+                    case LuaType.Nil: ls.Add($"{Indent(indent)}{key}(Nil)"); break;
+                    case LuaType.String: ls.Add($"{Indent(indent)}{key}(String):{val}"); break;
+                    case LuaType.Boolean: ls.Add($"{Indent(indent)}{key}(Boolean):{val}"); break;
+                    case LuaType.Number: ls.Add($"{Indent(indent)}{key}(Number):{val}"); break;
+                    case LuaType.Table: var lsx = DumpRawTable(l, key, indent); if (lsx is not null) ls.AddRange(lsx); break; // recursion!
+                    default: ls.Add($"{Indent(indent)}{key}:{val}"); break;
+                }
+
+                // Remove value(-1), now key on top at(-1).
+                l.Pop(1);
+            }
+
+            static string Indent(int indent)
+            {
+                return indent > 0 ? new(' ', 4 * indent) : "";
+            }
+
+            return ls;
         }
     }
 }
