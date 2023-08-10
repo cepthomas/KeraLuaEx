@@ -148,8 +148,9 @@ namespace KeraLuaEx.Test
         /// <param name="l"></param>
         /// <param name="tableName"></param>
         /// <param name="indent"></param>
+        /// <param name="all"></param>
         /// <returns></returns>
-        public static List<string>? DumpRawTable(Lua l, string tableName, int indent = 0)
+        public static List<string>? DumpRawTable(Lua l, string tableName, int indent, bool all)
         {
             if (indent > 1)
             {
@@ -186,7 +187,7 @@ namespace KeraLuaEx.Test
                         val = l.ToNumber(-1);
                         break;
                     case LuaType.Table:
-                        var lsx = DumpRawTable(l, key, indent + 1); // recursion!
+                        var lsx = DumpRawTable(l, key, indent + 1, all); // recursion!
                         if (lsx is not null)
                         {
                             ls.AddRange(lsx);
@@ -194,7 +195,10 @@ namespace KeraLuaEx.Test
                         break;
 
                     case LuaType.Function:
-                        val = l.ToStringL(-1)!;
+                        if (all)
+                        {
+                            val = l.ToStringL(-1)!;
+                        }
                         break;
                     case LuaType.LightUserData:
                     case LuaType.UserData:

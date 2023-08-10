@@ -40,7 +40,7 @@ namespace KeraLuaEx.Test
 
             _l.PushGlobalTable();
 
-            var sg = Common.DumpRawTable(_l, "Globals");
+            var sg = Common.DumpRawTable(_l, "Globals", 0, true);
 
             Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg));
         }
