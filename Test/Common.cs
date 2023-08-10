@@ -68,14 +68,9 @@ namespace KeraLuaEx.Test
                     val = l.ToBoolean(-1);
                     break;
                 case LuaType.Number:
-                    if (l.IsInteger(-1))
-                    {
-                        val = l.ToInteger(-1)!;
-                    }
-                    else
-                    {
-                        val = l.ToNumber(-1)!;
-                    }
+                    // Ternary op doesn't work so...
+                    if (l.IsInteger(-1)) { val = l.ToInteger(-1)!; }
+                    else { val = l.ToNumber(-1)!; }
                     break;
                 case LuaType.Table:
                     val = l.ToDataTable();
@@ -93,7 +88,7 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
-        /// 
+        /// Dump the stack.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="info"></param>
@@ -148,26 +143,22 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
-        /// 
+        /// Dump the table at the top of the stack.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="tableName"></param>
         /// <param name="indent"></param>
         /// <returns></returns>
-        public static List<string> DumpRawTable(Lua l, string tableName, int indent = 0)
+        public static List<string>? DumpRawTable(Lua l, string tableName, int indent = 0)
         {
             if (indent > 1)
             {
                 return null;
             }
 
-
-
-
-            List<string> ls = new();
-
-            ls.Add($"{Indent(indent)}{tableName}(table):");
-            indent += 1;
+            var sindent = indent > 0 ? new(' ', 4 * indent) : "";
+            List<string> ls = new() { $"{sindent}{tableName}(table):" };
+            sindent += "    ";
 
             // Put a nil key on stack.
             l.PushNil();
@@ -181,25 +172,49 @@ namespace KeraLuaEx.Test
 
                 // Get type of value(-1).
                 LuaType valType = l.Type(-1);
-                string val = l.ToStringL(-1)!;
+                object? val = null;
 
                 switch (valType)
                 {
-                    case LuaType.Nil: ls.Add($"{Indent(indent)}{key}(Nil)"); break;
-                    case LuaType.String: ls.Add($"{Indent(indent)}{key}(String):{val}"); break;
-                    case LuaType.Boolean: ls.Add($"{Indent(indent)}{key}(Boolean):{val}"); break;
-                    case LuaType.Number: ls.Add($"{Indent(indent)}{key}(Number):{val}"); break;
-                    case LuaType.Table: var lsx = DumpRawTable(l, key, indent); if (lsx is not null) ls.AddRange(lsx); break; // recursion!
-                    default: ls.Add($"{Indent(indent)}{key}:{val}"); break;
+                    case LuaType.String:
+                        val = l.ToStringL(-1)!.Replace("\0", @"\0"); // fix embedded 0
+                        break;
+                    case LuaType.Boolean:
+                        val = l.ToBoolean(-1);
+                        break;
+                    case LuaType.Number:
+                        val = l.ToNumber(-1);
+                        break;
+                    case LuaType.Table:
+                        var lsx = DumpRawTable(l, key, indent + 1); // recursion!
+                        if (lsx is not null)
+                        {
+                            ls.AddRange(lsx);
+                        }
+                        break;
+
+                    case LuaType.Function:
+                        val = l.ToStringL(-1)!;
+                        break;
+                    case LuaType.LightUserData:
+                    case LuaType.UserData:
+                    case LuaType.Thread:
+                        // ignore
+                        break;
+                }
+
+                if (val is not null)
+                {
+                    ls.Add($"{sindent}{key}:{val}");
                 }
 
                 // Remove value(-1), now key on top at(-1).
                 l.Pop(1);
             }
 
-            static string Indent(int indent)
+            if (ls.Count <= 1)
             {
-                return indent > 0 ? new(' ', 4 * indent) : "";
+                ls.Add($"{sindent}EMPTY");
             }
 
             return ls;

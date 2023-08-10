@@ -16,11 +16,17 @@
         private void InitializeComponent()
         {
             toolStrip1 = new System.Windows.Forms.ToolStrip();
-            btnOpen = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            btnClearOnRun = new System.Windows.Forms.ToolStripButton();
+            toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             btnGoMain = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             txtPos = new System.Windows.Forms.ToolStripTextBox();
+            btnGoPlay = new System.Windows.Forms.ToolStripButton();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            btnFile = new System.Windows.Forms.ToolStripDropDownButton();
+            openMenu = new System.Windows.Forms.ToolStripMenuItem();
+            saveMenu = new System.Windows.Forms.ToolStripMenuItem();
             rtbScript = new System.Windows.Forms.RichTextBox();
             rtbOutput = new System.Windows.Forms.RichTextBox();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -44,26 +50,31 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnOpen, toolStripSeparator3, btnGoMain, toolStripSeparator1, txtPos });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnFile, toolStripSeparator3, btnClearOnRun, toolStripSeparator4, btnGoMain, toolStripSeparator1, txtPos, btnGoPlay, toolStripSeparator2 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1286, 27);
             toolStrip1.TabIndex = 0;
             toolStrip1.Text = "toolStrip1";
             // 
-            // btnOpen
-            // 
-            btnOpen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            btnOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
-            btnOpen.Name = "btnOpen";
-            btnOpen.Size = new System.Drawing.Size(49, 24);
-            btnOpen.Text = "Open";
-            btnOpen.Click += Open_Click;
-            // 
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
             toolStripSeparator3.Size = new System.Drawing.Size(6, 27);
+            // 
+            // btnClearOnRun
+            // 
+            btnClearOnRun.CheckOnClick = true;
+            btnClearOnRun.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnClearOnRun.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnClearOnRun.Name = "btnClearOnRun";
+            btnClearOnRun.Size = new System.Drawing.Size(99, 24);
+            btnClearOnRun.Text = "Clear On Run";
+            // 
+            // toolStripSeparator4
+            // 
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new System.Drawing.Size(6, 27);
             // 
             // btnGoMain
             // 
@@ -87,6 +98,44 @@
             txtPos.Name = "txtPos";
             txtPos.ReadOnly = true;
             txtPos.Size = new System.Drawing.Size(70, 20);
+            // 
+            // btnGoPlay
+            // 
+            btnGoPlay.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnGoPlay.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnGoPlay.Name = "btnGoPlay";
+            btnGoPlay.Size = new System.Drawing.Size(63, 24);
+            btnGoPlay.Text = "Go Play";
+            btnGoPlay.Click += GoPlay_Click;
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(6, 27);
+            // 
+            // btnFile
+            // 
+            btnFile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openMenu, saveMenu });
+            btnFile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnFile.Name = "btnFile";
+            btnFile.Size = new System.Drawing.Size(46, 24);
+            btnFile.Text = "File";
+            // 
+            // openMenu
+            // 
+            openMenu.Name = "openMenu";
+            openMenu.Size = new System.Drawing.Size(224, 26);
+            openMenu.Text = "Open";
+            openMenu.Click += Open_Click;
+            // 
+            // saveMenu
+            // 
+            saveMenu.Name = "saveMenu";
+            saveMenu.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S;
+            saveMenu.Size = new System.Drawing.Size(224, 26);
+            saveMenu.Text = "Save";
+            saveMenu.Click += Save_Click;
             // 
             // rtbScript
             // 
@@ -204,7 +253,6 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.RichTextBox rtbScript;
         private System.Windows.Forms.RichTextBox rtbOutput;
-        private System.Windows.Forms.ToolStripButton btnOpen;
         private System.Windows.Forms.ToolStripButton btnGoMain;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer3;
@@ -213,6 +261,13 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripTextBox txtPos;
+        private System.Windows.Forms.ToolStripButton btnGoPlay;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripButton btnClearOnRun;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripDropDownButton btnFile;
+        private System.Windows.Forms.ToolStripMenuItem openMenu;
+        private System.Windows.Forms.ToolStripMenuItem saveMenu;
     }
 }
 

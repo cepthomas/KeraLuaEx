@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using NUnit.Framework;
 
 
 namespace KeraLuaEx.Test
@@ -16,44 +15,38 @@ namespace KeraLuaEx.Test
         /// <summary>Bound lua function.</summary>
         readonly static LuaFunction _fTimer = Timer;
 
-        /// <summary>Bound lua function.</summary>
-        readonly static LuaFunction _fLoad = Load;
-
         /// <summary>Metrics.</summary>
         static readonly Stopwatch _sw = new();
         static long _startTicks = 0;
 
-        bool _disposed;
-
         #region Lifecycle
-        public static void Init(Lua l)
+        public static int Load(Lua l)
         {
-            // C:\Dev\repos\C\c_emb_lua\source\c\exec.c
-
-            // Open std libs.
-            l.OpenLibs();
-
             // Load app stuff. This table gets pushed on the stack and into globals.
-            l.RequireF("api_test", _fLoad, true);
-
-            // Pop the table off the stack as it interferes with calling the module function.
-            l.Pop(1);
+            l.RequireF("api_test", OpenLib, true);
 
             _startTicks = 0;
             _sw.Start();
-        }
-        #endregion
-
-        static int Load(IntPtr p)
-        {
-            var l = Lua.FromIntPtr(p)!;
-
-            // Register our C <-> Lua functions.
-            l.Register("printex", _fPrint);
-            l.Register("timer", _fTimer);
 
             return 1;
         }
+        #endregion
+
+        static int OpenLib(IntPtr p)
+        {
+            // Open lib into global table.
+            var l = Lua.FromIntPtr(p)!;
+            l.PushGlobalTable();
+            l.SetFuncs(_libFuncs, 0);
+            return 1;
+        }
+
+        static readonly LuaRegister[] _libFuncs = new LuaRegister[]
+        {
+            new LuaRegister("printex", _fPrint),
+            new LuaRegister("timer", _fTimer),
+            new LuaRegister(null, null)
+        };
 
         #region Lua functions implemented in C#
         /// <summary>
@@ -64,11 +57,14 @@ namespace KeraLuaEx.Test
         static int PrintEx(IntPtr p)
         {
             var l = Lua.FromIntPtr(p)!;
-            ///// Get arguments.
+
+            // Get arguments.
             var s = l.ToStringL(-1);
-            ///// Do the work.
+
+            // Do the work.
             Common.Log($"printex:{s}");
-            ///// Return results.
+
+            // Return results.
             return 0;
         }
 
@@ -80,9 +76,11 @@ namespace KeraLuaEx.Test
         static int Timer(IntPtr p)
         {
             var l = Lua.FromIntPtr(p)!;
-            ///// Get arguments.
+
+            // Get arguments.
             bool on = l.ToBoolean(-1);
-            ///// Do the work.
+
+            // Do the work.
             double totalMsec = 0;
             if (on)
             {
@@ -93,7 +91,8 @@ namespace KeraLuaEx.Test
                 long t = _sw.ElapsedTicks; // snap
                 totalMsec = (t - _startTicks) * 1000D / Stopwatch.Frequency;
             }
-            ///// Return results.
+
+            // Return results.
             l.PushNumber(totalMsec);
             return 1;
         }

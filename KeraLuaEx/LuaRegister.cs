@@ -17,5 +17,11 @@ namespace KeraLuaEx
         /// </summary>
         [MarshalAs(UnmanagedType.FunctionPtr)]
         public LuaFunction? function;
+
+        public LuaRegister(string? name, LuaFunction? function)
+        {
+            this.name = name;
+            this.function = function;
+        }
     }
 }

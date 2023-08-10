@@ -95,6 +95,8 @@ namespace KeraLuaEx.Host
                 }
             }
 
+            btnClearOnRun.Checked = true;
+
             base.OnLoad(e);
         }
 
@@ -158,7 +160,9 @@ namespace KeraLuaEx.Host
         /// <summary>
         /// Allows the user to select a script file.
         /// </summary>
-        void Open_Click(object? sender, EventArgs e)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Open_Click(object sender, EventArgs e)
         {
             if (_dirty)
             {
@@ -184,6 +188,52 @@ namespace KeraLuaEx.Host
                 OpenScriptFile(openDlg.FileName);
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Save_Click(object sender, EventArgs e)
+        {
+            if (_dirty)
+            {
+                _watcher.EnableRaisingEvents = false;
+                File.WriteAllText(_fn, rtbScript.Text);
+                _watcher.EnableRaisingEvents = true;
+                _dirty = false;
+            }
+        }
+
+        ///// <summary>
+        ///// Allows the user to select a script file.
+        ///// </summary>
+        //void Open_Click(object? sender, EventArgs e)
+        //{
+        //    if (_dirty)
+        //    {
+        //        if (MessageBox.Show("File has been edited - do you want to save the changes?",
+        //            "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
+        //        {
+        //            _watcher.EnableRaisingEvents = false;
+        //            File.WriteAllText(_fn, rtbScript.Text);
+        //            _watcher.EnableRaisingEvents = true;
+        //            _dirty = false;
+        //        }
+        //    }
+
+        //    using OpenFileDialog openDlg = new()
+        //    {
+        //        Filter = "Lua files | *.lua",
+        //        Title = "Select a Lua file",
+        //        InitialDirectory = _scriptsPath,
+        //    };
+
+        //    if (openDlg.ShowDialog() == DialogResult.OK)
+        //    {
+        //        OpenScriptFile(openDlg.FileName);
+        //    }
+        //}
 
         /// <summary>
         /// Common script file opener.
@@ -250,23 +300,21 @@ namespace KeraLuaEx.Host
         }
         #endregion
 
-        #region Run tests
-        /// <summary>
-        /// Do something.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void GoMain_Click(object sender, EventArgs e)
+        void GoPlay_Click(object sender, EventArgs e)
         {
-            rtbOutput.Clear();
+            if (btnClearOnRun.Checked)
+            {
+                rtbOutput.Clear();
+            }
 
             LuaExTests tests = new();
+
+            Log(Level.INF, "Starting test:Play");
 
             try
             {
                 tests.Setup();
-                tests.BasicInterop(rtbScript.Text);
-                //tests.CallLuaFunctions();
+                tests.Play(rtbScript.Text);
             }
             catch (Exception ex)
             {
@@ -276,6 +324,43 @@ namespace KeraLuaEx.Host
             {
                 tests.TearDown();
             }
+
+            Log(Level.INF, "Finished test:Play");
+
+        }
+
+        #region Run tests
+        /// <summary>
+        /// Do something.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void GoMain_Click(object sender, EventArgs e)
+        {
+            if (btnClearOnRun.Checked)
+            {
+                rtbOutput.Clear();
+            }
+
+            LuaExTests tests = new();
+
+            Log(Level.INF, "Starting test:BasicInterop");
+
+            try
+            {
+                tests.Setup();
+                tests.BasicInterop(rtbScript.Text);
+            }
+            catch (Exception ex)
+            {
+                Log(Level.ERR, $"{ex}");
+            }
+            finally
+            {
+                tests.TearDown();
+            }
+
+            Log(Level.INF, "Finished test:BasicInterop");
         }
         #endregion
 
