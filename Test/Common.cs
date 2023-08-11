@@ -49,7 +49,7 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
-        /// Generic get a simple global value. Restores stack.
+        /// Generic get a simple global value. Restores stack.TODOF improve? remove?
         /// </summary>
         /// <param name="l"></param>
         /// <param name="name"></param>
@@ -62,7 +62,7 @@ namespace KeraLuaEx.Test
             switch (t)
             {
                 case LuaType.String:
-                    val = l.ToStringL(-1)!;
+                    val = l.ToStringL(-1)!;//TODOF
                     break;
                 case LuaType.Boolean:
                     val = l.ToBoolean(-1);
@@ -81,7 +81,7 @@ namespace KeraLuaEx.Test
                     break;
             }
 
-            // Restore stack from get.
+            // Restore stack from GetGlobal().
             l.Pop(1);
 
             return val;
@@ -101,17 +101,17 @@ namespace KeraLuaEx.Test
 
             if (num > 0)
             {
-                for (int i = num; i >= 1; i--)
+                for (int i = 1; i <= num; i++)
                 {
                     LuaType t = l.Type(i);
                     string tinfo = $"[{i}]({t}):";
                     string s = t switch
                     {
-                        LuaType.String => $"{tinfo}{l.ToStringL(i)}",
+                        LuaType.String => $"{tinfo}{l.ToStringL(i)}",//TODOF
                         LuaType.Boolean => $"{tinfo}{l.ToBoolean(i)}",
                         LuaType.Number => $"{tinfo}{(l.IsInteger(i) ? l.ToInteger(i) : l.ToNumber(i))}",
                         LuaType.Nil => $"{tinfo}nil",
-                        //LuaType.Table => $"{tinfo}{l.ToString(i) ?? "null"}",
+                        LuaType.Table => $"{tinfo}{l.ToStringL(i) ?? "null"}",
                         _ => $"{tinfo}{l.ToPointer(i):X}",
                     };
                     ls.Add(s);
@@ -133,7 +133,7 @@ namespace KeraLuaEx.Test
         /// <param name="lsin"></param>
         /// <param name="indent"></param>
         /// <returns></returns>
-        public static string FormatDump(string name, List<string> lsin, bool indent)
+        public static string FormatDump(string name, List<string> lsin, bool indent)//TODOF
         {
             string sindent = indent ? "    " : "";
             var lines = new List<string> { $"{name}:" };
@@ -169,7 +169,7 @@ namespace KeraLuaEx.Test
             {
                 // Get key(-2) info.
                 LuaType keyType = l.Type(-2);
-                string key = l.ToStringL(-2)!;
+                string key = l.ToStringL(-2)!;//TODOF
 
                 // Get type of value(-1).
                 LuaType valType = l.Type(-1);
@@ -193,7 +193,6 @@ namespace KeraLuaEx.Test
                             ls.AddRange(lsx);
                         }
                         break;
-
                     case LuaType.Function:
                         if (all)
                         {
@@ -218,7 +217,7 @@ namespace KeraLuaEx.Test
 
             if (ls.Count <= 1)
             {
-                ls.Add($"{sindent}EMPTY");
+                ls.Add($"{sindent}Empty");
             }
 
             return ls;

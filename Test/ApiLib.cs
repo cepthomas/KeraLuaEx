@@ -22,13 +22,10 @@ namespace KeraLuaEx.Test
         #region Lifecycle
         public static int Load(Lua l)
         {
-            Debug.WriteLine("1" + Common.DumpStack(l));
-
             // Load app stuff. This table gets pushed on the stack and into globals.
-            l.RequireF("api_test", OpenLib, true);
+            l.RequireF("api_lib", OpenLib, true);
 
-            Debug.WriteLine("4" + Common.DumpStack(l));
-
+            // Other inits.
             _startTicks = 0;
             _sw.Start();
 
@@ -36,28 +33,12 @@ namespace KeraLuaEx.Test
         }
         #endregion
 
-//1  Stack:  Empty
-//2  Stack:  [2](Table):2B1C0EEE530  [1](String):api_test
-//3  Stack:  [2](Table):2B1C0EEE530  [1](String):api_test
-//4  Stack:  [1](Table):2B1C0EEE530
-
-
         static int OpenLib(IntPtr p)
         {
             // Open lib into global table.
             var l = Lua.FromIntPtr(p)!;
-            
-            
-            l.PushGlobalTable();
-
-            //l.NewTable();
-
-            Debug.WriteLine("2" + Common.DumpStack(l));
-
-
+            l.NewTable();
             l.SetFuncs(_libFuncs, 0);
-
-            Debug.WriteLine("3" + Common.DumpStack(l));
 
             return 1;
         }

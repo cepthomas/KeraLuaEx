@@ -9,6 +9,7 @@ using System.Text;
 using System.ComponentModel;
 using KeraLuaEx.Test;
 
+
 namespace KeraLuaEx.Host
 {
     public partial class HostForm : Form
@@ -205,36 +206,6 @@ namespace KeraLuaEx.Host
             }
         }
 
-        ///// <summary>
-        ///// Allows the user to select a script file.
-        ///// </summary>
-        //void Open_Click(object? sender, EventArgs e)
-        //{
-        //    if (_dirty)
-        //    {
-        //        if (MessageBox.Show("File has been edited - do you want to save the changes?",
-        //            "Hey you!", MessageBoxButtons.OKCancel) == DialogResult.OK)
-        //        {
-        //            _watcher.EnableRaisingEvents = false;
-        //            File.WriteAllText(_fn, rtbScript.Text);
-        //            _watcher.EnableRaisingEvents = true;
-        //            _dirty = false;
-        //        }
-        //    }
-
-        //    using OpenFileDialog openDlg = new()
-        //    {
-        //        Filter = "Lua files | *.lua",
-        //        Title = "Select a Lua file",
-        //        InitialDirectory = _scriptsPath,
-        //    };
-
-        //    if (openDlg.ShowDialog() == DialogResult.OK)
-        //    {
-        //        OpenScriptFile(openDlg.FileName);
-        //    }
-        //}
-
         /// <summary>
         /// Common script file opener.
         /// </summary>
@@ -300,6 +271,12 @@ namespace KeraLuaEx.Host
         }
         #endregion
 
+        #region Run tests TODO2 consolidate these + make friedly to NUnit.
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void GoPlay_Click(object sender, EventArgs e)
         {
             if (btnClearOnRun.Checked)
@@ -307,14 +284,13 @@ namespace KeraLuaEx.Host
                 rtbOutput.Clear();
             }
 
-            LuaExTests tests = new();
-
-            Log(Level.INF, "Starting test:Play");
+            Log(Level.INF, "Starting tests");
+            LuaExTests tests = new() { ScriptText = rtbScript.Text };
 
             try
             {
                 tests.Setup();
-                tests.Play(rtbScript.Text);
+                tests.Play();
             }
             catch (Exception ex)
             {
@@ -325,11 +301,9 @@ namespace KeraLuaEx.Host
                 tests.TearDown();
             }
 
-            Log(Level.INF, "Finished test:Play");
-
+            Log(Level.INF, "Finished tests");
         }
 
-        #region Run tests
         /// <summary>
         /// Do something.
         /// </summary>
@@ -342,14 +316,14 @@ namespace KeraLuaEx.Host
                 rtbOutput.Clear();
             }
 
-            LuaExTests tests = new();
-
-            Log(Level.INF, "Starting test:BasicInterop");
+            Log(Level.INF, "Starting tests");
+            LuaExTests tests = new() { ScriptText = rtbScript.Text };
 
             try
             {
                 tests.Setup();
-                tests.BasicInterop(rtbScript.Text);
+                //tests.ScriptWithGlobal(rtbScript.Text);
+                tests.ScriptWithModule();
             }
             catch (Exception ex)
             {
@@ -360,7 +334,7 @@ namespace KeraLuaEx.Host
                 tests.TearDown();
             }
 
-            Log(Level.INF, "Finished test:BasicInterop");
+            Log(Level.INF, "Finished tests");
         }
         #endregion
 
@@ -373,7 +347,7 @@ namespace KeraLuaEx.Host
         void Log(Level level, string msg)
         {
             string text = $">{level} {msg}{Environment.NewLine}";
-            int _maxText = 5000;
+            int _maxText = 10000;
 
             // Trim buffer.
             if (_maxText > 0 && rtbOutput.TextLength > _maxText)

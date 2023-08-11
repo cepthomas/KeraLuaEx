@@ -23,6 +23,9 @@ namespace KeraLuaEx
 
         /// <summary>Error info if not throwing on error.</summary>
         string _serror = "";
+
+        /// <summary>Option for multiple returns in 'lua_pcall' and 'lua_call'</summary>
+        public const int LUA_MULTRET = -1;
         #endregion
 
         #region Properties
@@ -175,7 +178,7 @@ namespace KeraLuaEx
             LuaStatus lstat = LoadFile(file);
             err = EvalLuaStatus(lstat);
 
-            lstat = PCall(0, -1, 0);
+            lstat = PCall(0, LUA_MULTRET, 0);
             err |= EvalLuaStatus(lstat);
 
             return err;
@@ -193,7 +196,7 @@ namespace KeraLuaEx
             LuaStatus lstat = LoadString(chunk);
             err = EvalLuaStatus(lstat);
 
-            lstat = PCall(0, -1, 0);
+            lstat = PCall(0, LUA_MULTRET, 0);
             err |= EvalLuaStatus(lstat);
 
             return err;
@@ -2190,7 +2193,7 @@ namespace KeraLuaEx
         }
         #endregion
 
-        #region New for KeraLuaEx
+        #region New for KeraLuaEx **************************************
         /// <summary>
         /// Convert a table from the lua stack. Note that this pops the table.
         /// </summary>
@@ -2221,11 +2224,11 @@ namespace KeraLuaEx
 
                 object? val = valType switch
                 {
-                   LuaType.Nil => null,
-                   LuaType.String => ToStringL(-1),
-                   LuaType.Number => DetermineNumber(-1),
-                   LuaType.Boolean => ToBoolean(-1),
-                   LuaType.Table => ToDataTable(), // recursion!
+                    LuaType.Nil => null,
+                    LuaType.String => ToStringL(-1),//TODOF
+                    LuaType.Number => DetermineNumber(-1),
+                    LuaType.Boolean => ToBoolean(-1),
+                    LuaType.Table => ToDataTable(), // recursion!
                     _ => throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
                 };
 

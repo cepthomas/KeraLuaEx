@@ -1,15 +1,11 @@
 
 local api = require "api_lib" -- C# module
 
--- Create the namespace/module.
-local M = {}
 
 -- Functions implemented in C#.
 api.printex("Loading luaex.lua!")
 api.timer(true)
 
-
-M.xxxxxxxx = "tracer"
 
 -- Local vars.
 local tune_string = "tune" 
@@ -22,21 +18,16 @@ g_number = 7.654
 g_int = 80808
 g_list_number = { 2.2, 56.3, 98.77, 2.303 }
 
--- Global func.
-function g_func(i)
-  api.printex("g_func " .. i)
-  return i * 4
-end
 
 -- Module vars.
-M.m_bool = false
-M.m_table = { dev_type="bing_bong", channel=10, abool=true }
-M.m_list_int = { 2, 56, 98, 2 }
-M.m_list_string = { "a", "string", "with" }
+g_bool = false
+g_table = { dev_type="bing_bong", channel=10, abool=true }
+g_list_int = { 2, 56, 98, 2 }
+g_list_string = { "a", "string", "with" }
 
 
 -- Table of tables.
-M.things =
+things =
 {
   tune = { dev_type="midi_in", channel=1, long_list={ 44, 77, 101 } },
   trig = { dev_type="virt_key", channel=2, adouble=1.234 },
@@ -46,17 +37,17 @@ M.things =
 }
 
 -- Mixed type array.
-M.invalid_table = { 1, 2, 3, "ppp", 88.22 }
+invalid_table = { 1, 2, 3, "ppp", 88.22 }
 
 
 -- Functions called from C#.
-function M.funcy(s)
+function g_func(s)
   index = index + 1
-  api.printex("funcy " .. #s .. " " .. index)
+  api.printex("g_func " .. #s .. " " .. index)
   return #s + 3
 end
 
-function M.calc(addends, suffix)
+function calc(addends, suffix)
   sum = 0
   for k, v in pairs(addends) do
     api.printex(k .. ":" .. v)
@@ -76,7 +67,3 @@ api.printex("this took " .. msec .. " msec")
 -- Seed the randomizer.
 local seed = os.time()
 math.randomseed(seed)
-M.seed = seed
-
--- Return the module.
-return M
