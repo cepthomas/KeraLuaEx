@@ -1,31 +1,42 @@
 
-require "api_test"
+local api = require "api_lib" -- C# module
+
+-- Create the namespace/module.
+local M = {}
 
 -- Functions implemented in C#.
---api_test.printex("Loading luaex.lua!")
---api_test.timer(true)
-
-math.randomseed(os.time())
+api.printex("Loading luaex.lua!")
+api.timer(true)
 
 
--- Locals.
+M.xxxxxxxx = "tracer"
+
+-- Local vars.
 local tune_string = "tune" 
 local const_string <const> = "trig" 
 local index = 1
 
--- Misc globals.
+-- Global vars.
 g_string = "booga booga"
 g_number = 7.654
 g_int = 80808
-g_bool = false
-g_table = { dev_type="bing_bong", channel=10, abool=true }
-g_list_int = { 2, 56, 98, 2 }
 g_list_number = { 2.2, 56.3, 98.77, 2.303 }
-g_list_string = { "a", "string", "with" }
+
+-- Global func.
+function g_func(i)
+  api.printex("g_func " .. i)
+  return i * 4
+end
+
+-- Module vars.
+M.m_bool = false
+M.m_table = { dev_type="bing_bong", channel=10, abool=true }
+M.m_list_int = { 2, 56, 98, 2 }
+M.m_list_string = { "a", "string", "with" }
 
 
 -- Table of tables.
-things =
+M.things =
 {
   tune = { dev_type="midi_in", channel=1, long_list={ 44, 77, 101 } },
   trig = { dev_type="virt_key", channel=2, adouble=1.234 },
@@ -35,25 +46,37 @@ things =
 }
 
 -- Mixed type array.
-invalid_table = { 1, 2, 3, "ppp", 88.22 }
+M.invalid_table = { 1, 2, 3, "ppp", 88.22 }
 
 
 -- Functions called from C#.
-function g_func(s)
+function M.funcy(s)
   index = index + 1
-  printex("g_func " .. #s .. " " .. index)
+  api.printex("funcy " .. #s .. " " .. index)
   return #s + 3
 end
 
-function calc(addends, suffix)
+function M.calc(addends, suffix)
   sum = 0
   for k, v in pairs(addends) do
-    printex(k .. ":" .. v)
+    api.printex(k .. ":" .. v)
     sum = sum + v
   end
   return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
 end
 
--- How long?
-msec = timer(false)
-printex("this took " .. msec .. " msec")
+-- How long is it?
+local msec = api.timer(false)
+api.printex("this took " .. msec .. " msec")
+
+
+----------------------------------------------------------------------------
+-- Module initialization.
+
+-- Seed the randomizer.
+local seed = os.time()
+math.randomseed(seed)
+M.seed = seed
+
+-- Return the module.
+return M
