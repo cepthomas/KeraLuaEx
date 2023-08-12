@@ -2193,7 +2193,7 @@ namespace KeraLuaEx
         }
         #endregion
 
-        #region New for KeraLuaEx **************************************
+        #region New for KeraLuaEx
         /// <summary>
         /// Convert a table from the lua stack. Note that this pops the table.
         /// </summary>
@@ -2212,7 +2212,7 @@ namespace KeraLuaEx
                 // Get key(-2) info.
                 LuaType keyType = Type(-2)!;
 
-                object? key = keyType switch
+                object? key = keyType switch //TODOF
                 {
                     LuaType.String => ToStringL(-2),
                     LuaType.Number => DetermineNumber(-2),
@@ -2222,10 +2222,10 @@ namespace KeraLuaEx
                 // Get type of value(-1).
                 LuaType valType = Type(-1)!;
 
-                object? val = valType switch
+                object? val = valType switch //TODOF
                 {
                     LuaType.Nil => null,
-                    LuaType.String => ToStringL(-1),//TODOF
+                    LuaType.String => ToStringL(-1),
                     LuaType.Number => DetermineNumber(-1),
                     LuaType.Boolean => ToBoolean(-1),
                     LuaType.Table => ToDataTable(), // recursion!
@@ -2241,7 +2241,7 @@ namespace KeraLuaEx
                 Pop(1);
             }
 
-            object? DetermineNumber(int index)
+            object? DetermineNumber(int index) //TODOF common?
             {
                 //return IsInteger(index) ? ToInteger(index) : ToNumber(index); // ternary op doesn't work - some subtle typing thing?
                 if (IsInteger(index)) { return ToInteger(index); }
@@ -2338,7 +2338,7 @@ namespace KeraLuaEx
                 // Add the stack.
                 for (int i = GetTop(); i >= 1; i--)
                 {
-                    ls.Add(ToStringL(i)!);
+                    ls.Add(ToStringL(i)!);  //TODOF tostring converts the value on the stack!!!
                 }
                 _serror = string.Join(Environment.NewLine, ls);
 

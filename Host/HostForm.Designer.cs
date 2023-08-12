@@ -19,10 +19,10 @@
             toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             btnClearOnRun = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            btnGoMain = new System.Windows.Forms.ToolStripButton();
+            btnRunTests = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             txtPos = new System.Windows.Forms.ToolStripTextBox();
-            btnGoPlay = new System.Windows.Forms.ToolStripButton();
+            btnPlay = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             btnFile = new System.Windows.Forms.ToolStripDropDownButton();
             openMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,7 +50,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnFile, toolStripSeparator3, btnClearOnRun, toolStripSeparator4, btnGoMain, toolStripSeparator1, txtPos, btnGoPlay, toolStripSeparator2 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnFile, toolStripSeparator3, btnClearOnRun, toolStripSeparator4, btnRunTests, toolStripSeparator1, txtPos, btnPlay, toolStripSeparator2 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1286, 27);
@@ -76,14 +76,13 @@
             toolStripSeparator4.Name = "toolStripSeparator4";
             toolStripSeparator4.Size = new System.Drawing.Size(6, 27);
             // 
-            // btnGoMain
+            // btnRunTests
             // 
-            btnGoMain.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            btnGoMain.ImageTransparentColor = System.Drawing.Color.Magenta;
-            btnGoMain.Name = "btnGoMain";
-            btnGoMain.Size = new System.Drawing.Size(69, 24);
-            btnGoMain.Text = "Go Main";
-            btnGoMain.Click += GoMain_Click;
+            btnRunTests.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnRunTests.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnRunTests.Name = "btnRunTests";
+            btnRunTests.Size = new System.Drawing.Size(69, 24);
+            btnRunTests.Text = "Run Tests";
             // 
             // toolStripSeparator1
             // 
@@ -99,14 +98,13 @@
             txtPos.ReadOnly = true;
             txtPos.Size = new System.Drawing.Size(70, 20);
             // 
-            // btnGoPlay
+            // btnPlay
             // 
-            btnGoPlay.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            btnGoPlay.ImageTransparentColor = System.Drawing.Color.Magenta;
-            btnGoPlay.Name = "btnGoPlay";
-            btnGoPlay.Size = new System.Drawing.Size(63, 24);
-            btnGoPlay.Text = "Go Play";
-            btnGoPlay.Click += GoPlay_Click;
+            btnPlay.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnPlay.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnPlay.Name = "btnPlay";
+            btnPlay.Size = new System.Drawing.Size(63, 24);
+            btnPlay.Text = "Go Play";
             // 
             // toolStripSeparator2
             // 
@@ -253,7 +251,7 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.RichTextBox rtbScript;
         private System.Windows.Forms.RichTextBox rtbOutput;
-        private System.Windows.Forms.ToolStripButton btnGoMain;
+        private System.Windows.Forms.ToolStripButton btnRunTests;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.RichTextBox rtbStack;
@@ -261,7 +259,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripTextBox txtPos;
-        private System.Windows.Forms.ToolStripButton btnGoPlay;
+        private System.Windows.Forms.ToolStripButton btnPlay;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton btnClearOnRun;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;

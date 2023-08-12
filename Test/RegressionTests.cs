@@ -501,14 +501,18 @@ main.lua-main.lua:11 (main)
             LuaStatus result = l.LoadString(chunk);
 
             if (result != LuaStatus.OK)
+            {
                 error = l.ToStringL(1, false)!;
+            }
 
             Assert.True(result == LuaStatus.OK, "Fail loading string: " + chunk + "ERROR:" + error);
 
             result = l.PCall(0, -1, 0);
 
             if (result != 0)
+            {
                 error = l.ToStringL(1, false)!;
+            }
 
             Assert.True(result == 0, "Fail calling chunk: " + chunk + " ERROR: " + error);
         }

@@ -86,13 +86,39 @@ namespace KeraLuaEx.Host
             _watcher.NotifyFilter = NotifyFilters.LastWrite;
             _watcher.Changed += Watcher_Changed;
 
+            // Figure out what we are doing today.
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
-                OpenScriptFile(args[1]);
-                if (_fn != "")
+                string fn = "";
+
+                switch (args[1])
                 {
-                    _scriptsPath = Path.GetDirectoryName(_fn)!;
+                    case "p":
+                        btnRunTests.Click += (_, __) => RunTests("Play");
+                        fn = "luaex_mod.lua";
+                        break;
+
+                    case "g":
+                        btnRunTests.Click += (_, __) => RunTests("ScriptWithGlobal");
+                        fn = "luaex.lua";
+                        break;
+
+                    case "m":
+                        btnRunTests.Click += (_, __) => RunTests("ScriptWithModule");
+                        fn = "luaex_mod.lua";
+                        break;
+                }
+
+                if (fn != "")
+                {
+                    string srcPath = Common.GetSourcePath();
+                    _scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
+                    OpenScriptFile(Path.Combine(_scriptsPath, fn));
+                }
+                else
+                {
+                    Log(Level.ERR, "Please supply a command argument: p | g | m");
                 }
             }
 
@@ -271,26 +297,31 @@ namespace KeraLuaEx.Host
         }
         #endregion
 
-        #region Run tests TODO2 consolidate these + make friedly to NUnit.
+        #region Internal functions
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void GoPlay_Click(object sender, EventArgs e)
+        /// <param name="which"></param>
+        void RunTests(string which)
         {
             if (btnClearOnRun.Checked)
             {
                 rtbOutput.Clear();
             }
 
-            Log(Level.INF, "Starting tests");
+            Log(Level.INF, $"Starting tests:{which}");
             LuaExTests tests = new() { ScriptText = rtbScript.Text };
 
             try
             {
                 tests.Setup();
-                tests.Play();
+
+                switch (which)
+                {
+                    case "Play": tests.Play(); break;
+                    case "ScriptWithGlobal": tests.ScriptWithGlobal(); break;
+                    case "ScriptWithModule": tests.ScriptWithModule(); break;
+                }
             }
             catch (Exception ex)
             {
@@ -301,44 +332,9 @@ namespace KeraLuaEx.Host
                 tests.TearDown();
             }
 
-            Log(Level.INF, "Finished tests");
+            Log(Level.INF, "Finished tests:{which}");
         }
 
-        /// <summary>
-        /// Do something.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void GoMain_Click(object sender, EventArgs e)
-        {
-            if (btnClearOnRun.Checked)
-            {
-                rtbOutput.Clear();
-            }
-
-            Log(Level.INF, "Starting tests");
-            LuaExTests tests = new() { ScriptText = rtbScript.Text };
-
-            try
-            {
-                tests.Setup();
-                //tests.ScriptWithGlobal(rtbScript.Text);
-                tests.ScriptWithModule();
-            }
-            catch (Exception ex)
-            {
-                Log(Level.ERR, $"{ex}");
-            }
-            finally
-            {
-                tests.TearDown();
-            }
-
-            Log(Level.INF, "Finished tests");
-        }
-        #endregion
-
-        #region Internal functions
         /// <summary>
         /// Log it.
         /// </summary>
@@ -366,9 +362,34 @@ namespace KeraLuaEx.Host
         /// </summary>
         void ShowStack()
         {
-            var s = Common.DumpStack(_l);
-            rtbStack.Text = s;
+            var ls = Common.DumpStack(_l);
+            rtbStack.Text = string.Join(Environment.NewLine, ls);
         }
         #endregion
+    }
+
+    public static class Extensions
+    {
+        /// <summary>
+        /// Invoke helper, maybe. Extension method.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="action"></param>
+        public static void InvokeIfRequired<T>(this T obj, InvokeIfRequiredDelegate<T> action) where T : ISynchronizeInvoke
+        {
+            //if (obj is not null)
+            //{
+                if (obj.InvokeRequired)
+                {
+                    obj.Invoke(action, new object[] { obj });
+                }
+                else
+                {
+                    action(obj);
+                }
+            //}
+        }
+        public delegate void InvokeIfRequiredDelegate<T>(T obj) where T : ISynchronizeInvoke;
     }
 }

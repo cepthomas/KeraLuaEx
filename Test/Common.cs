@@ -49,12 +49,31 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
-        /// Generic get a simple global value. Restores stack.TODOF improve? remove?
+        /// Check the stack size.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="expected"></param>
+        /// <param name="file">Ignore - compiler use.</param>
+        /// <param name="line">Ignore - compiler use.</param>
+        /// <exception cref="LuaException"></exception>
+        public static void EvalStackSize(Lua l, int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        {
+            int num = l.GetTop();
+            if (num != expected)
+            {
+                var s = $"{file}({line}): Expected {expected} stack but is {num}";
+                Log(s);
+                //throw new LuaException(s); TODO2
+            }
+        }
+
+        /// <summary>
+        /// Generic get a simple global value. Restores stack.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static object? GetGlobalValue(Lua l, string name)
+        public static object? GetGlobalValue(Lua l, string name) //TODOF
         {
             object? val = null;
 
@@ -62,7 +81,7 @@ namespace KeraLuaEx.Test
             switch (t)
             {
                 case LuaType.String:
-                    val = l.ToStringL(-1)!;//TODOF
+                    val = l.ToStringL(-1)!;
                     break;
                 case LuaType.Boolean:
                     val = l.ToBoolean(-1);
@@ -88,12 +107,26 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
+        /// Dump the globals.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <returns></returns>
+        public static List<string> DumpGlobals(Lua l)
+        {
+            l.PushGlobalTable();
+            var sg3 = DumpRawTable(l, "globals", 0, true);
+            l.Pop(1); // from PushGlobalTable()
+
+            return sg3;
+        }
+
+        /// <summary>
         /// Dump the stack.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="info"></param>
         /// <returns></returns>
-        public static string DumpStack(Lua l, string info = "")
+        public static List<string> DumpStack(Lua l, string info = "") //TODOF
         {
             List<string> ls = new() { info, "Stack:" };
 
@@ -107,7 +140,7 @@ namespace KeraLuaEx.Test
                     string tinfo = $"[{i}]({t}):";
                     string s = t switch
                     {
-                        LuaType.String => $"{tinfo}{l.ToStringL(i)}",//TODOF
+                        LuaType.String => $"{tinfo}{l.ToStringL(i)}",
                         LuaType.Boolean => $"{tinfo}{l.ToBoolean(i)}",
                         LuaType.Number => $"{tinfo}{(l.IsInteger(i) ? l.ToInteger(i) : l.ToNumber(i))}",
                         LuaType.Nil => $"{tinfo}nil",
@@ -122,8 +155,7 @@ namespace KeraLuaEx.Test
                 ls.Add("Empty");
             }
 
-            return string.Join("  ", ls);
-            //return string.Join(Environment.NewLine, ls);
+            return ls;
         }
 
         /// <summary>
@@ -133,7 +165,7 @@ namespace KeraLuaEx.Test
         /// <param name="lsin"></param>
         /// <param name="indent"></param>
         /// <returns></returns>
-        public static string FormatDump(string name, List<string> lsin, bool indent)//TODOF
+        public static string FormatDump(string name, List<string> lsin, bool indent) //TODOF
         {
             string sindent = indent ? "    " : "";
             var lines = new List<string> { $"{name}:" };
@@ -150,7 +182,7 @@ namespace KeraLuaEx.Test
         /// <param name="indent"></param>
         /// <param name="all"></param>
         /// <returns></returns>
-        public static List<string>? DumpRawTable(Lua l, string tableName, int indent, bool all)
+        public static List<string>? DumpRawTable(Lua l, string tableName, int indent, bool all) //TODOF
         {
             if (indent > 1)
             {
@@ -169,7 +201,7 @@ namespace KeraLuaEx.Test
             {
                 // Get key(-2) info.
                 LuaType keyType = l.Type(-2);
-                string key = l.ToStringL(-2)!;//TODOF
+                string key = l.ToStringL(-2)!;
 
                 // Get type of value(-1).
                 LuaType valType = l.Type(-1);
@@ -222,5 +254,34 @@ namespace KeraLuaEx.Test
 
             return ls;
         }
+
+
+        /// <summary>
+        /// Format value for display.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="val"></param>
+        /// <returns></returns>
+        /// <exception cref="SyntaxException"></exception>
+        public static string FormatCsharpVal(string name, object? val) //TODOF used??
+        {
+            string s = "???";
+
+            s = val switch
+            {
+                int _ => $"{name}(int):{val}",
+                long _ => $"{name}(long):{val}",
+                double _ => $"{name}(double):{val}",
+                bool _ => $"{name}(bool):{val}",
+                string _ => $"{name}(string):{val}",
+                DataTable _ => $"{name}(table):{val}",
+                null => $"{name}:null",
+                _ => throw new SyntaxException($"Unsupported type:{val.GetType()} for {name}"),
+            };
+
+            return s;
+        }
+
+        
     }
 }

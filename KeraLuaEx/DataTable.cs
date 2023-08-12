@@ -246,7 +246,7 @@ namespace KeraLuaEx
         /// <param name="indent">Indent level for table</param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public string Format(string tableName, int indent = 0)//TODOF
+        public string Format(string tableName, int indent = 0) //TODOF
         {
             List<string> ls = new();
 

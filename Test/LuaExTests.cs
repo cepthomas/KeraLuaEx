@@ -14,12 +14,16 @@ namespace KeraLuaEx.Test
         /// <summary>Lua context.</summary>
         Lua? _l;
 
+        /// <summary>Explicit script.</summary>
+        public string ScriptText { get; set; } = "";
+
         [SetUp]
         public void Setup()
         {
             _l?.Close();
             _l = new Lua();
             ApiLib.Load(_l);
+
         }
 
         [TearDown]
@@ -29,75 +33,81 @@ namespace KeraLuaEx.Test
             _l = null;
         }
 
-        // TODO1 deal with this.
-        //if (script != "")
-        //{
-        //    _l!.LoadString(script);
-        //}
-        //else
-        //{
-        //    string srcPath = Common.GetSourcePath();
-        //    string scriptsPath = Path.Combine(srcPath, "scripts");
-        //    Common.SetLuaPath(_l!, new() { scriptsPath });
-        //    string scriptFile = Path.Combine(scriptsPath, "luaex.lua");
-        //    _l!.LoadFile(scriptFile);
-        //}
 
-        public string ScriptText { get; set; } = "";
-
+        void LoadScript(string fn)
+        {
+            if (ScriptText != "")
+            {
+               _l!.LoadString(ScriptText);
+            }
+            else
+            {
+               string srcPath = Common.GetSourcePath();
+               string scriptsPath = Path.Combine(srcPath, "scripts");
+               Common.SetLuaPath(_l!, new() { scriptsPath });
+               string scriptFile = Path.Combine(scriptsPath, fn);
+               _l!.LoadFile(scriptFile);
+            }
+        }
+        
 
         [Test]
         public void Play()
         {
-            _l!.LoadString(ScriptText);
+            ///// Load everything.
+            LoadScript("luaex_mod.lua");
 
-            // Call to load file. TODO1 should be a util... but requires module returns itself, otherwise thinngs need to be global to be visible i think.
+            // PCall loads the file.
             _l.PCall(0, Lua.LUA_MULTRET, 0);
-
-            //// Top of the stack is the module itself. Save it for later.
-            //_l.SetGlobal("luaex");
-            //// Reset stack.
-            //_l.SetTop(0);
-            //return;
-
 
             var s = Common.DumpStack(_l, "PCall return stack");
             Common.Log(Environment.NewLine + s);
             // [1] is the luaex module, [2] is api_lib
             //The function results are pushed onto the stack in direct order (the first result is pushed first),
             //so that after the call the last result is on the top of the stack.
-
-            //// Stick module in global.
+            // Stick module in global.
             //_l.SetGlobal("luaex");
+            Common.EvalStackSize(_l, 0);
 
-            var sg1 = Common.DumpRawTable(_l, "[1]", 0, true);
-            Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg1));
-            _l.Pop(1);
 
-            //var sg2 = Common.DumpRawTable(_l, "[2]", 0, true);
-            //Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg2));
-            //_l.Pop(1);
+            if (_l.GetTop() > 0)
+            {
+                var sg1 = Common.DumpRawTable(_l, "[1]", 0, true);
+                Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg1));
+                _l.Pop(1);
+            }
+            Common.EvalStackSize(_l, 0);
 
-            // Dump globals. TODOF
-            _l.PushGlobalTable();
-            var sg3 = Common.DumpRawTable(_l, "globals", 0, true);
-            _l.Pop(1); // from PushGlobalTable()
-            Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg3));
+            if (_l.GetTop() > 0)
+            {
+                var sg2 = Common.DumpRawTable(_l, "[2]", 0, true);
+                Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg2));
+                _l.Pop(1);
+            }
+            Common.EvalStackSize(_l, 0);
+
+            // Dump globals.
+            var gl = Common.DumpGlobals(_l);
+            Common.Log(Environment.NewLine + string.Join(Environment.NewLine, gl));
+
+            Common.EvalStackSize(_l, 0);
         }
 
         [Test]
         public void ScriptWithGlobal()
         {
-            _l!.LoadString(ScriptText);
+            ///// Load everything.
+            LoadScript("luaex.lua");
 
-            // Call to load file.
+            // PCall loads the file.
             _l.PCall(0, Lua.LUA_MULTRET, 0);
 
-            // Reset stack.
-            _l.SetTop(0);
+            //// Reset stack.
+            //_l.SetTop(0);
+            Common.EvalStackSize(_l, 0);
 
 
-            // Look at globals.
+            ///// Look at globals.
             var x = Common.GetGlobalValue(_l, "g_number");
             Assert.AreEqual(7.654, x);
 
@@ -137,6 +147,7 @@ namespace KeraLuaEx.Test
 
             var list = dblt.AsList();
             Assert.AreEqual(909.555, list[2]);
+            Common.EvalStackSize(_l, 0);
 
 
             ///// Execute a lua function.
@@ -153,6 +164,7 @@ namespace KeraLuaEx.Test
             var resi = _l.ToInteger(-1);
             Assert.AreEqual(s.Length + 3, resi);
             _l.Pop(1); // Clean up returned value.
+            Common.EvalStackSize(_l, 0);
 
 
             ///// Execute a more complex lua function.
@@ -175,15 +187,18 @@ namespace KeraLuaEx.Test
             Assert.AreEqual(2, table.Count);
             Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
             Assert.AreEqual(9295, table["sum"]);
+
+            Common.EvalStackSize(_l, 0);
         }
 
 
         [Test]
         public void ScriptWithModule()
         {
-            _l!.LoadString(ScriptText);
+            ///// Load everything.
+            LoadScript("luaex_mod.lua");
 
-            // Call to load file.
+            // PCall loads the file.
             _l.PCall(0, Lua.LUA_MULTRET, 0);
 
             // Top of the stack is the module itself. Save it for later.
@@ -191,27 +206,16 @@ namespace KeraLuaEx.Test
 
             // Reset stack.
             _l.SetTop(0);
-
-            //// Dump globals. TODOF - make a utility for this.
-            //_l.PushGlobalTable();
-            //var sg3 = Common.DumpRawTable(_l, "globals", 0, true);
-            //_l.Pop(1); // from PushGlobalTable()
-            //Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg3));
-
-
+            Common.EvalStackSize(_l, 0);
 
             ///// Look at globals.
-
+            // var gl = Common.DumpGlobals(_l);
+            // Common.Log(Environment.NewLine + string.Join(Environment.NewLine, gl));
             var x = Common.GetGlobalValue(_l, "g_int");
             Assert.AreEqual(71717, x);
 
-
-
-            ///// Look at module stuff.
-            //var mod = Common.GetGlobalValue(_l, "luaex_mod") as DataTable;
+            ///// Look at module.
             LuaType t = _l.GetGlobal("luaex_mod");
-            //var sg1 = Common.DumpRawTable(_l, ">>>", 0, true);
-            //Common.Log(Environment.NewLine + string.Join(Environment.NewLine, sg1));
 
             _l.GetField(-1, "m_string");
             var sval = _l.ToStringL(-1);
@@ -222,10 +226,10 @@ namespace KeraLuaEx.Test
             var bval = _l.ToBoolean(-1);
             Assert.AreEqual(false, bval);
             _l.Pop(1);
+            Common.EvalStackSize(_l, 0);
 
 
-
-            ///// Execute a lua function.
+            ///// Execute a module lua function.
             _l.GetField(-1, "funcmod");
 
             // Push the arguments.
@@ -239,6 +243,7 @@ namespace KeraLuaEx.Test
             var resi = _l.ToInteger(-1);
             Assert.AreEqual(s.Length + 3, resi);
             _l.Pop(1); // Clean up returned value.
+            Common.EvalStackSize(_l, 0);
 
 
             ///// Execute a more complex lua function.
@@ -261,8 +266,11 @@ namespace KeraLuaEx.Test
             Assert.AreEqual(2, table.Count);
             Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
             Assert.AreEqual(9295, table["sum"]);
+            Common.EvalStackSize(_l, 0);
 
             _l.Pop(1); // GetGlobal("luaex_mod")
+
+            Common.EvalStackSize(_l, 0);
         }
     }
 }
