@@ -70,7 +70,7 @@ namespace KeraLuaEx.Host
                 { Level.DBG, Color.LightGreen },
                 { Level.SCR, Color.LightBlue },
             };
-            Test.Common.LogMessage += (object? sender, string e) => Log(Level.SCR, e);
+            TestUtils.LogMessage += (_, string e) => Log(Level.SCR, e);
 
             Log(Level.INF, "============================ Starting up ===========================");
 
@@ -79,7 +79,7 @@ namespace KeraLuaEx.Host
             rtbOutput.Font = font;
             rtbStack.Font = font;
 
-            rtbScript.KeyDown += (object? _, KeyEventArgs __) => _dirty = true;
+            rtbScript.KeyDown += (_, __) => _dirty = true;
             rtbScript.MouseDown += Script_MouseDown;
 
             _watcher.EnableRaisingEvents = false;
@@ -112,7 +112,7 @@ namespace KeraLuaEx.Host
 
                 if (fn != "")
                 {
-                    string srcPath = Common.GetSourcePath();
+                    string srcPath = TestUtils.GetSourcePath();
                     _scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
                     OpenScriptFile(Path.Combine(_scriptsPath, fn));
                 }
@@ -332,7 +332,7 @@ namespace KeraLuaEx.Host
                 tests.TearDown();
             }
 
-            Log(Level.INF, "Finished tests:{which}");
+            Log(Level.INF, $"Finished tests:{which}");
         }
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace KeraLuaEx.Host
         /// </summary>
         void ShowStack()
         {
-            var ls = Common.DumpStack(_l);
+            var ls = _l.DumpStack();
             rtbStack.Text = string.Join(Environment.NewLine, ls);
         }
         #endregion
@@ -378,17 +378,14 @@ namespace KeraLuaEx.Host
         /// <param name="action"></param>
         public static void InvokeIfRequired<T>(this T obj, InvokeIfRequiredDelegate<T> action) where T : ISynchronizeInvoke
         {
-            //if (obj is not null)
-            //{
-                if (obj.InvokeRequired)
-                {
-                    obj.Invoke(action, new object[] { obj });
-                }
-                else
-                {
-                    action(obj);
-                }
-            //}
+            if (obj.InvokeRequired)
+            {
+                obj.Invoke(action, new object[] { obj });
+            }
+            else
+            {
+                action(obj);
+            }
         }
         public delegate void InvokeIfRequiredDelegate<T>(T obj) where T : ISynchronizeInvoke;
     }

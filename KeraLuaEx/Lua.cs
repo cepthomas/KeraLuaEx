@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Linq;
-
+using System.Diagnostics;
 
 namespace KeraLuaEx
 {
@@ -45,8 +45,26 @@ namespace KeraLuaEx
         /// <summary>Get the context on the main thread. Will be this if only one.</summary>
         public Lua LMain { get { return _lMain ?? this; } }
 
-        /// <summary>Errors cause exceptions.</summary>
+        /// <summary>Errors cause exceptions. TODO or provide event and let client handle it.</summary>
         public bool ThrowOnError { get; set; } = true;
+        #endregion        
+
+        #region Events
+        /// <summary>Notification event.</summary>
+        public event EventHandler<NotificationEventArgs>? Notification;
+
+        /// <summary>Notification event.</summary>
+        public class NotificationEventArgs : EventArgs
+        {
+            /// <summary>The information.</summary>
+            public string Message { get; set; } = "";
+
+            /// <summary>Unrecoverable.</summary>
+            public bool Fatal { get; set; } = false;
+
+            /// <summary>Client takes care of it.</summary>
+            public bool Handled { get; set; } = false;
+        }
         #endregion        
 
         #region Lifecycle
@@ -2195,7 +2213,7 @@ namespace KeraLuaEx
 
         #region New for KeraLuaEx
         /// <summary>
-        /// Convert a table from the lua stack. Note that this pops the table.
+        /// Convert a table from the lua stack. Note that this pops the table unlike other ToXXX().
         /// </summary>
         /// <returns>Minty fresh table.</returns>
         /// <exception cref="SyntaxException"></exception>
@@ -2212,7 +2230,7 @@ namespace KeraLuaEx
                 // Get key(-2) info.
                 LuaType keyType = Type(-2)!;
 
-                object? key = keyType switch //TODOF
+                object? key = keyType switch
                 {
                     LuaType.String => ToStringL(-2),
                     LuaType.Number => DetermineNumber(-2),
@@ -2222,7 +2240,7 @@ namespace KeraLuaEx
                 // Get type of value(-1).
                 LuaType valType = Type(-1)!;
 
-                object? val = valType switch //TODOF
+                object? val = valType switch
                 {
                     LuaType.Nil => null,
                     LuaType.String => ToStringL(-1),
@@ -2239,13 +2257,6 @@ namespace KeraLuaEx
 
                 // Remove value(-1), now key on top at(-1).
                 Pop(1);
-            }
-
-            object? DetermineNumber(int index) //TODOF common?
-            {
-                //return IsInteger(index) ? ToInteger(index) : ToNumber(index); // ternary op doesn't work - some subtle typing thing?
-                if (IsInteger(index)) { return ToInteger(index); }
-                else { return ToNumber(index); }
             }
 
             return table;
@@ -2333,16 +2344,12 @@ namespace KeraLuaEx
                     $"Caller:{Path.GetFileName(file)}({line})"
                 };
 
-                GetGlobal("debug");
+                GetGlobal("debug"); // ensures the source file info.
 
-                // Add the stack.
-                for (int i = GetTop(); i >= 1; i--)
-                {
-                    ls.Add(ToStringL(i)!);  //TODOF tostring converts the value on the stack!!!
-                }
-                _serror = string.Join(Environment.NewLine, ls);
+                var st = DumpStack();
+                _serror = string.Join(Environment.NewLine, st);
 
-                Pop(1); // clean up global.
+                Pop(1); // clean up GetGlobal("debug").
 
                 if (ThrowOnError)
                 {
@@ -2351,6 +2358,85 @@ namespace KeraLuaEx
             }
 
             return hasError;
+        }
+
+        /// <summary>
+        /// Dump the contents of the stack.
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        public List<string> DumpStack(string info = "")
+        {
+            List<string> ls = new();
+            if (info != "")
+            {
+                ls.Add(info);
+            }
+
+            int num = GetTop();
+
+            if (num > 0)
+            {
+                for (int i = 1; i <= num; i++)
+                {
+                    LuaType t = Type(i);
+                    string st = t.ToString().ToLower();
+                    string tinfo = $"    [{i}]:";
+
+                    string s = t switch
+                    {
+                        LuaType.String => $"{tinfo}{ToStringL(i)}({st})",
+                        LuaType.Boolean => $"{tinfo}{ToBoolean(i)}({st})",
+                        LuaType.Number => $"{tinfo}{DetermineNumber(i)}({st})",
+                        LuaType.Nil => $"{tinfo}nil",
+                        LuaType.Table => $"{tinfo}{ToStringL(i) ?? "null"}({st})",
+                        _ => $"{tinfo}{ToPointer(i):X}({st})",
+                    };
+                    ls.Add(s);
+                }
+            }
+            else
+            {
+                ls.Add("Empty");
+            }
+
+            return ls;
+        }
+
+        /// <summary>
+        /// Check the stack size.
+        /// </summary>
+        /// <param name="expected"></param>
+        /// <param name="file">Ignore - compiler use.</param>
+        /// <param name="line">Ignore - compiler use.</param>
+        /// <exception cref="LuaException"></exception>
+        public void EvalStackSize(int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        {
+            int num = GetTop();
+
+            if (num != expected)
+            {
+                _serror = $"{file}({line}): Expected {expected} stack but is {num}";
+
+                if (ThrowOnError)
+                {
+                    Debug.WriteLine(_serror);
+                    //throw new LuaException(_serror); TODO1
+                }
+            }
+        }
+
+        /// <summary>
+        /// ToXXX() for generic numbers.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public object? DetermineNumber(int index)
+        {
+            //return IsInteger(index) ? ToInteger(index) : ToNumber(index); // ternary op doesn't work - some subtle typing thing?
+            if (IsInteger(index)) { return ToInteger(index); }
+            else if (IsNumber(index)) { return ToNumber(index); }
+            else { return null; }
         }
     }
     #endregion

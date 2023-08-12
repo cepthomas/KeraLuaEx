@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
-//using KeraLuaEx;
+using static KeraLuaEx.Test.TestUtils;
 
 
 namespace KeraLuaEx.Test
@@ -32,9 +32,9 @@ namespace KeraLuaEx.Test
         {
             using Lua l = new();
 
-            string srcPath = Common.GetSourcePath();
+            string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            Common.SetLuaPath(l, new() { scriptsPath });
+            SetLuaPath(l, new() { scriptsPath });
             LuaStatus lstat = l.LoadFile(Path.Combine(scriptsPath, "cf.lua"));
             Assert.AreEqual(LuaStatus.OK, lstat);
             lstat = l.PCall(0, -1, 0);
@@ -132,9 +132,9 @@ namespace KeraLuaEx.Test
 
             _hookLog.Clear();
 
-            string srcPath = Common.GetSourcePath();
+            string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            Common.SetLuaPath(l, new() { scriptsPath });
+            SetLuaPath(l, new() { scriptsPath });
 
             l.SetHook(_funcHookCallback, LuaHookMask.Line, 0);
 
@@ -220,9 +220,9 @@ main.lua-main.lua:11 (main)
 
             _hookLog.Clear();
 
-            string srcPath = Common.GetSourcePath();
+            string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            Common.SetLuaPath(l, new() { scriptsPath });
+            SetLuaPath(l, new() { scriptsPath });
 
             l.SetHook(_funcHookCallback, LuaHookMask.Line, 0);
 

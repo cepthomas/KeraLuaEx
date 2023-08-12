@@ -101,36 +101,50 @@ namespace KeraLuaEx
         }
         #endregion
 
-        #region Indexing, iteration, etc?
-        // Indexer for string fields of the table
-        // Client screwups will gen exceptions
+        #region Indexing
+        /// <summary>
+        /// Indexer for string fields of the table. Used for dictionary only.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public object? this[string index]
         {
             get
             {
-                if (Type != TableType.Dictionary)
+                if (Type == TableType.Dictionary)
+                {
+                    // If key exists return it else null.
+                    var match = _tableFields.Where(f => f.Key as string == index);
+                    return match.Any() ? match.First().Value : null;
+                }
+                else
                 {
                     throw new InvalidOperationException($"This is not a dictionary table");
                 }
-
-                // If key exists return it else null.
-                var match = _tableFields.Where(f => f.Key as string == index);
-                return match.Any() ? match.First().Value : null;
             }
         }
-         // Indexer for numeric fields of the table
+
+        /// <summary>
+        /// Indexer for numeric fields of the table. Used for array only.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public object? this[int index]
         {
             get
             {
-                if (Type != TableType.List)
+                if (Type == TableType.List)
+                {
+                    // If key exists return it else null.
+                    object? res = (index < 0 || index >= _tableFields.Count) ? null : _tableFields[index].Value;
+                    return res;
+                }
+                else
                 {
                     throw new InvalidOperationException($"This is not a dictionary table");
                 }
-
-                // If key exists return it else null.
-                object? res = (index < 0 || index >= _tableFields.Count) ? null : _tableFields[index].Value;
-                return res;
             }
         }
         #endregion
@@ -246,34 +260,34 @@ namespace KeraLuaEx
         /// <param name="indent">Indent level for table</param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public string Format(string tableName, int indent = 0) //TODOF
+        public string Format(string tableName, int indent = 0)
         {
             List<string> ls = new();
+            var sindent = indent > 0 ? new(' ', 4 * indent) : "";
 
             switch (Type)
             {
                 case TableType.List:
                     List<object> lvals = new();
                     _tableFields.ForEach(f => lvals.Add(f.Value));
-                    ls.Add($"{Indent(indent)}{tableName}(array):[ {string.Join(", ", lvals)} ]");
+                    ls.Add($"{sindent}{tableName}(array):[ {string.Join(", ", lvals)} ]");
                     break;
 
                 case TableType.Dictionary:
-                    ls.Add($"{Indent(indent)}{tableName}(dict):");
-                    indent += 1;
+                    ls.Add($"{sindent}{tableName}(dict):");
+                    sindent += "    ";
 
                     foreach (var f in _tableFields)
                     {
                         switch (f.Value)
                         {
-                            case null:          ls.Add($"{Indent(indent)}{f.Key}(null):");      break;
-                            case string s:      ls.Add($"{Indent(indent)}{f.Key}(string):{s}"); break;
-                            case bool b:        ls.Add($"{Indent(indent)}{f.Key}(bool):{b}");   break;
-                            //case int i:       ls.Add($"{Indent(indent)}{f.Key}(int):{i}");    break;
-                            case long l:        ls.Add($"{Indent(indent)}{f.Key}(long):{l}");   break;
-                            case double d:      ls.Add($"{Indent(indent)}{f.Key}(double):{d}"); break;
-                            case DataTable t:   ls.Add($"{t.Format($"{f.Key}", indent)}");      break; // recursion!
-                            default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
+                            case null:          ls.Add($"{sindent}{f.Key}(null):");      break;
+                            case string s:      ls.Add($"{sindent}{f.Key}(string):{s}"); break;
+                            case bool b:        ls.Add($"{sindent}{f.Key}(bool):{b}");   break;
+                            case long l:        ls.Add($"{sindent}{f.Key}(long):{l}");   break;
+                            case double d:      ls.Add($"{sindent}{f.Key}(double):{d}"); break;
+                            case DataTable t:   ls.Add($"{t.Format($"{f.Key}", indent + 1)}");      break; // recursion!
+                            default:            throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
                         }
                     }
                     break;
@@ -282,11 +296,6 @@ namespace KeraLuaEx
                 case TableType.Invalid:
                     ls.Add($"Table is {Type}");
                     break;
-            }
-
-            static string Indent(int indent)
-            {
-                return indent > 0 ? new(' ', 4 * indent) : "";
             }
 
             return string.Join(Environment.NewLine, ls);

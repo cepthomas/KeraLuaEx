@@ -65,7 +65,7 @@ namespace KeraLuaEx.Test
             var s = l.ToStringL(-1);
 
             // Do the work.
-            Common.Log($"printex:{s}");
+            TestUtils.Log($"printex:{s}");
 
             // Return results.
             return 0;
