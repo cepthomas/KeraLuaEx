@@ -24,7 +24,6 @@ namespace KeraLuaEx.Test
             _l?.Close();
             _l = new Lua();
             ApiLib.Load(_l);
-
         }
 
         [TearDown]
@@ -33,7 +32,6 @@ namespace KeraLuaEx.Test
             _l?.Close();
             _l = null;
         }
-
 
         [Test]
         public void Play()
@@ -51,7 +49,7 @@ namespace KeraLuaEx.Test
             //so that after the call the last result is on the top of the stack.
             // Stick module in global.
             //_l.SetGlobal("luaex");
-            _l.EvalStackSize(0);
+            EvalStackSize(_l, 0);
 
             if (_l.GetTop() > 0)
             {
@@ -59,7 +57,7 @@ namespace KeraLuaEx.Test
                 Log(Environment.NewLine + string.Join(Environment.NewLine, sg1));
                 _l.Pop(1);
             }
-            _l.EvalStackSize(0);
+            EvalStackSize(_l, 0);
 
             if (_l.GetTop() > 0)
             {
@@ -67,13 +65,13 @@ namespace KeraLuaEx.Test
                 Log(Environment.NewLine + string.Join(Environment.NewLine, sg2));
                 _l.Pop(1);
             }
-            _l.EvalStackSize(0);
+            EvalStackSize(_l, 0);
 
             // Dump globals.
             var gl = DumpGlobals(_l);
             Log(Environment.NewLine + string.Join(Environment.NewLine, gl));
 
-            _l.EvalStackSize(0);
+            EvalStackSize(_l, 0);
         }
 
         [Test]
@@ -86,9 +84,8 @@ namespace KeraLuaEx.Test
             _l.PCall(0, Lua.LUA_MULTRET, 0);
 
             //// Reset stack.
-            //_l.SetTop(0);
-            _l.EvalStackSize(0);
-
+            _l.SetTop(0);
+            EvalStackSize(_l, 0);
 
             ///// Look at globals.
             var x = GetGlobalValue(_l, "g_number");
@@ -130,7 +127,8 @@ namespace KeraLuaEx.Test
 
             var list = dblt.AsList();
             Assert.AreEqual(909.555, list[2]);
-            _l.EvalStackSize(0);
+
+            EvalStackSize(_l, 0);
 
 
             ///// Execute a lua function.
@@ -147,11 +145,12 @@ namespace KeraLuaEx.Test
             var resi = _l.ToInteger(-1);
             Assert.AreEqual(s.Length + 3, resi);
             _l.Pop(1); // Clean up returned value.
-            _l.EvalStackSize(0);
 
+            EvalStackSize(_l, 0);
 
             ///// Execute a more complex lua function.
             _l.GetGlobal("calc");
+            EvalStackSize(_l, 1);
 
             // Push the arguments.
             var addends = new List<long>() { 3901, 488, 922, 1578, 2406 };
@@ -159,21 +158,22 @@ namespace KeraLuaEx.Test
             table = new DataTable(addends);
             _l.PushDataTable(table);
             _l.PushString(suffix);
+            EvalStackSize(_l, 3);
 
             // Do the call.
             _l.PCall(2, 1, 0); //attempt to call a number value
+            EvalStackSize(_l, 1);
 
             // Get the results from the stack.
             table = _l.ToDataTable();
-            //_l.Pop(1); // Don't pop - ToDataTable() does that for you.
+            _l.Pop(1);
             Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
             Assert.AreEqual(2, table.Count);
             Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
             Assert.AreEqual(9295, table["sum"]);
 
-            _l.EvalStackSize(0);
+            EvalStackSize(_l, 0);
         }
-
 
         [Test]
         public void ScriptWithModule()
@@ -189,7 +189,8 @@ namespace KeraLuaEx.Test
 
             // Reset stack.
             _l.SetTop(0);
-            _l.EvalStackSize(0);
+
+            EvalStackSize(_l, 0);
 
             ///// Look at globals.
             // var gl = Common.DumpGlobals(_l);
@@ -209,7 +210,8 @@ namespace KeraLuaEx.Test
             var bval = _l.ToBoolean(-1);
             Assert.AreEqual(false, bval);
             _l.Pop(1);
-            _l.EvalStackSize(0);
+
+            EvalStackSize(_l, 1); // GetGlobal("luaex_mod") 
 
 
             ///// Execute a module lua function.
@@ -219,18 +221,23 @@ namespace KeraLuaEx.Test
             var s = "az9011 birdie";
             _l.PushString(s);
 
+            EvalStackSize(_l, 3);
+
             // Do the call.
             _l.PCall(1, 1, 0);
+            EvalStackSize(_l, 2);
 
             // Get result.
             var resi = _l.ToInteger(-1);
             Assert.AreEqual(s.Length + 3, resi);
             _l.Pop(1); // Clean up returned value.
-            _l.EvalStackSize(0);
+            
+            EvalStackSize(_l, 1);
 
 
             ///// Execute a more complex lua function.
             _l.GetField(-1, "calcmod");
+            EvalStackSize(_l, 2);
 
             // Push the arguments.
             var addends = new List<long>() { 3901, 488, 922, 1578, 2406 };
@@ -244,16 +251,16 @@ namespace KeraLuaEx.Test
 
             // Get the results from the stack.
             table = _l.ToDataTable();
-            //_l.Pop(1); // Don't pop - ToDataTable() does that for you.
+            _l.Pop(1);
             Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
             Assert.AreEqual(2, table.Count);
             Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
             Assert.AreEqual(9295, table["sum"]);
-            _l.EvalStackSize(0);
+            EvalStackSize(_l, 1);
 
             _l.Pop(1); // GetGlobal("luaex_mod")
 
-            _l.EvalStackSize(0);
+            EvalStackSize(_l, 0);
         }
 
         // Helper.

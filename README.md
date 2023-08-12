@@ -33,3 +33,4 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 - Original term "State" changed to "L".
 - Removed lots of overloaded funcs, uses default args instead.
 - Removed expression-bodied members because I prefer to reserve `=>` for lambdas only.
+

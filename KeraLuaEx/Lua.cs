@@ -2393,6 +2393,8 @@ namespace KeraLuaEx
                         _ => $"{tinfo}{ToPointer(i):X}({st})",
                     };
                     ls.Add(s);
+
+                    Pop(1); // remove the value from stack
                 }
             }
             else
@@ -2401,29 +2403,6 @@ namespace KeraLuaEx
             }
 
             return ls;
-        }
-
-        /// <summary>
-        /// Check the stack size.
-        /// </summary>
-        /// <param name="expected"></param>
-        /// <param name="file">Ignore - compiler use.</param>
-        /// <param name="line">Ignore - compiler use.</param>
-        /// <exception cref="LuaException"></exception>
-        public void EvalStackSize(int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
-        {
-            int num = GetTop();
-
-            if (num != expected)
-            {
-                _serror = $"{file}({line}): Expected {expected} stack but is {num}";
-
-                if (ThrowOnError)
-                {
-                    Debug.WriteLine(_serror);
-                    //throw new LuaException(_serror); TODO1
-                }
-            }
         }
 
         /// <summary>

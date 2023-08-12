@@ -181,6 +181,26 @@ namespace KeraLuaEx.Test
             };
             return s;
         }
+
+
+        /// <summary>
+        /// Check the stack size.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="expected"></param>
+        /// <param name="file">Ignore - compiler use.</param>
+        /// <param name="line">Ignore - compiler use.</param>
+        public static void EvalStackSize(Lua l, int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        {
+            int num = l.GetTop();
+
+            if (num != expected)
+            {
+                string serror = $"{file}({line}): Expected {expected} stack but is {num}";
+                Log(serror);
+            }
+        }
+
         #endregion
     }
 }
