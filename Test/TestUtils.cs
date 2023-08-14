@@ -25,28 +25,13 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
-        /// Sets package.path.
-        /// </summary>
-        /// <param name="l"></param>
-        /// <param name="paths"></param>
-        public static void SetLuaPath(Lua l, List<string> paths)
-        {
-            List<string> parts = new() { "?", "?.lua" };
-            paths.ForEach(p => parts.Add(Path.Join(p, "?.lua").Replace('\\', '/')));
-            string luapath = string.Join(';', parts);
-            string s = $"package.path = \"{luapath}\"";
-            l.DoString(s);
-        }
-
-        /// <summary>
         /// Get the dir name of the caller's source file.
         /// </summary>
         /// <param name="callerPath"></param>
         /// <returns>Caller source dir.</returns>
         public static string GetSourcePath([CallerFilePath] string callerPath = "")
         {
-            var dir = Path.GetDirectoryName(callerPath)!;
-            return dir;
+            return Path.GetDirectoryName(callerPath)!;
         }
         #endregion
 
@@ -72,8 +57,7 @@ namespace KeraLuaEx.Test
                 _ => throw new ArgumentException($"Unsupported type {t} for {name}"),
             };
 
-            // Restore stack from GetGlobal().
-            l.Pop(1);
+            l.Pop(1); // from GetGlobal().
 
             return val;
         }
@@ -150,7 +134,7 @@ namespace KeraLuaEx.Test
                     l.Pop(1);
                 }
 
-                if (ls.Count < 2) // always one line minimum
+                if (ls.Count < 2)
                 {
                     ls.Add($"{sindent}Empty");
                 }
@@ -184,7 +168,7 @@ namespace KeraLuaEx.Test
 
 
         /// <summary>
-        /// Check the stack size.
+        /// Check the stack size and log if incorrect.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="expected"></param>

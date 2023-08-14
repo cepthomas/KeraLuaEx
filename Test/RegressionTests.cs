@@ -34,7 +34,7 @@ namespace KeraLuaEx.Test
 
             string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            SetLuaPath(l, new() { scriptsPath });
+            l.SetLuaPath(new() { scriptsPath });
             LuaStatus lstat = l.LoadFile(Path.Combine(scriptsPath, "cf.lua"));
             Assert.AreEqual(LuaStatus.OK, lstat);
             lstat = l.PCall(0, -1, 0);
@@ -134,7 +134,7 @@ namespace KeraLuaEx.Test
 
             string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            SetLuaPath(l, new() { scriptsPath });
+            l.SetLuaPath(new() { scriptsPath });
 
             l.SetHook(_funcHookCallback, LuaHookMask.Line, 0);
 
@@ -222,7 +222,7 @@ main.lua-main.lua:11 (main)
 
             string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            SetLuaPath(l, new() { scriptsPath });
+            l.SetLuaPath(new() { scriptsPath });
 
             l.SetHook(_funcHookCallback, LuaHookMask.Line, 0);
 

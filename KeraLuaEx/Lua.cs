@@ -45,26 +45,8 @@ namespace KeraLuaEx
         /// <summary>Get the context on the main thread. Will be this if only one.</summary>
         public Lua LMain { get { return _lMain ?? this; } }
 
-        /// <summary>Errors cause exceptions. TODO or provide event and let client handle it.</summary>
+        /// <summary>Errors cause exceptions.</summary>
         public bool ThrowOnError { get; set; } = true;
-        #endregion        
-
-        #region Events
-        /// <summary>Notification event.</summary>
-        public event EventHandler<NotificationEventArgs>? Notification;
-
-        /// <summary>Notification event.</summary>
-        public class NotificationEventArgs : EventArgs
-        {
-            /// <summary>The information.</summary>
-            public string Message { get; set; } = "";
-
-            /// <summary>Unrecoverable.</summary>
-            public bool Fatal { get; set; } = false;
-
-            /// <summary>Client takes care of it.</summary>
-            public bool Handled { get; set; } = false;
-        }
         #endregion        
 
         #region Lifecycle
@@ -2211,7 +2193,7 @@ namespace KeraLuaEx
         }
         #endregion
 
-        #region New for KeraLuaEx
+        #region Added for KeraLuaEx
         /// <summary>
         /// Convert a table from the lua stack. Note that this pops the table unlike other ToXXX().
         /// </summary>
@@ -2406,7 +2388,20 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// ToXXX() for generic numbers.
+        /// Sets package.path for the context.
+        /// </summary>
+        /// <param name="paths"></param>
+        public void SetLuaPath(List<string> paths)
+        {
+            List<string> parts = new() { "?", "?.lua" };
+            paths.ForEach(p => parts.Add(Path.Join(p, "?.lua").Replace('\\', '/')));
+            string s = string.Join(';', parts);
+            s = $"package.path = \"{s}\"";
+            DoString(s);
+        }
+
+        /// <summary>
+        /// Converts to integer or number.
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>

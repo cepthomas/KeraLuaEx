@@ -21,7 +21,11 @@ namespace KeraLuaEx.Test
         static long _startTicks = 0;
 
         #region Lifecycle
-        public static int Load(Lua l)
+        /// <summary>
+        /// Load the lua libs implemented in C#.
+        /// </summary>
+        /// <param name="l">Lua context</param>
+        public static void Load(Lua l)
         {
             // Load app stuff. This table gets pushed on the stack and into globals.
             l.RequireF("api_lib", OpenLib, true);
@@ -29,33 +33,38 @@ namespace KeraLuaEx.Test
             // Other inits.
             _startTicks = 0;
             _sw.Start();
-
-            return 1;
         }
-        #endregion
 
+        /// <summary>
+        /// Internal callback to actually load the libs.
+        /// </summary>
+        /// <param name="p">Pointer to context.</param>
+        /// <returns></returns>
         static int OpenLib(IntPtr p)
         {
             // Open lib into global table.
             var l = Lua.FromIntPtr(p)!;
-            l.NewTable();
-            l.SetFuncs(_libFuncs, 0);
+            l.NewLib(_libFuncs);
 
             return 1;
         }
 
+        /// <summary>
+        /// Bind the C# functions to lua.
+        /// </summary>
         static readonly LuaRegister[] _libFuncs = new LuaRegister[]
         {
             new LuaRegister("printex", _fPrint),
             new LuaRegister("timer", _fTimer),
             new LuaRegister(null, null)
         };
+        #endregion
 
         #region Lua functions implemented in C#
         /// <summary>
-        /// Called by lua script.
+        /// Replacement for lua print(), redirects to log.
         /// </summary>
-        /// <param name="p"></param>
+        /// <param name="p">Pointer to context.</param>
         /// <returns></returns>
         static int PrintEx(IntPtr p)
         {
@@ -72,9 +81,9 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
-        /// Called by lua script.
+        /// Lua script requires a high res timestamp - msec as double.
         /// </summary>
-        /// <param name="p"></param>
+        /// <param name="p">Pointer to context.</param>
         /// <returns></returns>
         static int Timer(IntPtr p)
         {
