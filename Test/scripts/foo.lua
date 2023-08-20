@@ -1,5 +1,5 @@
 
-local m = require "module1"
+local m = require("module1")
 
 function method1()
     local x = 10;

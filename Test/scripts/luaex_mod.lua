@@ -1,5 +1,5 @@
 
-local api = require "api_lib" -- C# module
+local api = require("api_lib") -- C# module
 
 -- Create the namespace/module.
 local M = {}
@@ -24,17 +24,17 @@ M.m_list_int = { 2, 56, 98, 2 }
 
 -- Functions called from C#.
 function M.funcmod(s)
-  api.printex("funcmod " .. #s)
-  return #s + 3
+    api.printex("funcmod " .. #s)
+    return #s + 3
 end
 
 function M.calcmod(addends, suffix)
-  sum = 0
-  for k, v in pairs(addends) do
-    api.printex(k .. ":" .. v)
-    sum = sum + v
-  end
-  return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
+    sum = 0
+    for k, v in pairs(addends) do
+        api.printex(k .. ":" .. v)
+        sum = sum + v
+    end
+    return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
 end
 
 -- How long is it?

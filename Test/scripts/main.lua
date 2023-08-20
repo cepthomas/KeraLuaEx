@@ -1,5 +1,5 @@
 
-require "foo"
+require("foo")
 
 local name = "alo alo"
 local x = 10

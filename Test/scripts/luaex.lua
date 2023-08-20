@@ -1,5 +1,5 @@
 
-local api = require "api_lib" -- C# module
+local api = require( "api_lib") -- C# module
 
 
 -- Functions implemented in C#.
@@ -29,11 +29,11 @@ g_list_string = { "a", "string", "with" }
 -- Table of tables.
 things =
 {
-  tune = { dev_type="midi_in", channel=1, long_list={ 44, 77, 101 } },
-  trig = { dev_type="virt_key", channel=2, adouble=1.234 },
-  whiz = { dev_type="bing_bong", double_table={ 145.89, 71.23, 909.555 }, channel=99 },
-  pers = { dev_type="abra", string_table={ 1, 23, 88, 22 }, channel=111, abool=false },
-  --invalid_table = { atable={ 1, 2, 3, "ppp", 88.22 }, channel=10, abool=true }
+    tune = { dev_type="midi_in", channel=1, long_list={ 44, 77, 101 } },
+    trig = { dev_type="virt_key", channel=2, adouble=1.234 },
+    whiz = { dev_type="bing_bong", double_table={ 145.89, 71.23, 909.555 }, channel=99 },
+    pers = { dev_type="abra", string_table={ 1, 23, 88, 22 }, channel=111, abool=false },
+    --invalid_table = { atable={ 1, 2, 3, "ppp", 88.22 }, channel=10, abool=true }
 }
 
 -- Mixed type array.
@@ -42,18 +42,18 @@ invalid_table = { 1, 2, 3, "ppp", 88.22 }
 
 -- Functions called from C#.
 function g_func(s)
-  index = index + 1
-  api.printex("g_func " .. #s .. " " .. index)
-  return #s + 3
+    index = index + 1
+    api.printex("g_func " .. #s .. " " .. index)
+    return #s + 3
 end
 
 function calc(addends, suffix)
-  sum = 0
-  for k, v in pairs(addends) do
-    api.printex(k .. ":" .. v)
-    sum = sum + v
-  end
-  return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
+    sum = 0
+    for k, v in pairs(addends) do
+        api.printex(k .. ":" .. v)
+        sum = sum + v
+    end
+    return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
 end
 
 -- How long is it?
