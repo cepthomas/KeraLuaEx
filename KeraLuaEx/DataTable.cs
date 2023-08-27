@@ -16,7 +16,7 @@ namespace KeraLuaEx
     /// LuaType.Nil         null
     /// LuaType.String      string
     /// LuaType.Boolean     bool
-    /// LuaType.Number      long or double
+    /// LuaType.Number      int or double
     /// LuaType.Table       List or Dictionary
     ///
     /// Lua tables support both array and map types. To be considered an array:
@@ -74,7 +74,7 @@ namespace KeraLuaEx
         /// Construct from a list.
         /// </summary>
         /// <param name="vals"></param>
-        public DataTable(List<long> vals)
+        public DataTable(List<int> vals)
         {
             vals.ForEach(v => _tableFields.Add(new(vals.Count + 1, v)));
             Type = TableType.List;
@@ -171,7 +171,7 @@ namespace KeraLuaEx
                             _tableFields.Add(new(key, val));
                             break;
 
-                        case long _:
+                        case int _:
                             Type = TableType.List;
                             _listValueType = val.GetType();
                             _tableFields.Add(new(key, val));
@@ -184,7 +184,7 @@ namespace KeraLuaEx
                     break;
 
                 case TableType.List:
-                    if (key.GetType() == typeof(long) && val.GetType() == _listValueType)
+                    if (key.GetType() == typeof(int) && val.GetType() == _listValueType)
                     {
                         _tableFields.Add(new(key, val));
                     }
@@ -284,7 +284,7 @@ namespace KeraLuaEx
                             case null:          ls.Add($"{sindent}{f.Key}(null):");      break;
                             case string s:      ls.Add($"{sindent}{f.Key}(string):{s}"); break;
                             case bool b:        ls.Add($"{sindent}{f.Key}(bool):{b}");   break;
-                            case long l:        ls.Add($"{sindent}{f.Key}(long):{l}");   break;
+                            case int l:        ls.Add($"{sindent}{f.Key}(int):{l}");   break;
                             case double d:      ls.Add($"{sindent}{f.Key}(double):{d}"); break;
                             case DataTable t:   ls.Add($"{t.Format($"{f.Key}", indent + 1)}");      break; // recursion!
                             default:            throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen

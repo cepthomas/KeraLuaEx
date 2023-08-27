@@ -6,7 +6,7 @@ using lua_Alloc = System.IntPtr;
 using lua_CFunction = System.IntPtr;
 using lua_Debug = System.IntPtr;
 using lua_Hook = System.IntPtr;
-using lua_Integer = System.Int64;
+using lua_Integer = System.Int32; // was 64
 using lua_KContext = System.IntPtr;
 using lua_KFunction = System.IntPtr;
 using lua_Number = System.Double;
@@ -99,7 +99,7 @@ namespace KeraLuaEx
         internal static extern int lua_gethookmask(lua_State luaState);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int lua_geti(lua_State luaState, int index, long i);
+        internal static extern int lua_geti(lua_State luaState, int index, int i);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         internal static extern int lua_getinfo(lua_State luaState, string what, lua_Debug ar);
@@ -237,7 +237,7 @@ namespace KeraLuaEx
         internal static extern void lua_sethook(lua_State luaState, lua_Hook f, int mask, int count);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void lua_seti(lua_State luaState, int index, long n);
+        internal static extern void lua_seti(lua_State luaState, int index, int n);
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void lua_setiuservalue(lua_State luaState, int index, int n);

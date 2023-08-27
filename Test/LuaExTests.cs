@@ -153,7 +153,7 @@ namespace KeraLuaEx.Test
             EvalStackSize(_l, 1);
 
             // Push the arguments.
-            var addends = new List<long>() { 3901, 488, 922, 1578, 2406 };
+            var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
             var suffix = "__the_end__";
             table = new DataTable(addends);
             _l.PushDataTable(table);
@@ -240,7 +240,7 @@ namespace KeraLuaEx.Test
             EvalStackSize(_l, 2);
 
             // Push the arguments.
-            var addends = new List<long>() { 3901, 488, 922, 1578, 2406 };
+            var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
             var suffix = "__the_end__";
             var table = new DataTable(addends);
             _l.PushDataTable(table);

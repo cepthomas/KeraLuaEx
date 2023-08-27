@@ -362,7 +362,7 @@ main.lua-main.lua:11 (main)
             l.DoString(script);
 
             l.GetGlobal("a");
-            long? a = l.ToInteger(-1);
+            int? a = l.ToInteger(-1);
             Assert.AreEqual(a, 2d);
         }
 
@@ -450,8 +450,8 @@ main.lua-main.lua:11 (main)
         static int Func(IntPtr p)
         {
             var l = Lua.FromIntPtr(p);
-            long param1 = l!.CheckInteger(1)!;
-            long param2 = l!.CheckInteger(2)!;
+            int param1 = l!.CheckInteger(1)!;
+            int param2 = l!.CheckInteger(2)!;
 
             l.PushInteger(param1 + param2);
             return 1;

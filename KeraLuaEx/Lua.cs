@@ -435,7 +435,7 @@ namespace KeraLuaEx
         /// <param name="index"></param>
         /// <param name="i"></param>
         /// <returns> Returns the type of the pushed value</returns>
-        public LuaType GetInteger(int index, long i)
+        public LuaType GetInteger(int index, int i)
         {
             return (LuaType)NativeMethods.lua_geti(_luaState, index, i);
         }
@@ -919,7 +919,7 @@ namespace KeraLuaEx
         /// Pushes an integer with value n onto the stack. 
         /// </summary>
         /// <param name="n"></param>
-        public void PushInteger(long n)
+        public void PushInteger(int n)
         {
             NativeMethods.lua_pushinteger(_luaState, n);
         }
@@ -1048,7 +1048,7 @@ namespace KeraLuaEx
         /// <param name="index"></param>
         /// <param name="n"></param>
         /// <returns>Returns the type of the pushed value</returns>
-        public LuaType RawGetInteger(int index, long n)
+        public LuaType RawGetInteger(int index, int n)
         {
             return (LuaType)NativeMethods.lua_rawgeti(_luaState, index, n);
         }
@@ -1101,7 +1101,7 @@ namespace KeraLuaEx
         /// </summary>
         /// <param name="index">index of table</param>
         /// <param name="i">value</param>
-        public void RawSetInteger(int index, long i)
+        public void RawSetInteger(int index, int i)
         {
             NativeMethods.lua_rawseti(_luaState, index, i);
         }
@@ -1259,7 +1259,7 @@ namespace KeraLuaEx
         /// </summary>
         /// <param name="index"></param>
         /// <param name="n"></param>
-        public void SetInteger(int index, long n)
+        public void SetInteger(int index, int n)
         {
             NativeMethods.lua_seti(_luaState, index, n);
         }
@@ -1430,9 +1430,9 @@ namespace KeraLuaEx
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public long? ToInteger(int index)
+        public int? ToInteger(int index)
         {
-            long value = NativeMethods.lua_tointegerx(_luaState, index, out int isInteger);
+            int value = NativeMethods.lua_tointegerx(_luaState, index, out int isInteger);
             if (isInteger != 0)
             {
                 return value;
@@ -1598,9 +1598,9 @@ namespace KeraLuaEx
         /// <param name="functionIndex"></param>
         /// <param name="n"></param>
         /// <returns></returns>
-        public long UpValueId(int functionIndex, int n)
+        public int UpValueId(int functionIndex, int n)
         {
-            return (long)NativeMethods.lua_upvalueid(_luaState, functionIndex, n);
+            return (int)NativeMethods.lua_upvalueid(_luaState, functionIndex, n);
         }
 
         /// <summary>
@@ -1712,7 +1712,7 @@ namespace KeraLuaEx
         /// </summary>
         /// <param name="argument"></param>
         /// <returns></returns>
-        public long CheckInteger(int argument)
+        public int CheckInteger(int argument)
         {
             return NativeMethods.luaL_checkinteger(_luaState, argument);
         }
@@ -1904,7 +1904,7 @@ namespace KeraLuaEx
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public long Length(int index)
+        public int Length(int index)
         {
             return NativeMethods.luaL_len(_luaState, index);
         }
@@ -1994,7 +1994,7 @@ namespace KeraLuaEx
         /// <param name="argument"></param>
         /// <param name="d">default value</param>
         /// <returns></returns>
-        public long OptInteger(int argument, long d)
+        public int OptInteger(int argument, int d)
         {
             return NativeMethods.luaL_optinteger(_luaState, argument, d);
         }
@@ -2266,7 +2266,7 @@ namespace KeraLuaEx
                             case string s: PushString(s); break;
                             case bool b: PushBoolean(b); break;
                             //case int i: PushInteger(i); break;
-                            case long l: PushInteger(l); break;
+                            case int l: PushInteger(l); break;
                             case double d: PushNumber(d); break;
                             case DataTable t: PushDataTable(t); break; // recursion!
                             default: throw new InvalidOperationException($"Unsupported type {list[i].GetType()} for {i}"); // should never happen
@@ -2289,7 +2289,7 @@ namespace KeraLuaEx
                             case string s: PushString(s); break;
                             case bool b: PushBoolean(b); break;
                             //case int i: PushInteger(i); break;
-                            case long l: PushInteger(l); break;
+                            case int l: PushInteger(l); break;
                             case double d: PushNumber(d); break;
                             case DataTable t: PushDataTable(t); break; // recursion!
                             default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
