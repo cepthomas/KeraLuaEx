@@ -18,6 +18,7 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 - Uses Lua 5.4.6 x64.
 - .NET6/C# Windows SDK project only.
 - Turned on nullable.
+- Integers fixed at 32 bit.
 
 ## Functional
 - Added a `DataTable` class to simplify passing data back and forth between C# and Lua. Limited to homogenous arrays
