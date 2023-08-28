@@ -37,32 +37,6 @@ namespace KeraLuaEx.Test
 
         #region Test and debug helpers
         /// <summary>
-        /// Generic get a simple global value. Restores stack.
-        /// </summary>
-        /// <param name="l"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static object? GetGlobalValue(Lua l, string name)
-        {
-            object? val = null;
-
-            LuaType t = l.GetGlobal(name);
-
-            val = t switch
-            {
-                LuaType.String => l.ToStringL(-1)!,
-                LuaType.Boolean => l.ToBoolean(-1),
-                LuaType.Number => l.DetermineNumber(-1),
-                LuaType.Table => l.ToDataTable(),
-                _ => throw new ArgumentException($"Unsupported type {t} for {name}"),
-            };
-
-            l.Pop(1); // from GetGlobal().
-
-            return val;
-        }
-
-        /// <summary>
         /// Dump the globals.
         /// </summary>
         /// <param name="l"></param>

@@ -2199,50 +2199,82 @@ namespace KeraLuaEx
         /// </summary>
         /// <returns>Minty fresh table.</returns>
         /// <exception cref="SyntaxException"></exception>
-        public DataTable ToDataTable()
+        public DataTable ToDataTable(int depth, bool inclFuncs)
         {
             DataTable table = new();
-
-            // Put a nil key on stack.
-            PushNil();
-
-            // Key(-1) is replaced by the next key(-1) in table(-2).
-            while (Next(-2))
+            if (depth > 0)
             {
-                // Get key(-2) info.
-                LuaType keyType = Type(-2)!;
+                // Put a nil key on stack.
+                PushNil();
 
-                object? key = keyType switch
+                // Key(-1) is replaced by the next key(-1) in table(-2).
+                while (Next(-2))
                 {
-                    LuaType.String => ToStringL(-2),
-                    LuaType.Number => DetermineNumber(-2),
-                    _ => throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}")
-                };
+                    // Get key(-2) info.
+                    LuaType keyType = Type(-2)!;
 
-                // Get type of value(-1).
-                LuaType valType = Type(-1)!;
+                    object? key = keyType switch
+                    {
+                        LuaType.String => ToStringL(-2),
+                        LuaType.Number => DetermineNumber(-2),
+                        _ => throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}")
+                    };
 
-                object? val = valType switch
-                {
-                    LuaType.Nil => null,
-                    LuaType.String => ToStringL(-1),
-                    LuaType.Number => DetermineNumber(-1),
-                    LuaType.Boolean => ToBoolean(-1),
-                    LuaType.Table => ToDataTable(), // recursion!
-                    _ => throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
-                };
+                    // Get type of value(-1).
+                    LuaType valType = Type(-1)!;
 
-                if (val is not null)
-                {
-                    table.AddVal(key!, val);
+                    object? val = valType switch
+                    {
+                        LuaType.Nil => null,
+                        LuaType.String => ToStringL(-1),
+                        LuaType.Number => DetermineNumber(-1),
+                        LuaType.Boolean => ToBoolean(-1),
+                        LuaType.Table => ToDataTable(depth - 1, inclFuncs), // recursion!
+                        LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+                        _ => null // TODO??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+                    };
+
+                    if (val is not null)
+                    {
+                        table.AddVal(key!, val);
+                    }
+
+                    // Remove value(-1), now key on top at(-1).
+                    Pop(1);
                 }
 
-                // Remove value(-1), now key on top at(-1).
-                Pop(1);
             }
+
 
             return table;
         }
+
+        /// <summary>
+        /// Helper to get a global value. Restores stack.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public object? GetGlobalValue(string name)
+        {
+            object? val = null;
+
+            LuaType t = GetGlobal(name);
+
+            val = t switch
+            {
+                LuaType.String => ToStringL(-1)!,
+                LuaType.Boolean => ToBoolean(-1),
+                LuaType.Number => DetermineNumber(-1),
+                LuaType.Function => ToCFunction(-1),
+                LuaType.Table => ToDataTable(99, true),
+                _ => throw new ArgumentException($"Unsupported type {t} for {name}"),
+            };
+
+            Pop(1); // from GetGlobal().
+
+            return val;
+        }
+
 
         /// <summary>
         /// Push onto lua stack.
@@ -2331,7 +2363,8 @@ namespace KeraLuaEx
                 var st = DumpStack();
                 _serror = string.Join(Environment.NewLine, st);
 
-                Pop(1); // clean up GetGlobal("debug").
+                SetTop(0); // clean up GetGlobal("debug").
+                //Pop(1); // This cores for some reason... TODO
 
                 if (ThrowOnError)
                 {

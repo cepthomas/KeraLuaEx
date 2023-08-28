@@ -20,9 +20,6 @@ namespace KeraLuaEx.Host
         #endregion
 
         #region Fields
-        /// <summary>Lua context.</summary>
-        readonly Lua _l = new();
-
         /// <summary>Detect file edited externally.</summary>
         readonly FileSystemWatcher _watcher = new();
 
@@ -46,8 +43,6 @@ namespace KeraLuaEx.Host
         public HostForm()
         {
             InitializeComponent();
-
-            _l = new(); // Shut up compiler.
         }
 
         /// <summary>
@@ -357,14 +352,14 @@ namespace KeraLuaEx.Host
             rtbOutput.ScrollToCaret();
         }
 
-        /// <summary>
-        /// Show the contents of the stack.
-        /// </summary>
-        void ShowStack()
-        {
-            var ls = _l.DumpStack();
-            rtbStack.Text = string.Join(Environment.NewLine, ls);
-        }
+        // /// <summary>
+        // /// Show the contents of the stack.
+        // /// </summary>
+        // void ShowStack()
+        // {
+        //     var ls = _l.DumpStack();
+        //     rtbStack.Text = string.Join(Environment.NewLine, ls);
+        // }
         #endregion
     }
 

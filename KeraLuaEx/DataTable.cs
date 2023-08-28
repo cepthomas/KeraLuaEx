@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
-
+using System.Collections;
 
 namespace KeraLuaEx
 {
@@ -26,14 +26,14 @@ namespace KeraLuaEx
     ///  - all keys must be strings and unique.
     ///  - values can be any supported type.
     /// </summary>
-    public class DataTable
+    public class DataTable// : IEnumerable<DataTable>
     {
         #region Types
         /// <summary>What am I?</summary>
         public enum TableType { Unknown, List, Dictionary, Invalid }
 
         /// <summary>Representation of a lua table field.</summary>
-        record TableField(object Key, object Value);
+        public record TableField(object Key, object Value);
         #endregion
 
         #region Fields
@@ -101,7 +101,25 @@ namespace KeraLuaEx
         }
         #endregion
 
-        #region Indexing
+        #region Iteration
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <returns></returns>
+        //public IEnumerator<DataTable> GetEnumerator()
+        //{
+        //    return new DataTableEnumerator(_tableFields);
+        //}
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <returns></returns>
+        //IEnumerator IEnumerable.GetEnumerator()
+        //{
+        //    return (IEnumerator)GetEnumerator();
+        //}
+
         /// <summary>
         /// Indexer for string fields of the table. Used for dictionary only.
         /// </summary>
@@ -301,5 +319,52 @@ namespace KeraLuaEx
             return string.Join(Environment.NewLine, ls);
         }
         #endregion
+
+
+        //// When you implement IEnumerable, you must also implement IEnumerator.
+        //public class DataTableEnumerator : IEnumerator
+        //{
+        //    List<TableField> _fields;
+
+        //    // Enumerators are positioned before the first element
+        //    // until the first MoveNext() call.
+        //    int position = -1;
+
+        //    public DataTableEnumerator(List<TableField> list)
+        //    {
+        //        _fields = list;
+        //    }
+
+        //    public bool MoveNext()
+        //    {
+        //        position++;
+        //        return position < _fields.Count;
+        //    }
+
+        //    public void Reset()
+        //    {
+        //        position = -1;
+        //    }
+
+        //    object IEnumerator.Current
+        //    {
+        //        get { return Current; }
+        //    }
+
+        //    public TableField Current
+        //    {
+        //        get
+        //        {
+        //            if (position < _fields.Count)
+        //            {
+        //                return _fields[position];
+        //            }
+        //            else
+        //            {
+        //                throw new InvalidOperationException();
+        //            }
+        //        }
+        //    }
+        //}
     }
 }

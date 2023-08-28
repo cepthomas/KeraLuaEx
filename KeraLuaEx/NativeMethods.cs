@@ -23,17 +23,7 @@ namespace KeraLuaEx
     [SuppressUnmanagedCodeSecurity]
     internal static class NativeMethods
     {
-#if __IOS__ || __TVOS__ || __WATCHOS__ || __MACCATALYST__
-        private const string LuaLibraryName = "@rpath/liblua54.framework/liblua54";
-#elif __ANDROID__
-        private const string LuaLibraryName = "liblua54.so";
-#elif __MACOS__ 
-        private const string LuaLibraryName = "liblua54.dylib";
-#elif WINDOWS_UWP
-        private const string LuaLibraryName = "lua54.dll";
-#else
         private const string LuaLibraryName = "lua54";
-#endif
 
         [DllImport(LuaLibraryName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int lua_absindex(lua_State luaState, int idx);
