@@ -56,7 +56,8 @@ namespace KeraLuaEx.Test
                 LuaType.Boolean => l.ToBoolean(-1),
                 LuaType.Number => l.DetermineNumber(-1),
                 LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
+                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs?
+                //LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
                 _ => null
             };
             n = l.GetTop();
@@ -96,7 +97,8 @@ namespace KeraLuaEx.Test
                 LuaType.Boolean => l.ToBoolean(-1),
                 LuaType.Number => l.DetermineNumber(-1),
                 LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
+                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs?
+                //LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
                 _ => null
             };
             n = l.GetTop();
@@ -113,33 +115,33 @@ namespace KeraLuaEx.Test
 
 
 
-        static object ToListOrDictionary(Lua l, int index, int depth, bool inclFuncs)
-        {
-            object? res = null;
+        //static object ToListOrDictionaryX(Lua l, int index, int depth, bool inclFuncs)
+        //{
+        //    object? res = null;
 
-            int n = l.GetTop();
-            var s = l.DumpStack();
-            n = l.GetTop();
+        //    int n = l.GetTop();
+        //    var s = l.DumpStack();
+        //    n = l.GetTop();
 
-            var table = l.GetTable(index);
-            n = l.GetTop();
+        //    var table = l.GetTable(index);
+        //    n = l.GetTop();
 
-            // Take a look at the first key to guess the object type.
-            LuaType keyType = l.Type(-1)!;
+        //    // Take a look at the first key to guess the object type.
+        //    LuaType keyType = l.Type(-1)!;
 
-            if (keyType == LuaType.Number)
-            {
-                return l.ToList();
-            }
-            else if (keyType == LuaType.String)
-            {
-                return l.ToDictionary(depth, inclFuncs);
-            }
-            else
-            {
-                throw new SyntaxException($"Unsupported key type {keyType} for {l.ToStringL(-2)}");
-            }
-        }
+        //    if (keyType == LuaType.Number)
+        //    {
+        //        return l.ToList();
+        //    }
+        //    else if (keyType == LuaType.String)
+        //    {
+        //        return l.ToDictionary(depth, inclFuncs);
+        //    }
+        //    else
+        //    {
+        //        throw new SyntaxException($"Unsupported key type {keyType} for {l.ToStringL(-2)}");
+        //    }
+        //}
 
 
 

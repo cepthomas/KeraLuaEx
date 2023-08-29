@@ -2208,6 +2208,8 @@ namespace KeraLuaEx
         {
             Dictionary<string, object> dict = new();
 
+            bool keysAreInt = true;
+
             if (depth > 0)
             {
                 // Put a nil key on stack to mark end of iteration.
@@ -2218,35 +2220,30 @@ namespace KeraLuaEx
                 {
                     // Get key(-2) info.
                     LuaType keyType = Type(-2)!;
-                    var key = ToStringL(-2);
+                    var key = ToStringL(-2); // coerce to string keys
 
-                    if (keyType == LuaType.String)
+                    if (IsInteger(index)) { return ToInteger(index); }
+                    else if (IsNumber(index)) { return ToNumber(index); }
+                    else { return null; }
+
+                    // Get type of value(-1).
+                    LuaType valType = Type(-1)!;
+
+                    object? val = valType switch
                     {
-                        // Get type of value(-1).
-                        LuaType valType = Type(-1)!;
+                        LuaType.Nil => null,
+                        LuaType.String => ToStringL(-1),
+                        LuaType.Number => DetermineNumber(-1),
+                        LuaType.Boolean => ToBoolean(-1),
+                        LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion!
+                        LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+                        _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+                    };
 
-                        object? val = valType switch
-                        {
-                            LuaType.Nil => null,
-                            LuaType.String => ToStringL(-1),
-                            LuaType.Number => DetermineNumber(-1),
-                            LuaType.Boolean => ToBoolean(-1),
-                            LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion!
-                            LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-                            _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
-                        };
-
-                        if (val is not null)
-                        {
-                            dict.Add(key!, val);
-                        }
-
-                    }
-                    else
+                    if (val is not null)
                     {
-                        throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}");
+                        dict.Add(key!, val);
                     }
-
 
                     // Remove value(-1), now key on top at(-1).
                     Pop(1);
@@ -2257,68 +2254,121 @@ namespace KeraLuaEx
         }
 
 
+        //public Dictionary<string, object> ToDictionary(int depth, bool inclFuncs)
+        //{
+        //    Dictionary<string, object> dict = new();
 
-        /// <summary>
-        /// Convert an array from the lua stack. Note that this pops the table unlike other ToXXX().
-        /// </summary>
-        /// <returns>Minty fresh array as list.</returns>
-        /// <exception cref="SyntaxException"></exception>
-        public List<object> ToList()
-        {
-            List<object> list = new();
-            LuaType? arrayValType = null;
+        //    if (depth > 0)
+        //    {
+        //        // Put a nil key on stack to mark end of iteration.
+        //        PushNil();
 
-            // Put a nil key on stack to mark end of iteration.
-            PushNil();
+        //        // Key(-1) is replaced by the next key(-1) in table(-2).
+        //        while (Next(-2))
+        //        {
+        //            // Get key(-2) info.
+        //            LuaType keyType = Type(-2)!;
+        //            var key = ToStringL(-2);
 
-            // Key(-1) is replaced by the next key(-1) in table(-2).
-            while (Next(-2))
-            {
-                // Get key(-2) info.
-                LuaType keyType = Type(-2)!;
+        //            if (keyType == LuaType.String)
+        //            {
+        //                // Get type of value(-1).
+        //                LuaType valType = Type(-1)!;
 
-                // Get type of value(-1).
-                LuaType valType = Type(-1)!;
+        //                object? val = valType switch
+        //                {
+        //                    LuaType.Nil => null,
+        //                    LuaType.String => ToStringL(-1),
+        //                    LuaType.Number => DetermineNumber(-1),
+        //                    LuaType.Boolean => ToBoolean(-1),
+        //                    LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion!
+        //                    LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+        //                    _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+        //                };
 
-                if (keyType == LuaType.Number)
-                {
-                    // Check value type.
-                    arrayValType ??= valType;
+        //                if (val is not null)
+        //                {
+        //                    dict.Add(key!, val);
+        //                }
 
-                    if (arrayValType == valType)
-                    {
-                        object? val = valType switch
-                        {
-                            LuaType.Nil => null,
-                            LuaType.String => ToStringL(-1),
-                            LuaType.Number => DetermineNumber(-1),
-                            LuaType.Boolean => ToBoolean(-1),
-                            LuaType.Table => ToList(),
-                            //LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-                            _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
-                        };
+        //            }
+        //            else
+        //            {
+        //                throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}");
+        //            }
 
-                        if (val is not null)
-                        {
-                            list.Add(val);
-                        }
-                    }
-                    else
-                    {
-                        throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}");
-                    }
-                }
-                else
-                {
-                    throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}");
-                }
 
-                // Remove value(-1), now key on top at(-1).
-                Pop(1);
-            }
+        //            // Remove value(-1), now key on top at(-1).
+        //            Pop(1);
+        //        }
+        //    }
 
-            return list;
-        }
+        //    return dict;
+        //}
+
+
+
+        ///// <summary>
+        ///// Convert an array from the lua stack. Note that this pops the table unlike other ToXXX().
+        ///// </summary>
+        ///// <returns>Minty fresh array as list.</returns>
+        ///// <exception cref="SyntaxException"></exception>
+        //public List<object> ToList()
+        //{
+        //    List<object> list = new();
+        //    LuaType? arrayValType = null;
+
+        //    // Put a nil key on stack to mark end of iteration.
+        //    PushNil();
+
+        //    // Key(-1) is replaced by the next key(-1) in table(-2).
+        //    while (Next(-2))
+        //    {
+        //        // Get key(-2) info.
+        //        LuaType keyType = Type(-2)!;
+
+        //        // Get type of value(-1).
+        //        LuaType valType = Type(-1)!;
+
+        //        if (keyType == LuaType.Number)
+        //        {
+        //            // Check value type.
+        //            arrayValType ??= valType;
+
+        //            if (arrayValType == valType)
+        //            {
+        //                object? val = valType switch
+        //                {
+        //                    LuaType.Nil => null,
+        //                    LuaType.String => ToStringL(-1),
+        //                    LuaType.Number => DetermineNumber(-1),
+        //                    LuaType.Boolean => ToBoolean(-1),
+        //                    LuaType.Table => ToList(),
+        //                    //LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+        //                    _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+        //                };
+
+        //                if (val is not null)
+        //                {
+        //                    list.Add(val);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}");
+        //        }
+
+        //        // Remove value(-1), now key on top at(-1).
+        //        Pop(1);
+        //    }
+
+        //    return list;
+        //}
 
         ///// <summary>
         ///// 
