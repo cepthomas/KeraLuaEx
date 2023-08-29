@@ -88,89 +88,110 @@ namespace KeraLuaEx.Test
             EvalStackSize(_l, 0);
 
             ///// Look at globals.
-            var x = GetGlobalValue(_l, "g_number");
-            Assert.AreEqual(7.654, x);
+            {
+                var o = GetGlobalValue(_l, "g_number");
+                Assert.IsInstanceOf<double>(o);
+                Assert.AreEqual(7.654, o);
+            }
 
-            x = GetGlobalValue(_l, "g_int");
-            Assert.AreEqual(80808, x);
+            {
+                var o = GetGlobalValue(_l, "g_int");
+                Assert.IsInstanceOf<int>(o);
+                Assert.AreEqual(80808, o);
+            }
 
-            var table = GetGlobalValue(_l, "g_list_number") as DataTable;
-            Assert.AreEqual(2.303, table[3]);
+            {
+                var o = GetGlobalValue(_l, "g_list_number");
+                Assert.IsInstanceOf<List<double>>(o);
+                //var t = o.GetType();
+                var list = o as List<double>;
+                Assert.AreEqual(4, list.Count);
+                Assert.AreEqual(2.303, list[3]);
+            }
 
-            table = GetGlobalValue(_l, "g_list_int") as DataTable;
-            Assert.AreEqual(98, table[2]);
-            var ls = table.AsList();
-            Assert.AreEqual(4, ls.Count);
-            Assert.AreEqual(98, ls[2]);
-            //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
+            {
+                var o = GetGlobalValue(_l, "g_list_int");
+                Assert.IsInstanceOf<List<int>>(o);
+                var list = o as List<int>;
+                Assert.AreEqual(4, list.Count);
+                Assert.AreEqual(98, list[2]);
+                //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
+            }
 
-            table = GetGlobalValue(_l, "g_table") as DataTable;
-            Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
-            Assert.AreEqual(3, table.Count);
-            Assert.AreEqual("bing_bong", table["dev_type"]);
+            {
+                var o = GetGlobalValue(_l, "g_table");
+                Assert.IsInstanceOf<Dictionary<string, object>>(o);
+                var dict = o as Dictionary<string, object>;
+                Assert.AreEqual(3, dict.Count);
+                Assert.AreEqual("bing_bong", dict["dev_type"]);
+            }
 
-            table = GetGlobalValue(_l, "things") as DataTable;
-            Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
-            Assert.AreEqual(4, table.Count);
+            {
+                var o = GetGlobalValue(_l, "things");
+                Assert.IsInstanceOf<Dictionary<string, object>>(o);
+                var dict = o as Dictionary<string, object>;
+                Assert.AreEqual(4, dict.Count);
 
-            var whiz = table["whiz"] as DataTable;
-            Assert.AreEqual(3, whiz.Count);
+                o = dict["whiz"];
+                Assert.IsInstanceOf<Dictionary<string, object>>(o);
+                var whiz = o as Dictionary<string, object>;
+                Assert.AreEqual(3, whiz.Count);
+                Assert.AreEqual(99, whiz["channel"]);
+                //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = dict["booga"]; });
 
-            var dict = whiz.AsDict();
-            Assert.AreEqual(3, dict.Count);
-            Assert.AreEqual(99, dict["channel"]);
-            //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = dict["booga"]; });
-
-            var dblt = whiz["double_table"] as DataTable;
-            Assert.AreEqual(DataTable.TableType.List, dblt.Type);
-            Assert.AreEqual(3, dblt.Count);
-
-            var list = dblt.AsList();
-            Assert.AreEqual(909.555, list[2]);
+                o = whiz["double_table"];
+                Assert.IsInstanceOf<List<double>>(o);
+                var list = o as List<double>;
+                Assert.AreEqual(3, list.Count);
+                Assert.AreEqual(909.555, list[2]);
+            }
 
             EvalStackSize(_l, 0);
 
 
             ///// Execute a lua function.
-            _l.GetGlobal("g_func");
+            {
+                _l.GetGlobal("g_func");
 
-            // Push the arguments.
-            var s = "az9011 birdie";
-            _l.PushString(s);
+                // Push the arguments.
+                var s = "az9011 birdie";
+                _l.PushString(s);
 
-            // Do the call.
-            _l.PCall(1, 1, 0);
+                // Do the call.
+                _l.PCall(1, 1, 0);
 
-            // Get result.
-            var resi = _l.ToInteger(-1);
-            Assert.AreEqual(s.Length + 3, resi);
-            _l.Pop(1); // Clean up returned value.
+                // Get result.
+                var resi = _l.ToInteger(-1);
+                Assert.AreEqual(s.Length + 3, resi);
+                _l.Pop(1); // Clean up returned value.
+            }
 
             EvalStackSize(_l, 0);
 
             ///// Execute a more complex lua function.
-            _l.GetGlobal("calc");
-            EvalStackSize(_l, 1);
+            {
+                _l.GetGlobal("calc");
+                EvalStackSize(_l, 1);
 
-            // Push the arguments.
-            var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
-            var suffix = "__the_end__";
-            table = new DataTable(addends);
-            _l.PushDataTable(table);
-            _l.PushString(suffix);
-            EvalStackSize(_l, 3);
+                // Push the arguments.
+                var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
+                _l.PushList(addends);
+                var suffix = "__the_end__";
+                _l.PushString(suffix);
+                EvalStackSize(_l, 3);
 
-            // Do the call.
-            _l.PCall(2, 1, 0); //attempt to call a number value
-            EvalStackSize(_l, 1);
+                // Do the call.
+                _l.PCall(2, 1, 0); //attempt to call a number value
+                EvalStackSize(_l, 1);
 
-            // Get the results from the stack.
-            table = _l.ToDataTable();
-            _l.Pop(1);
-            Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
-            Assert.AreEqual(2, table.Count);
-            Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
-            Assert.AreEqual(9295, table["sum"]);
+                // Get the results from the stack.
+                var dict = _l.ToDictionary(2, false);
+                Assert.IsInstanceOf<Dictionary<string, object>>(dict);
+                _l.Pop(1);
+                Assert.AreEqual(2, dict.Count);
+                Assert.AreEqual(">>>9295___the_end__<<<", dict["str"]);
+                Assert.AreEqual(9295, dict["sum"]);
+            }
 
             EvalStackSize(_l, 0);
         }
@@ -184,7 +205,7 @@ namespace KeraLuaEx.Test
             // PCall loads the file.
             _l.PCall(0, Lua.LUA_MULTRET, 0);
 
-            // Top of the stack is the module itself. Save it for later.
+            // Top of the stack is the module itself. Saves it for later.
             _l.SetGlobal("luaex_mod");
 
             // Reset stack.
@@ -193,70 +214,91 @@ namespace KeraLuaEx.Test
             EvalStackSize(_l, 0);
 
             ///// Look at globals.
-            // var gl = Common.DumpGlobals(_l);
-            // Common.Log(Environment.NewLine + string.Join(Environment.NewLine, gl));
-            var x = GetGlobalValue(_l, "g_int");
-            Assert.AreEqual(71717, x);
+            {
+                var o = GetGlobalValue(_l, "g_int");
+                Assert.IsInstanceOf<int>(o);
+                Assert.AreEqual(71717, o);
+            }
 
-            ///// Look at module.
-            LuaType t = _l.GetGlobal("luaex_mod");
+            ///// Look inside module.
+            LuaType t = _l.GetGlobal("luaex_mod"); // push lua value onto stack
+            {
+                var o = GetTableValue(_l, "m_string");
+                Assert.IsInstanceOf<string>(o);
+                Assert.AreEqual("Here I am", o);
+                // _l.GetField(-1, "m_string"); // push lua value onto stack
+                // var sval = _l.ToStringL(-1); // assign, no pop
+                // Assert.AreEqual("Here I am", sval);
+                // _l.Pop(1); // balance stack
+            }
 
-            _l.GetField(-1, "m_string");
-            var sval = _l.ToStringL(-1);
-            Assert.AreEqual("Here I am", sval);
-            _l.Pop(1);
+            {
+                var o = GetTableValue(_l, "m_bool");
+                Assert.IsInstanceOf<bool>(o);
+                Assert.AreEqual(false, o);
+                // _l.GetField(-1, "m_bool");
+                // var bval = _l.ToBoolean(-1);
+                // Assert.AreEqual(false, bval);
+                // _l.Pop(1);
+            }
 
-            _l.GetField(-1, "m_bool");
-            var bval = _l.ToBoolean(-1);
-            Assert.AreEqual(false, bval);
-            _l.Pop(1);
-
-            EvalStackSize(_l, 1); // GetGlobal("luaex_mod") 
+            EvalStackSize(_l, 1); // luaex_mod is on top of stack
 
 
             ///// Execute a module lua function.
-            _l.GetField(-1, "funcmod");
+            {
+                _l.GetField(-1, "funcmod"); // push lua value onto stack
 
-            // Push the arguments.
-            var s = "az9011 birdie";
-            _l.PushString(s);
+                // Push the arguments.
+                var s = "az9011 birdie";
+                _l.PushString(s);
 
-            EvalStackSize(_l, 3);
+                EvalStackSize(_l, 3);
 
-            // Do the call.
-            _l.PCall(1, 1, 0);
-            EvalStackSize(_l, 2);
+                // Do the call.
+                _l.PCall(1, 1, 0);
+                EvalStackSize(_l, 2);
 
-            // Get result.
-            var resi = _l.ToInteger(-1);
-            Assert.AreEqual(s.Length + 3, resi);
-            _l.Pop(1); // Clean up returned value.
+                // Get result.
+                var resi = _l.ToInteger(-1);
+                Assert.AreEqual(s.Length + 3, resi);
+                _l.Pop(1); // Clean up returned value.
+            }
             
             EvalStackSize(_l, 1);
 
-
             ///// Execute a more complex lua function.
-            _l.GetField(-1, "calcmod");
-            EvalStackSize(_l, 2);
+            {
+                _l.GetField(-1, "calcmod");
+                EvalStackSize(_l, 2);
 
-            // Push the arguments.
-            var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
-            var suffix = "__the_end__";
-            var table = new DataTable(addends);
-            _l.PushDataTable(table);
-            _l.PushString(suffix);
+                // Push the arguments.
+                var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
+                var suffix = "__the_end__";
+                // var table = new DataTable(addends);
+                // _l.PushDataTable(table);
+                _l.PushList(addends);
+                _l.PushString(suffix);
 
-            // Do the call.
-            _l.PCall(2, 1, 0); //attempt to call a number value
+                // Do the call.
+                _l.PCall(2, 1, 0);
 
-            // Get the results from the stack.
-            table = _l.ToDataTable();
-            _l.Pop(1);
-            Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
-            Assert.AreEqual(2, table.Count);
-            Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
-            Assert.AreEqual(9295, table["sum"]);
-            EvalStackSize(_l, 1);
+                // Get the results from the stack.
+                var dict = _l.ToDictionary(4, false);
+                Assert.IsInstanceOf<Dictionary<string, object>>(dict);
+                Assert.AreEqual(2, dict.Count);
+                Assert.AreEqual(">>>9295___the_end__<<<", dict["str"]);
+                Assert.AreEqual(9295, dict["sum"]);
+
+                // table = _l.ToDataTable();
+                // _l.Pop(1);
+                // Assert.AreEqual(DataTable.TableType.Dictionary, table.Type);
+                // Assert.AreEqual(2, table.Count);
+                // Assert.AreEqual(">>>9295___the_end__<<<", table["str"]);
+                // Assert.AreEqual(9295, table["sum"]);
+
+                EvalStackSize(_l, 1);
+            }
 
             _l.Pop(1); // GetGlobal("luaex_mod")
 

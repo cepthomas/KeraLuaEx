@@ -2194,6 +2194,222 @@ namespace KeraLuaEx
         #endregion
 
         #region Added for KeraLuaEx
+
+
+
+
+
+        /// <summary>
+        /// Convert a dictionary from the lua stack. Note that this pops the table unlike other ToXXX().
+        /// </summary>
+        /// <returns>Minty fresh dictionary.</returns>
+        /// <exception cref="SyntaxException"></exception>
+        public Dictionary<string, object> ToDictionary(int depth, bool inclFuncs)
+        {
+            Dictionary<string, object> dict = new();
+
+            if (depth > 0)
+            {
+                // Put a nil key on stack to mark end of iteration.
+                PushNil();
+
+                // Key(-1) is replaced by the next key(-1) in table(-2).
+                while (Next(-2))
+                {
+                    // Get key(-2) info.
+                    LuaType keyType = Type(-2)!;
+                    var key = ToStringL(-2);
+
+                    if (keyType == LuaType.String)
+                    {
+                        // Get type of value(-1).
+                        LuaType valType = Type(-1)!;
+
+                        object? val = valType switch
+                        {
+                            LuaType.Nil => null,
+                            LuaType.String => ToStringL(-1),
+                            LuaType.Number => DetermineNumber(-1),
+                            LuaType.Boolean => ToBoolean(-1),
+                            LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion!
+                            LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+                            _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+                        };
+
+                        if (val is not null)
+                        {
+                            dict.Add(key!, val);
+                        }
+
+                    }
+                    else
+                    {
+                        throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}");
+                    }
+
+
+                    // Remove value(-1), now key on top at(-1).
+                    Pop(1);
+                }
+            }
+
+            return dict;
+        }
+
+
+
+        /// <summary>
+        /// Convert an array from the lua stack. Note that this pops the table unlike other ToXXX().
+        /// </summary>
+        /// <returns>Minty fresh array as list.</returns>
+        /// <exception cref="SyntaxException"></exception>
+        public List<object> ToList()
+        {
+            List<object> list = new();
+            LuaType? arrayValType = null;
+
+            // Put a nil key on stack to mark end of iteration.
+            PushNil();
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (Next(-2))
+            {
+                // Get key(-2) info.
+                LuaType keyType = Type(-2)!;
+
+                // Get type of value(-1).
+                LuaType valType = Type(-1)!;
+
+                if (keyType == LuaType.Number)
+                {
+                    // Check value type.
+                    arrayValType ??= valType;
+
+                    if (arrayValType == valType)
+                    {
+                        object? val = valType switch
+                        {
+                            LuaType.Nil => null,
+                            LuaType.String => ToStringL(-1),
+                            LuaType.Number => DetermineNumber(-1),
+                            LuaType.Boolean => ToBoolean(-1),
+                            LuaType.Table => ToList(),
+                            //LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+                            _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+                        };
+
+                        if (val is not null)
+                        {
+                            list.Add(val);
+                        }
+                    }
+                    else
+                    {
+                        throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}");
+                    }
+                }
+                else
+                {
+                    throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}");
+                }
+
+                // Remove value(-1), now key on top at(-1).
+                Pop(1);
+            }
+
+            return list;
+        }
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="inclFuncs"></param>
+        ///// <returns></returns>
+        ///// <exception cref="SyntaxException"></exception>
+        //object ToListOrDictionary(bool inclFuncs)
+        //{
+        //    object? res = null;
+
+        //    // Take a look at the first key to guess the object type.
+        //    LuaType keyType = Type(-2)!;
+
+        //    if (keyType == LuaType.Number)
+        //    {
+        //        return ToList();
+        //    }
+        //    else if (keyType == LuaType.String)
+        //    {
+        //        return ToDictionary(99, inclFuncs);
+        //    }
+        //    else
+        //    {
+        //        throw new SyntaxException($"Unsupported key type {keyType} for {ToStringL(-2)}");
+        //    }
+        //}
+
+
+        /// <summary>
+        /// Push onto lua stack.
+        /// </summary>
+        /// <param name="list"></param>
+        public void PushList<T>(List<T> list)
+        {
+            // Check for supported types: double int string.
+            var tv = typeof(T);
+            if ( !(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
+            {
+                throw new InvalidOperationException($"Unsupported value type {tv}");
+            }
+
+            // Create a new empty table and push it onto the stack.
+            NewTable();
+
+            // Add the values from the source.
+            for (int i = 0; i < list.Count; i++)
+            {
+                PushInteger(i + 1);
+                switch (list[i])
+                {
+                    case string v: PushString(v); break;
+                    case int v: PushInteger(v); break;
+                    case double v: PushNumber(v); break;
+                }
+                SetTable(-3);
+            }
+        }
+
+        /// <summary>
+        /// Push onto lua stack.
+        /// </summary>
+        /// <param name="dict"></param>
+        public void PushDictionary(Dictionary<string, object> dict)
+        {
+            // Create a new empty table and push it onto the stack.
+            NewTable();
+
+            // Add the values from the source.
+            foreach (var f in dict)
+            {
+                PushString(f.Key);
+                switch (f.Value)
+                {
+                    case null: PushNil(); break;
+                    case string s: PushString(s); break;
+                    case bool b: PushBoolean(b); break;
+                    case int i: PushInteger(i); break;
+                    case double d: PushNumber(d); break;
+                    case Dictionary<string, object> t: PushDictionary(t); break; // recursion!
+                    default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
+                }
+                SetTable(-3);
+            }
+        }
+
+
+
+/////////////// to here ////////////////
+/*
+
         /// <summary>
         /// Convert a table from the lua stack. Note that this pops the table unlike other ToXXX().
         /// </summary>
@@ -2204,7 +2420,7 @@ namespace KeraLuaEx
             DataTable table = new();
             if (depth > 0)
             {
-                // Put a nil key on stack.
+                // Put a nil key on stack to mark end of iteration.
                 PushNil();
 
                 // Key(-1) is replaced by the next key(-1) in table(-2).
@@ -2231,7 +2447,7 @@ namespace KeraLuaEx
                         LuaType.Boolean => ToBoolean(-1),
                         LuaType.Table => ToDataTable(depth - 1, inclFuncs), // recursion!
                         LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-                        _ => null // TODO??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+                        _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
                     };
 
                     if (val is not null)
@@ -2247,32 +2463,6 @@ namespace KeraLuaEx
 
 
             return table;
-        }
-
-        /// <summary>
-        /// Helper to get a global value. Restores stack.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public object? GetGlobalValue(string name)
-        {
-            object? val = null;
-
-            LuaType t = GetGlobal(name);
-
-            val = t switch
-            {
-                LuaType.String => ToStringL(-1)!,
-                LuaType.Boolean => ToBoolean(-1),
-                LuaType.Number => DetermineNumber(-1),
-                LuaType.Function => ToCFunction(-1),
-                LuaType.Table => ToDataTable(99, true),
-                _ => throw new ArgumentException($"Unsupported type {t} for {name}"),
-            };
-
-            Pop(1); // from GetGlobal().
-
-            return val;
         }
 
 
@@ -2335,6 +2525,10 @@ namespace KeraLuaEx
             }
         }
 
+*/
+/////////////// to here ////////////////
+
+
         /// <summary>
         /// Check lua status. If _throwOnError is true, throws an exception otherwise returns true for error.
         /// </summary>
@@ -2364,7 +2558,7 @@ namespace KeraLuaEx
                 _serror = string.Join(Environment.NewLine, st);
 
                 SetTop(0); // clean up GetGlobal("debug").
-                //Pop(1); // This cores for some reason... TODO
+                //Pop(1); // This cores for some reason... TODO1
 
                 if (ThrowOnError)
                 {
@@ -2409,7 +2603,7 @@ namespace KeraLuaEx
                     };
                     ls.Add(s);
 
-                    Pop(1); // remove the value from stack
+                    //Pop(1); // remove the value from stack
                 }
             }
             else

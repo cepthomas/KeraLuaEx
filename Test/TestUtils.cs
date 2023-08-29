@@ -37,6 +37,118 @@ namespace KeraLuaEx.Test
 
         #region Test and debug helpers
         /// <summary>
+        /// Helper to get a global value. Restores stack.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="name"></param>
+        /// <param name="inclFuncs"></param>
+        /// <returns></returns>
+        public static object? GetGlobalValue(Lua l, string name, bool inclFuncs = false)
+        {
+            object? val = null;
+            int n = l.GetTop();
+
+            LuaType t = l.GetGlobal(name); // push lua value onto stack
+            n = l.GetTop();
+            val = t switch
+            {
+                LuaType.String => l.ToStringL(-1)!, // assign, no pop
+                LuaType.Boolean => l.ToBoolean(-1),
+                LuaType.Number => l.DetermineNumber(-1),
+                LuaType.Function => l.ToCFunction(-1),
+                LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
+                _ => null
+            };
+            n = l.GetTop();
+            l.Pop(1); // balance stack.
+            n = l.GetTop();
+            if (val is null)
+            {
+                throw new ArgumentException($"Unsupported type {t} for {name} in table");
+            }
+
+            return val;
+        }
+
+        /// <summary>
+        /// Helper to get a table value. Assumes it is on the stack top. Restores stack.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="name"></param>
+        /// <param name="inclFuncs"></param>
+        /// <returns></returns>
+        public static object? GetTableValue(Lua l, string name, bool inclFuncs = false)//TODO1 consolidate with above?
+        {
+            object? val = null;
+
+            int n = l.GetTop();
+
+            if (!l.IsTable(-1))
+            {
+                throw new ArgumentException($"Not a table on top of stack");
+            }
+
+            LuaType t = l.GetField(-1, name); // push lua value onto stack
+            n = l.GetTop();
+            val = t switch
+            {
+                LuaType.String => l.ToStringL(-1)!, // assign, no pop
+                LuaType.Boolean => l.ToBoolean(-1),
+                LuaType.Number => l.DetermineNumber(-1),
+                LuaType.Function => l.ToCFunction(-1),
+                LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
+                _ => null
+            };
+            n = l.GetTop();
+            l.Pop(1); // balance stack.
+            n = l.GetTop();
+            if (val is null)
+            {
+                throw new ArgumentException($"Unsupported type {t} for {name} in table");
+            }
+
+            return val;
+        }
+
+
+
+
+        static object ToListOrDictionary(Lua l, int index, int depth, bool inclFuncs)
+        {
+            object? res = null;
+
+            int n = l.GetTop();
+            var s = l.DumpStack();
+            n = l.GetTop();
+
+            var table = l.GetTable(index);
+            n = l.GetTop();
+
+            // Take a look at the first key to guess the object type.
+            LuaType keyType = l.Type(-1)!;
+
+            if (keyType == LuaType.Number)
+            {
+                return l.ToList();
+            }
+            else if (keyType == LuaType.String)
+            {
+                return l.ToDictionary(depth, inclFuncs);
+            }
+            else
+            {
+                throw new SyntaxException($"Unsupported key type {keyType} for {l.ToStringL(-2)}");
+            }
+        }
+
+
+
+
+
+
+
+
+        /// <summary>
         /// Dump the globals.
         /// </summary>
         /// <param name="l"></param>
@@ -66,7 +178,7 @@ namespace KeraLuaEx.Test
                 ls.Add($"{sindent}{tableName}(table all={all}):");
                 sindent += "    ";
 
-                // Put a nil key on stack.
+                // Put a nil key on stack to mark end of iteration.
                 l.PushNil();
 
                 // Key(-1) is replaced by the next key(-1) in table(-2).
@@ -117,28 +229,28 @@ namespace KeraLuaEx.Test
             return ls;
         }
 
-        /// <summary>
-        /// Format value for display.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="val"></param>
-        /// <returns></returns>
-        /// <exception cref="SyntaxException"></exception>
-        public static string FormatCsharpVal(string name, object? val)
-        {
-            string s = val switch
-            {
-                int => $"{name}:{val}(integer)",
-                long => $"{name}:{val}(long)",
-                double => $"{name}:{val}(double)",
-                bool => $"{name}:{val}(bool)",
-                string => $"{name}:{val}(string)",
-                DataTable => $"{name}:{val}(table)",
-                null => $"{name}:null",
-                _ => throw new SyntaxException($"Unsupported type:{val.GetType()} for {name}"),
-            };
-            return s;
-        }
+        ///// <summary>
+        ///// Format value for display.
+        ///// </summary>
+        ///// <param name="name"></param>
+        ///// <param name="val"></param>
+        ///// <returns></returns>
+        ///// <exception cref="SyntaxException"></exception>
+        //public static string FormatCsharpVal(string name, object? val)
+        //{
+        //    string s = val switch
+        //    {
+        //        int => $"{name}:{val}(integer)",
+        //        long => $"{name}:{val}(long)",
+        //        double => $"{name}:{val}(double)",
+        //        bool => $"{name}:{val}(bool)",
+        //        string => $"{name}:{val}(string)",
+        //        DataTable => $"{name}:{val}(table)",
+        //        null => $"{name}:null",
+        //        _ => throw new SyntaxException($"Unsupported type:{val.GetType()} for {name}"),
+        //    };
+        //    return s;
+        //}
 
 
         /// <summary>
@@ -158,7 +270,6 @@ namespace KeraLuaEx.Test
                 Log(serror);
             }
         }
-
         #endregion
     }
 }

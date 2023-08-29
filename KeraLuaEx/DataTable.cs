@@ -26,7 +26,7 @@ namespace KeraLuaEx
     ///  - all keys must be strings and unique.
     ///  - values can be any supported type.
     /// </summary>
-    public class DataTable// : IEnumerable<DataTable>
+    public class DataTableX
     {
         #region Types
         /// <summary>What am I?</summary>
@@ -56,7 +56,7 @@ namespace KeraLuaEx
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public DataTable()
+        public DataTableX()
         {
         }
 
@@ -64,17 +64,7 @@ namespace KeraLuaEx
         /// Construct from a list.
         /// </summary>
         /// <param name="vals"></param>
-        public DataTable(List<double> vals)
-        {
-            vals.ForEach(v => _tableFields.Add(new(vals.Count + 1, v)));
-            Type = TableType.List;
-        }
-
-        /// <summary>
-        /// Construct from a list.
-        /// </summary>
-        /// <param name="vals"></param>
-        public DataTable(List<int> vals)
+        public DataTableX(List<double> vals)
         {
             vals.ForEach(v => _tableFields.Add(new(vals.Count + 1, v)));
             Type = TableType.List;
@@ -84,7 +74,17 @@ namespace KeraLuaEx
         /// Construct from a list.
         /// </summary>
         /// <param name="vals"></param>
-        public DataTable(List<string> vals)
+        public DataTableX(List<int> vals)
+        {
+            vals.ForEach(v => _tableFields.Add(new(vals.Count + 1, v)));
+            Type = TableType.List;
+        }
+
+        /// <summary>
+        /// Construct from a list.
+        /// </summary>
+        /// <param name="vals"></param>
+        public DataTableX(List<string> vals)
         {
             vals.ForEach(v => _tableFields.Add(new(vals.Count + 1, v)));
             Type = TableType.List;
@@ -94,7 +94,7 @@ namespace KeraLuaEx
         /// Construct from a dictionary.
         /// </summary>
         /// <param name="vals"></param>
-        public DataTable(Dictionary<string, object> vals)
+        public DataTableX(Dictionary<string, object> vals)
         {
             vals.ToList().ForEach(kv => _tableFields.Add(new(kv.Key, kv.Value)));
             Type = TableType.Dictionary;
@@ -106,7 +106,7 @@ namespace KeraLuaEx
         ///// 
         ///// </summary>
         ///// <returns></returns>
-        //public IEnumerator<DataTable> GetEnumerator()
+        //public IEnumerator<DataTableX> GetEnumerator()
         //{
         //    return new DataTableEnumerator(_tableFields);
         //}
@@ -304,7 +304,7 @@ namespace KeraLuaEx
                             case bool b:        ls.Add($"{sindent}{f.Key}(bool):{b}");   break;
                             case int l:        ls.Add($"{sindent}{f.Key}(int):{l}");   break;
                             case double d:      ls.Add($"{sindent}{f.Key}(double):{d}"); break;
-                            case DataTable t:   ls.Add($"{t.Format($"{f.Key}", indent + 1)}");      break; // recursion!
+                            case DataTableX t:   ls.Add($"{t.Format($"{f.Key}", indent + 1)}");      break; // recursion!
                             default:            throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
                         }
                     }
