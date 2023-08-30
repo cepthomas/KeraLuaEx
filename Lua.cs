@@ -2194,10 +2194,12 @@ namespace KeraLuaEx
         #endregion
 
         #region Added for KeraLuaEx
-
-
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <param name="inclFuncs"></param>
+        /// <returns></returns>
         public TableEx ToTableEx(int depth, bool inclFuncs)
         {
             TableEx t = new();
@@ -2206,8 +2208,6 @@ namespace KeraLuaEx
 
             return t;
         }
-
-
 
         /* These were semi-working
         /// <summary>
@@ -2414,9 +2414,6 @@ namespace KeraLuaEx
         }
 
         */
-
-
-
 
         /// <summary>
         /// Convert an array from the lua stack. Note that this pops the table unlike other ToXXX().

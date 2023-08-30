@@ -94,7 +94,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(7.654, o);
             }
 
-            EvalStackSize(_l, 99);
+            EvalStackSize(_l, 0);//0
 
             {
                 var o = GetGlobalValue(_l, "g_int");
@@ -102,7 +102,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(80808, o);
             }
 
-            EvalStackSize(_l, 99);
+            EvalStackSize(_l, 0);//0
 
             {
                 _l.GetGlobal("g_list_number"); // push lua value onto stack
@@ -117,7 +117,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(2.303, list[3]);
             }
 
-            EvalStackSize(_l, 99);
+            EvalStackSize(_l, 0);//1
 
             {
                 _l.GetGlobal("g_list_int"); // push lua value onto stack
@@ -131,22 +131,23 @@ namespace KeraLuaEx.Test
                 //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
             }
 
-            EvalStackSize(_l, 99);
+            EvalStackSize(_l, 0);//2
 
             {
                 _l.GetGlobal("g_table"); // push lua value onto stack
-                var dict = _l.ToTableEx(99, false);
+                var tbl = _l.ToTableEx(99, false);
 
 
 
                 //var o = _l.ToDictionary("g_table");
                 //Assert.IsInstanceOf<Dictionary<string, object>>(o);
                 //var dict = o as Dictionary<string, object>;
-                Assert.AreEqual(3, dict.Count);
-                Assert.AreEqual("bing_bong", dict["dev_type"]);
+                Assert.AreEqual(3, tbl.Count);
+                //Assert.AreEqual("bing_bong", dict.Get("dev_type"));
+                Assert.AreEqual("bing_bong", tbl["dev_type"]);
             }
 
-            EvalStackSize(_l, 99);
+            EvalStackSize(_l, 0);//3
 
             {
                 _l.GetGlobal("things"); // push lua value onto stack
@@ -165,6 +166,7 @@ namespace KeraLuaEx.Test
                 //var dict = o as Dictionary<string, object>;
                 Assert.AreEqual(4, tbl.Count);
 
+                //var whiz = tbl.Get("whiz");
                 var whiz = tbl["whiz"];
                 //Assert.IsInstanceOf<Dictionary<string, object>>(o);
                 Assert.IsInstanceOf<TableEx>(whiz);
@@ -185,7 +187,7 @@ namespace KeraLuaEx.Test
 
             }
 
-            EvalStackSize(_l, 0);
+            EvalStackSize(_l, 0);//4
 
 
             ///// Execute a lua function.
@@ -205,34 +207,34 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up returned value.
             }
 
-            EvalStackSize(_l, 0);
+            EvalStackSize(_l, 0);//4
 
             ///// Execute a more complex lua function.
             {
                 _l.GetGlobal("calc");
-                EvalStackSize(_l, 1);
+                EvalStackSize(_l, 1);//5
 
                 // Push the arguments.
                 var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
                 _l.PushList(addends);
                 var suffix = "__the_end__";
                 _l.PushString(suffix);
-                EvalStackSize(_l, 3);
+                EvalStackSize(_l, 3);//7
 
                 // Do the call.
                 _l.PCall(2, 1, 0); //attempt to call a number value
-                EvalStackSize(_l, 1);
+                EvalStackSize(_l, 1);//5
 
                 // Get the results from the stack.
-                var dict = _l.ToTableEx(2, false);
-                Assert.IsInstanceOf<Dictionary<string, object>>(dict);
+                var tbl = _l.ToTableEx(2, false);
+                Assert.IsInstanceOf<TableEx> (tbl);
                 _l.Pop(1);
-                Assert.AreEqual(2, dict.Count);
-                Assert.AreEqual(">>>9295___the_end__<<<", dict["str"]);
-                Assert.AreEqual(9295, dict["sum"]);
+                Assert.AreEqual(2, tbl.Count);
+                Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
+                Assert.AreEqual(9295, tbl["sum"]);
             }
 
-            EvalStackSize(_l, 0);
+            EvalStackSize(_l, 0);//4
         }
 
         [Test]
@@ -301,12 +303,12 @@ namespace KeraLuaEx.Test
 
             {
                 GetTableValue(_l, "m_table"); // push lua value onto stack
-                var dict = _l.ToTableEx(99, false);
+                var tbl = _l.ToTableEx(99, false);
                 //var o = _l.ToDictionary("g_table");
                 //Assert.IsInstanceOf<Dictionary<string, object>>(o);
                 //var dict = o as Dictionary<string, object>;
-                Assert.AreEqual(3, dict.Count);
-                Assert.AreEqual("bing_bong", dict["dev_type"]);
+                Assert.AreEqual(3, tbl.Count);
+                Assert.AreEqual("bing_bong", tbl["dev_type"]);
             }
 
             EvalStackSize(_l, 1); // luaex_mod is on top of stack
@@ -350,11 +352,11 @@ namespace KeraLuaEx.Test
                 _l.PCall(2, 1, 0);
 
                 // Get the results from the stack.
-                var dict = _l.ToTableEx(4, false);
-                Assert.IsInstanceOf<Dictionary<string, object>>(dict);
-                Assert.AreEqual(2, dict.Count);
-                Assert.AreEqual(">>>9295___the_end__<<<", dict["str"]);
-                Assert.AreEqual(9295, dict["sum"]);
+                var tbl = _l.ToTableEx(4, false);
+                Assert.IsInstanceOf<Dictionary<string, object>>(tbl);
+                Assert.AreEqual(2, tbl.Count);
+                Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
+                Assert.AreEqual(9295, tbl["sum"]);
 
                 // table = _l.ToDataTable();
                 // _l.Pop(1);

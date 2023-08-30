@@ -2,22 +2,33 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Collections.Generic;
 using System.Linq;
-using System.Collections.ObjectModel;
-using System.Collections;
-using System.Security.Cryptography.X509Certificates;
+using System.Collections.Generic;
+
 
 namespace KeraLuaEx
 {
-    public class TableEx : Dictionary<string, object>
+    public class TableEx //: Dictionary<string, object>
     {
         bool _keysAreInt = true;
         bool _valsAreHomogenous = true;
         //LuaType? valType = null;
         Type? _nativeArrayType = null;
+        readonly Dictionary<string, object> _elements = new();
 
         public Type? ListType { get { return _nativeArrayType; } }
+
+        public int Count { get { return _elements.Count; } }
+
+        //public object Get(string key)//TODO0 use []?
+        //{
+        //    return _elements[key];
+        //}
+
+        public object this[string key]
+        {
+            get => _elements[key];
+        }
 
         public void Create(Lua l, int depth, bool inclFuncs)
         {
@@ -58,7 +69,7 @@ namespace KeraLuaEx
                         _nativeArrayType ??= t; // init
                         _valsAreHomogenous &= t == _nativeArrayType;
 
-                        Add(key!, val);
+                        _elements.Add(key!, val);
                     }
 
                     // Remove value(-1), now key on top at(-1).
@@ -76,7 +87,7 @@ namespace KeraLuaEx
 
         public override string ToString()
         {
-            return $"TableEx:{base.ToString()}";
+            return $"TableEx:{_elements}";
         }
 
 
@@ -88,7 +99,7 @@ namespace KeraLuaEx
             }
 
             List<int> list = new();
-            foreach (var kv in this)
+            foreach (var kv in _elements)
             {
                 list.Add((int)kv.Value);
             }
@@ -104,7 +115,7 @@ namespace KeraLuaEx
             }
 
             List<double> list = new();
-            foreach (var kv in this)
+            foreach (var kv in _elements)
             {
                 list.Add((double)kv.Value);
             }
@@ -120,7 +131,7 @@ namespace KeraLuaEx
             }
 
             List<string> list = new();
-            foreach (var kv in this)
+            foreach (var kv in _elements)
             {
                 list.Add((string)kv.Value);
             }
