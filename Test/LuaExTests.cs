@@ -94,14 +94,18 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(7.654, o);
             }
 
+            EvalStackSize(_l, 99);
+
             {
                 var o = GetGlobalValue(_l, "g_int");
                 Assert.IsInstanceOf<int>(o);
                 Assert.AreEqual(80808, o);
             }
 
+            EvalStackSize(_l, 99);
+
             {
-                var o = GetGlobalValue(_l, "g_list_number");
+                var o = _l.ToList<double>("g_list_number");
                 Assert.IsInstanceOf<List<double>>(o);
                 //var t = o.GetType();
                 var list = o as List<double>;
@@ -109,8 +113,10 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(2.303, list[3]);
             }
 
+            EvalStackSize(_l, 99);
+
             {
-                var o = GetGlobalValue(_l, "g_list_int");
+                var o = _l.ToList<int>("g_list_int");
                 Assert.IsInstanceOf<List<int>>(o);
                 var list = o as List<int>;
                 Assert.AreEqual(4, list.Count);
@@ -118,16 +124,20 @@ namespace KeraLuaEx.Test
                 //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
             }
 
+            EvalStackSize(_l, 99);
+
             {
-                var o = GetGlobalValue(_l, "g_table");
+                var o = _l.ToDictionary("g_table");
                 Assert.IsInstanceOf<Dictionary<string, object>>(o);
                 var dict = o as Dictionary<string, object>;
                 Assert.AreEqual(3, dict.Count);
                 Assert.AreEqual("bing_bong", dict["dev_type"]);
             }
 
+            EvalStackSize(_l, 99);
+
             {
-                var o = GetGlobalValue(_l, "things");
+                var o = _l.ToDictionary("things");
                 Assert.IsInstanceOf<Dictionary<string, object>>(o);
                 var dict = o as Dictionary<string, object>;
                 Assert.AreEqual(4, dict.Count);

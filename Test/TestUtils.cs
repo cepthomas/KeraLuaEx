@@ -43,26 +43,24 @@ namespace KeraLuaEx.Test
         /// <param name="name"></param>
         /// <param name="inclFuncs"></param>
         /// <returns></returns>
-        public static object? GetGlobalValue(Lua l, string name, bool inclFuncs = false)
+        public static object? GetGlobalValue(Lua l, string name, bool inclFuncs = false)//TODO1 consolidate with GetTableValue? put these in Lua.cs?
         {
             object? val = null;
-            int n = l.GetTop();
 
             LuaType t = l.GetGlobal(name); // push lua value onto stack
-            n = l.GetTop();
             val = t switch
             {
                 LuaType.String => l.ToStringL(-1)!, // assign, no pop
                 LuaType.Boolean => l.ToBoolean(-1),
                 LuaType.Number => l.DetermineNumber(-1),
                 LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs?
+                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs? list?
                 //LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
                 _ => null
             };
-            n = l.GetTop();
+
             l.Pop(1); // balance stack.
-            n = l.GetTop();
+
             if (val is null)
             {
                 throw new ArgumentException($"Unsupported type {t} for {name} in table");
@@ -78,11 +76,9 @@ namespace KeraLuaEx.Test
         /// <param name="name"></param>
         /// <param name="inclFuncs"></param>
         /// <returns></returns>
-        public static object? GetTableValue(Lua l, string name, bool inclFuncs = false)//TODO1 consolidate with above?
+        public static object? GetTableValue(Lua l, string name, bool inclFuncs = false)
         {
             object? val = null;
-
-            int n = l.GetTop();
 
             if (!l.IsTable(-1))
             {
@@ -90,20 +86,19 @@ namespace KeraLuaEx.Test
             }
 
             LuaType t = l.GetField(-1, name); // push lua value onto stack
-            n = l.GetTop();
             val = t switch
             {
                 LuaType.String => l.ToStringL(-1)!, // assign, no pop
                 LuaType.Boolean => l.ToBoolean(-1),
                 LuaType.Number => l.DetermineNumber(-1),
                 LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs?
+                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs? list/array?
                 //LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
                 _ => null
             };
-            n = l.GetTop();
+
             l.Pop(1); // balance stack.
-            n = l.GetTop();
+
             if (val is null)
             {
                 throw new ArgumentException($"Unsupported type {t} for {name} in table");

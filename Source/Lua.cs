@@ -2200,15 +2200,16 @@ namespace KeraLuaEx
 
 
         /// <summary>
-        /// Convert a dictionary from the lua stack. Note that this pops the table unlike other ToXXX().
+        /// Convert a dictionary from the lua stack. Note that this pops the table unlike other ToXXX(). TODO1 not?
         /// </summary>
         /// <returns>Minty fresh dictionary.</returns>
         /// <exception cref="SyntaxException"></exception>
         public Dictionary<string, object> ToDictionary(int depth, bool inclFuncs)
         {
             Dictionary<string, object> dict = new();
-
             bool keysAreInt = true;
+            bool valsAreHomogenous = true;
+            LuaType? arrayValType = null;
 
             if (depth > 0)
             {
@@ -2220,24 +2221,25 @@ namespace KeraLuaEx
                 {
                     // Get key(-2) info.
                     LuaType keyType = Type(-2)!;
+                    keysAreInt &= IsInteger(-2);
                     var key = ToStringL(-2); // coerce to string keys
-
-                    if (IsInteger(index)) { return ToInteger(index); }
-                    else if (IsNumber(index)) { return ToNumber(index); }
-                    else { return null; }
 
                     // Get type of value(-1).
                     LuaType valType = Type(-1)!;
+                    // Save first.
+                    arrayValType ??= valType;
+                    valsAreHomogenous &= (valType == arrayValType);
 
+                    // Save the data.
                     object? val = valType switch
                     {
                         LuaType.Nil => null,
                         LuaType.String => ToStringL(-1),
                         LuaType.Number => DetermineNumber(-1),
                         LuaType.Boolean => ToBoolean(-1),
-                        LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion!
+                        LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion! TODO1 how about List?
                         LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-                        _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+                        _ => null // ignore others
                     };
 
                     if (val is not null)
@@ -2245,13 +2247,233 @@ namespace KeraLuaEx
                         dict.Add(key!, val);
                     }
 
-                    // Remove value(-1), now key on top at(-1).
+                    // Remove value(-1), now key on top at(-1). ??????????????
                     Pop(1);
                 }
             }
 
             return dict;
         }
+
+
+
+
+
+        public List<int> ToListInt()
+        {
+            List<int> list = new();
+            bool keysAreInt = true;
+            bool valsAreHomogenous = true;
+
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (Next(-2))
+            {
+                // Get key(-2) info and check validity. TODO1 check consecutive values.
+                //LuaType keyType = Type(-2)!;
+                if (!IsInteger(-2))
+                {
+                    throw new SyntaxException($"Not an array.");
+                }
+
+                // Get type of value(-1) and check validity.
+                if (IsInteger(-1))
+                {
+                    var val = ToInteger(-1);
+                    if (val is null)
+                    {
+                        throw new SyntaxException($"Array invalid value.");
+                    }
+                    else
+                    {
+                        list.Add((int)val);
+                    }
+                }
+                else
+                {
+                    throw new SyntaxException($"Array values must all be integers.");
+                }
+//?                Pop(1);
+            }
+
+
+            return list;
+        }
+
+
+
+        public List<double> ToListDouble()
+        {
+            List<double> list = new();
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (Next(-2))
+            {
+                // Get key(-2) info and check validity. TODO1 check consecutive values.
+                //LuaType keyType = Type(-2)!;
+                if (!IsInteger(-2))
+                {
+                    throw new SyntaxException($"Not an array.");
+                }
+
+                // Get type of value(-1) and check validity.
+                if (IsNumber(-1))
+                {
+                    var val = ToNumber(-1);
+                    if (val is null)
+                    {
+                        throw new SyntaxException($"Array invalid value.");
+                    }
+                    else
+                    {
+                        list.Add((double)val);
+                    }
+
+                }
+                else
+                {
+                    throw new SyntaxException($"Array values must all be integers.");
+                }
+//?                Pop(1);
+            }
+
+            return list;
+        }
+
+
+
+
+        public List<string> ToListString()
+        {
+            List<string> list = new();
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (Next(-2))
+            {
+                // Get key(-2) info and check validity. TODO1 check consecutive values.
+                //LuaType keyType = Type(-2)!;
+                if (!IsInteger(-2))
+                {
+                    throw new SyntaxException($"Not an array.");
+                }
+
+                // Get type of value(-1) and check validity.
+                if (IsString(-1))
+                {
+                    var val = ToStringL(-1);
+                    if (val is null)
+                    {
+                        throw new SyntaxException($"Array invalid value.");
+                    }
+                    else
+                    {
+                        list.Add(val);
+                    }
+
+                }
+                else
+                {
+                    throw new SyntaxException($"Array values must all be integers.");
+                }
+//?                Pop(1);
+            }
+
+            return list;
+        }
+
+
+
+
+
+
+        /// <summary>
+        /// Convert an array from the lua stack. Note that this pops the table unlike other ToXXX().
+        /// </summary>
+        /// <returns>Minty fresh array as list.</returns>
+        /// <exception cref="SyntaxException"></exception>
+        public List<T> ToList_not<T>()
+        {
+            // Check for supported types: double int string.
+            var tv = typeof(T);
+            if ( !(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
+            {
+                throw new InvalidOperationException($"Unsupported value type {tv}");
+            }
+
+            List<T> list = new();
+            LuaType? arrayValType = null;
+            bool keysAreInt = true;
+            bool valsAreHomogenous = true;
+
+            // Put a nil key on stack to mark end of iteration.
+            PushNil();
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (Next(-2))
+            {
+                // Get key(-2) info and check validity.
+                LuaType keyType = Type(-2)!;
+                if (!IsInteger(-2))
+                {
+                    throw new SyntaxException($"Not an array.");
+                }
+ 
+                // Get type of value(-1) and check validity.
+                LuaType valType = Type(-1)!;
+                arrayValType ??= valType;
+                if (valType != arrayValType)
+                {
+                    throw new SyntaxException($"Array values must be same type.");
+                }
+
+                object? val = valType switch
+                {
+                    LuaType.Nil => null,
+                    LuaType.String => ToStringL(-1),
+                    LuaType.Number => DetermineNumber(-1),
+                    LuaType.Boolean => ToBoolean(-1),
+                    //LuaType.Table => ToList(), TODO1 lists of lists/dicts?
+                    //LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+                    _ => null // ignore others
+                };
+
+                //switch (valType, typeof(T))
+                //{
+                //    case (LuaType.String, typeof(string)):
+
+                //            break;
+
+
+                //    case string v: PushString(v); break;
+                //    case int v: PushInteger(v); break;
+                //    case double v: PushNumber(v); break;
+                //}
+
+
+                //if (IsInteger(index)) { return ToInteger(index); }
+                //else if (IsNumber(index)) { return ToNumber(index); }
+
+
+                //switch (list[i])
+                //{
+                //    case string v: PushString(v); break;
+                //    case int v: PushInteger(v); break;
+                //    case double v: PushNumber(v); break;
+                //}
+
+
+                //if (val is not null)
+                //{
+                //    list.Add(val);
+                //}
+ 
+                // Remove value(-1), now key on top at(-1).
+                Pop(1);
+            }
+ 
+            return list;
+         }
+
 
 
         //public Dictionary<string, object> ToDictionary(int depth, bool inclFuncs)

@@ -15,24 +15,24 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 # Significant Changes
 
 ## Innards
-- Uses Lua 5.4.6 x64.
-- .NET6/C# Windows SDK project only.
+- Uses Lua 5.4.6 x64. Windows only right now.
+- .NET6/C# SDK project only.
 - Turned on nullable.
 - Integers fixed at 32 bit.
 
 ## Functional
-- Added a `DataTable` class to simplify passing data back and forth between C# and Lua. Limited to homogenous arrays
+- TODO Added a `DataTable` class to simplify passing data back and forth between C# and Lua. Limited to homogenous arrays
   and string-keyed dictionaries.
 - `ToNumberX()` and `ToIntegerX()` are removed and plain `ToNumber()` and `ToInteger()` now return nullables.
 - Error handling:
   - Option to throw exceptions (default) or return LuaStatus codes. Checking is implemented in these functions:
         `Load()`, `LoadBuffer()`, `LoadFile()`, `LoadString()`, `PCall()`, `PCallK()`, `Resume()`.
   - `Error()` is not used internally.
-  - Removed most arg checking - it was kind of sparse. Client will have to handle things like null argument exceptions etc.
+  - Removed most arg checking - it was kind of sparse. Client will have to handle things like `NullArgumentException` etc.
 
 ## Cosmetic
 - Original term `State` changed to `L`.
-- Removed lots of overloaded funcs, useing default args instead.
+- Removed lots of overloaded funcs, using default args instead.
 - Removed expression-bodied members because I prefer to reserve `=>` for lambdas only.
 
 ## Script Structure
