@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Source", "Source\KeraLuaEx.csproj", "{394131F1-6FBA-4526-AAAA-651F61335F9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeraLuaEx", ".\KeraLuaEx.csproj", "{394131F1-6FBA-4526-AAAA-651F61335F9A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{F03046C3-52B4-4439-A209-300502F0967B}"
 EndProject
