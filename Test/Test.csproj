@@ -33,7 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\KeraLuaEx\KeraLuaEx.csproj" />
+      <ProjectReference Include="..\KeraLuaEx.csproj" />
     </ItemGroup>
 
 </Project>

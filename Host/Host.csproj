@@ -21,7 +21,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\KeraLuaEx\KeraLuaEx.csproj" />
+      <ProjectReference Include="..\KeraLuaEx.csproj" />
       <ProjectReference Include="..\Test\Test.csproj" />
     </ItemGroup>
 

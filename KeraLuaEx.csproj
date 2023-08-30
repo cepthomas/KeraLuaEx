@@ -19,6 +19,20 @@
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
     </PropertyGroup>
     <ItemGroup>
+      <Compile Remove="Host\**" />
+      <Compile Remove="Test\**" />
+      <EmbeddedResource Remove="Host\**" />
+      <EmbeddedResource Remove="Test\**" />
+      <None Remove="Host\**" />
+      <None Remove="Test\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove=".gitignore" />
+      <None Remove="klx.sublime-project" />
+      <None Remove="klx.sublime-workspace" />
+      <None Remove="notes.txt" />
+    </ItemGroup>
+    <ItemGroup>
       <None Update="lua54.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

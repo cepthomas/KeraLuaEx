@@ -21,7 +21,7 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 - Integers fixed at 32 bit.
 
 ## Functional
-- TODO Added a `DataTable` class to simplify passing data back and forth between C# and Lua. Limited to homogenous arrays
+- TODO0 Added a `DataTable` class to simplify passing data back and forth between C# and Lua. Limited to homogenous arrays
   and string-keyed dictionaries.
 - `ToNumberX()` and `ToIntegerX()` are removed and plain `ToNumber()` and `ToInteger()` now return nullables.
 - Error handling:

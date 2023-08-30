@@ -2198,18 +2198,31 @@ namespace KeraLuaEx
 
 
 
+        public TableEx ToTableEx(int depth, bool inclFuncs)
+        {
+            TableEx t = new();
 
+            t.Create(this, depth, inclFuncs);
+
+            return t;
+        }
+
+
+
+        /* These were semi-working
         /// <summary>
-        /// Convert a dictionary from the lua stack. Note that this pops the table unlike other ToXXX(). TODO1 not?
+        /// Convert a dictionary from the lua stack.
         /// </summary>
         /// <returns>Minty fresh dictionary.</returns>
         /// <exception cref="SyntaxException"></exception>
         public Dictionary<string, object> ToDictionary(int depth, bool inclFuncs)
         {
             Dictionary<string, object> dict = new();
+
             bool keysAreInt = true;
             bool valsAreHomogenous = true;
-            LuaType? arrayValType = null;
+            LuaType? firstValType = null;
+            Type? nativeArrayType = null;
 
             if (depth > 0)
             {
@@ -2227,8 +2240,8 @@ namespace KeraLuaEx
                     // Get type of value(-1).
                     LuaType valType = Type(-1)!;
                     // Save first.
-                    arrayValType ??= valType;
-                    valsAreHomogenous &= (valType == arrayValType);
+                    firstValType ??= valType;
+                    valsAreHomogenous &= valType == firstValType;
 
                     // Save the data.
                     object? val = valType switch
@@ -2237,19 +2250,30 @@ namespace KeraLuaEx
                         LuaType.String => ToStringL(-1),
                         LuaType.Number => DetermineNumber(-1),
                         LuaType.Boolean => ToBoolean(-1),
-                        LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion! TODO1 how about List?
+                        LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion!
                         LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
                         _ => null // ignore others
                     };
 
                     if (val is not null)
                     {
+                        var t = val.GetType();
+                        nativeArrayType ??= t; // init
+                        valsAreHomogenous &= t == nativeArrayType;
+
                         dict.Add(key!, val);
                     }
 
-                    // Remove value(-1), now key on top at(-1). ??????????????
+                    // Remove value(-1), now key on top at(-1).
                     Pop(1);
                 }
+            }
+
+            // Patch up type info.
+            if (!keysAreInt || !valsAreHomogenous)
+            {
+                // Not an array.
+                nativeArrayType = null;
             }
 
             return dict;
@@ -2257,19 +2281,17 @@ namespace KeraLuaEx
 
 
 
-
-
         public List<int> ToListInt()
         {
             List<int> list = new();
-            bool keysAreInt = true;
-            bool valsAreHomogenous = true;
 
+            // Put a nil key on stack to mark end of iteration.
+            PushNil();
 
             // Key(-1) is replaced by the next key(-1) in table(-2).
             while (Next(-2))
             {
-                // Get key(-2) info and check validity. TODO1 check consecutive values.
+                // Get key(-2) info and check validity. TO-DO0 check consecutive values.
                 //LuaType keyType = Type(-2)!;
                 if (!IsInteger(-2))
                 {
@@ -2293,9 +2315,10 @@ namespace KeraLuaEx
                 {
                     throw new SyntaxException($"Array values must all be integers.");
                 }
-//?                Pop(1);
-            }
 
+                // Remove value(-1), now key on top at(-1).
+                Pop(1);
+            }
 
             return list;
         }
@@ -2306,11 +2329,13 @@ namespace KeraLuaEx
         {
             List<double> list = new();
 
+            // Put a nil key on stack to mark end of iteration.
+            PushNil();
+
             // Key(-1) is replaced by the next key(-1) in table(-2).
             while (Next(-2))
             {
-                // Get key(-2) info and check validity. TODO1 check consecutive values.
-                //LuaType keyType = Type(-2)!;
+                // Get key(-2) info and check validity. TO-DO0 check/enfrce consecutive values - all flavors.
                 if (!IsInteger(-2))
                 {
                     throw new SyntaxException($"Not an array.");
@@ -2334,7 +2359,9 @@ namespace KeraLuaEx
                 {
                     throw new SyntaxException($"Array values must all be integers.");
                 }
-//?                Pop(1);
+
+                // Remove value(-1), now key on top at(-1).
+                Pop(1);
             }
 
             return list;
@@ -2347,10 +2374,13 @@ namespace KeraLuaEx
         {
             List<string> list = new();
 
+            // Put a nil key on stack to mark end of iteration.
+            PushNil();
+
             // Key(-1) is replaced by the next key(-1) in table(-2).
             while (Next(-2))
             {
-                // Get key(-2) info and check validity. TODO1 check consecutive values.
+                // Get key(-2) info and check validity. TO-DO0 check consecutive values.
                 //LuaType keyType = Type(-2)!;
                 if (!IsInteger(-2))
                 {
@@ -2375,13 +2405,15 @@ namespace KeraLuaEx
                 {
                     throw new SyntaxException($"Array values must all be integers.");
                 }
-//?                Pop(1);
+
+                // Remove value(-1), now key on top at(-1).
+                Pop(1);
             }
 
             return list;
         }
 
-
+        */
 
 
 
@@ -2391,88 +2423,66 @@ namespace KeraLuaEx
         /// </summary>
         /// <returns>Minty fresh array as list.</returns>
         /// <exception cref="SyntaxException"></exception>
-        public List<T> ToList_not<T>()
-        {
-            // Check for supported types: double int string.
-            var tv = typeof(T);
-            if ( !(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
-            {
-                throw new InvalidOperationException($"Unsupported value type {tv}");
-            }
+        //public List<T> ToList_not<T>()
+        //{
+        //    // Check for supported types: double int string.
+        //    var tv = typeof(T);
+        //    if ( !(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
+        //    {
+        //        throw new InvalidOperationException($"Unsupported value type {tv}");
+        //    }
 
-            List<T> list = new();
-            LuaType? arrayValType = null;
-            bool keysAreInt = true;
-            bool valsAreHomogenous = true;
+        //    List<T> list = new();
+        //    LuaType? arrayValType = null;
+        //    bool keysAreInt = true;
+        //    bool valsAreHomogenous = true;
+        //    Type? nativeArrayType = null;
 
-            // Put a nil key on stack to mark end of iteration.
-            PushNil();
+        //    // Put a nil key on stack to mark end of iteration.
+        //    PushNil();
 
-            // Key(-1) is replaced by the next key(-1) in table(-2).
-            while (Next(-2))
-            {
-                // Get key(-2) info and check validity.
-                LuaType keyType = Type(-2)!;
-                if (!IsInteger(-2))
-                {
-                    throw new SyntaxException($"Not an array.");
-                }
- 
-                // Get type of value(-1) and check validity.
-                LuaType valType = Type(-1)!;
-                arrayValType ??= valType;
-                if (valType != arrayValType)
-                {
-                    throw new SyntaxException($"Array values must be same type.");
-                }
+        //    // Key(-1) is replaced by the next key(-1) in table(-2).
+        //    while (Next(-2))
+        //    {
+        //        // Get key(-2) info and check validity.
+        //        LuaType keyType = Type(-2)!;
+        //        if (!IsInteger(-2))
+        //        {
+        //            throw new SyntaxException($"Not an array.");
+        //        }
 
-                object? val = valType switch
-                {
-                    LuaType.Nil => null,
-                    LuaType.String => ToStringL(-1),
-                    LuaType.Number => DetermineNumber(-1),
-                    LuaType.Boolean => ToBoolean(-1),
-                    //LuaType.Table => ToList(), TODO1 lists of lists/dicts?
-                    //LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-                    _ => null // ignore others
-                };
-
-                //switch (valType, typeof(T))
-                //{
-                //    case (LuaType.String, typeof(string)):
-
-                //            break;
+        //        // Get type of value(-1) and check validity.
+        //        LuaType valType = Type(-1)!;
 
 
-                //    case string v: PushString(v); break;
-                //    case int v: PushInteger(v); break;
-                //    case double v: PushNumber(v); break;
-                //}
+        //        //if (IsInteger(index)) { return ToInteger(index); }
+        //        //else if (IsNumber(index)) { return ToNumber(index); }
 
 
-                //if (IsInteger(index)) { return ToInteger(index); }
-                //else if (IsNumber(index)) { return ToNumber(index); }
 
+        //        arrayValType ??= valType; // init?
+        //        if (valType != arrayValType)
+        //        {
+        //            throw new SyntaxException($"Array values must be same type.");
+        //        }
 
-                //switch (list[i])
-                //{
-                //    case string v: PushString(v); break;
-                //    case int v: PushInteger(v); break;
-                //    case double v: PushNumber(v); break;
-                //}
+        //        object? val = valType switch
+        //        {
+        //            LuaType.Nil => null,
+        //            LuaType.String => ToStringL(-1),
+        //            LuaType.Number => DetermineNumber(-1),
+        //            LuaType.Boolean => ToBoolean(-1),
+        //            LuaType.Table => ToDictionary(99, true),// TO-DO0 lists of lists/dicts?
+        //            //LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
+        //            _ => null // ignore others
+        //        };
 
+        //        // Remove value(-1), now key on top at(-1).
+        //        Pop(1);
+        //    }
 
-                //if (val is not null)
-                //{
-                //    list.Add(val);
-                //}
- 
-                // Remove value(-1), now key on top at(-1).
-                Pop(1);
-            }
- 
-            return list;
-         }
+        //    return list;
+        // }
 
 
 
@@ -2505,7 +2515,7 @@ namespace KeraLuaEx
         //                    LuaType.Boolean => ToBoolean(-1),
         //                    LuaType.Table => ToDictionary(depth - 1, inclFuncs), // recursion!
         //                    LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-        //                    _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+        //                    _ => null // TO-DO0??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
         //                };
 
         //                if (val is not null)
@@ -2567,7 +2577,7 @@ namespace KeraLuaEx
         //                    LuaType.Boolean => ToBoolean(-1),
         //                    LuaType.Table => ToList(),
         //                    //LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-        //                    _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+        //                    _ => null // TO-DO0??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
         //                };
 
         //                if (val is not null)
@@ -2719,7 +2729,7 @@ namespace KeraLuaEx
                         LuaType.Boolean => ToBoolean(-1),
                         LuaType.Table => ToDataTable(depth - 1, inclFuncs), // recursion!
                         LuaType.Function => inclFuncs ? ToCFunction(-1) : null,
-                        _ => null // TODO1??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
+                        _ => null // TO-DO0??? ignore throw new SyntaxException($"Unsupported value type {valType} for {ToStringL(-2)}")
                     };
 
                     if (val is not null)
@@ -2830,7 +2840,7 @@ namespace KeraLuaEx
                 _serror = string.Join(Environment.NewLine, st);
 
                 SetTop(0); // clean up GetGlobal("debug").
-                //Pop(1); // This cores for some reason... TODO1
+                //Pop(1); // This cores for some reason... TODO0
 
                 if (ThrowOnError)
                 {

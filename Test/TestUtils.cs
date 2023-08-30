@@ -43,7 +43,7 @@ namespace KeraLuaEx.Test
         /// <param name="name"></param>
         /// <param name="inclFuncs"></param>
         /// <returns></returns>
-        public static object? GetGlobalValue(Lua l, string name, bool inclFuncs = false)//TODO1 consolidate with GetTableValue? put these in Lua.cs?
+        public static object? GetGlobalValue(Lua l, string name, bool inclFuncs = false)//TODO0 consolidate with GetTableValue? put these in Lua.cs?
         {
             object? val = null;
 
@@ -54,8 +54,7 @@ namespace KeraLuaEx.Test
                 LuaType.Boolean => l.ToBoolean(-1),
                 LuaType.Number => l.DetermineNumber(-1),
                 LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs? list?
-                //LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
+                LuaType.Table => l.ToTableEx(99, inclFuncs), //TODO0 depth? inclFuncs? list?
                 _ => null
             };
 
@@ -92,8 +91,7 @@ namespace KeraLuaEx.Test
                 LuaType.Boolean => l.ToBoolean(-1),
                 LuaType.Number => l.DetermineNumber(-1),
                 LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => l.ToDictionary(99, inclFuncs), //TODO1 depth? inclFuncs? list/array?
-                //LuaType.Table => ToListOrDictionary(l, -1, 99, inclFuncs), //TODO1 depth? inclFuncs?
+                LuaType.Table => l.ToTableEx(99, inclFuncs), //TODO0 depth? inclFuncs? list/array?
                 _ => null
             };
 
@@ -226,28 +224,6 @@ namespace KeraLuaEx.Test
             return ls;
         }
 
-        ///// <summary>
-        ///// Format value for display.
-        ///// </summary>
-        ///// <param name="name"></param>
-        ///// <param name="val"></param>
-        ///// <returns></returns>
-        ///// <exception cref="SyntaxException"></exception>
-        //public static string FormatCsharpVal(string name, object? val)
-        //{
-        //    string s = val switch
-        //    {
-        //        int => $"{name}:{val}(integer)",
-        //        long => $"{name}:{val}(long)",
-        //        double => $"{name}:{val}(double)",
-        //        bool => $"{name}:{val}(bool)",
-        //        string => $"{name}:{val}(string)",
-        //        DataTable => $"{name}:{val}(table)",
-        //        null => $"{name}:null",
-        //        _ => throw new SyntaxException($"Unsupported type:{val.GetType()} for {name}"),
-        //    };
-        //    return s;
-        //}
 
 
         /// <summary>
