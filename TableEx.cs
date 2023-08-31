@@ -8,30 +8,41 @@ using System.Collections.Generic;
 
 namespace KeraLuaEx
 {
-    public class TableEx //: Dictionary<string, object>
+    public class TableEx
     {
-        bool _keysAreInt = true;
-        bool _valsAreHomogenous = true;
-        //LuaType? valType = null;
-        Type? _nativeArrayType = null;
+        #region Fields
+        /// <summary>Dictionary used to store the data.</summary>
         readonly Dictionary<string, object> _elements = new();
+        #endregion
 
-        public Type? ListType { get { return _nativeArrayType; } }
+        #region Properties
+        /// <summary>Value type for list. If null this is a dictionary.</summary>
+        public Type? ListType { get; private set; }
 
+        /// <summary>Number of values.</summary>
         public int Count { get { return _elements.Count; } }
 
-        //public object Get(string key)//TODO0 use []?
-        //{
-        //    return _elements[key];
-        //}
-
+        /// <summary>Indexer.</summary>
+        /// <param name="key"></param>
+        /// <returns>Element at key</returns>
         public object this[string key]
         {
-            get => _elements[key];
+            get { return _elements[key]; }
         }
+        #endregion
 
+        #region Public api.
+        /// <summary>
+        /// Manufacture contents from a lua table on the top of the stack.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="depth"></param>
+        /// <param name="inclFuncs"></param>
         public void Create(Lua l, int depth, bool inclFuncs)
         {
+            bool keysAreInt = true;
+            bool valsAreHomogenous = true;
+
             if (depth > 0)
             {
                 // Put a nil key on stack to mark end of iteration.
@@ -41,8 +52,8 @@ namespace KeraLuaEx
                 while (l.Next(-2))
                 {
                     // Get key(-2) info.
-                    LuaType keyType = l.Type(-2)!;
-                    _keysAreInt &= l.IsInteger(-2); //TODO0 check/enfrce consecutive values - all flavors.
+                    //LuaType keyType = l.Type(-2)!;
+                    keysAreInt &= l.IsInteger(-2); // TODO0 check/enforce consecutive values - all flavors.
                     var key = l.ToStringL(-2); // coerce to string keys for plain dictionary.
 
                     // Get type of value(-1).
@@ -66,9 +77,8 @@ namespace KeraLuaEx
                     if (val is not null)
                     {
                         var t = val.GetType();
-                        _nativeArrayType ??= t; // init
-                        _valsAreHomogenous &= t == _nativeArrayType;
-
+                        ListType ??= t; // init
+                        valsAreHomogenous &= t == ListType;
                         _elements.Add(key!, val);
                     }
 
@@ -77,66 +87,99 @@ namespace KeraLuaEx
                 }
 
                 // Patch up type info.
-                if (!_keysAreInt || !_valsAreHomogenous)
+                if (!keysAreInt || !valsAreHomogenous)
                 {
                     // Not an array.
-                    _nativeArrayType = null;
+                    ListType = null;
                 }
             }
         }
 
-        public override string ToString()
+        /// <summary>
+        /// Get a typed list - if supported.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public List<T> ToList<T>()
         {
-            return $"TableEx:{_elements}";
-        }
-
-
-        public List<int> ToListInt()
-        {
-            if (_nativeArrayType != typeof(int))
+            // Check for supported types.
+            var tv = typeof(T);
+            if ( !(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
             {
-                throw new InvalidOperationException($"Not an int array");
+                throw new InvalidOperationException($"Unsupported value type {tv}");
             }
 
-            List<int> list = new();
+            List<T> list = new();
             foreach (var kv in _elements)
             {
-                list.Add((int)kv.Value);
+                list.Add((T)kv.Value);
             }
 
             return list;
         }
 
-        public List<double> ToListDouble()
+        /// <summary>
+        /// Dump the table into a readable form.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="indent">Indent level for table</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public string Dump(string tableName, int indent = 0)
         {
-            if (_nativeArrayType != typeof(double))
+            List<string> ls = new();
+            var sindent = indent > 0 ? new(' ', 4 * indent) : "";
+
+            if (ListType is null) // dictionary
             {
-                throw new InvalidOperationException($"Not a double array");
+                ls.Add($"{sindent}{tableName}(dict):");
+                sindent += "    ";
+
+                foreach (var f in _elements)
+                {
+                    switch (f.Value)
+                    {
+                        case null: ls.Add($"{sindent}{f.Key}(null):"); break;
+                        case string s: ls.Add($"{sindent}{f.Key}(string):{s}"); break;
+                        case bool b: ls.Add($"{sindent}{f.Key}(bool):{b}"); break;
+                        case int l: ls.Add($"{sindent}{f.Key}(int):{l}"); break;
+                        case double d: ls.Add($"{sindent}{f.Key}(double):{d}"); break;
+                        case TableEx t: ls.Add($"{t.Dump($"{f.Key}", indent + 1)}"); break; // recursion!
+                        default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
+                    }
+                }
+            }
+            else // simple list of int/double/string
+            {
+                var sname = ListType.ToString().Replace("System.", "").Replace("KeraLuaEx.", "").ToLower();
+                List<string> lvals = new();
+                foreach(var f in _elements)
+                {
+                    lvals.Add(f.Value.ToString()!);
+                }
+                ls.Add($"{sindent}{tableName}(list of {sname}):[ {string.Join(", ", lvals)} ]");
             }
 
-            List<double> list = new();
-            foreach (var kv in _elements)
-            {
-                list.Add((double)kv.Value);
-            }
-
-            return list;
+            return string.Join(Environment.NewLine, ls);
         }
 
-        public List<string> ToListString()
-        {
-            if (_nativeArrayType != typeof(string))
-            {
-                throw new InvalidOperationException($"Not a string array");
-            }
-
-            List<string> list = new();
-            foreach (var kv in _elements)
-            {
-                list.Add((string)kv.Value);
-            }
-
-            return list;
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <returns></returns>
+        //public override string ToString() TDO1??
+        //{
+        //    StringBuilder sb = new("TableEx");
+        //    foreach (var kv in _elements)
+        //    {
+        //        sb.Append(kv.ToString());
+        //    }
+        //    var s = _elements.ToString();
+        //    s = string.Join(Environment.NewLine, sb.ToString());
+        //    s = $"TableEx:{_elements}";
+        //    return s;
+        //}
+        #endregion
     }
 }

@@ -9,9 +9,9 @@ using System.Runtime.CompilerServices;
 
 namespace KeraLuaEx.Test
 {
+    /// <summary>Test and debug helpers.</summary>
     public class TestUtils
     {
-        #region Core stuff
         /// <summary>Log message event.</summary>
         public static event EventHandler<string>? LogMessage;
 
@@ -33,115 +33,6 @@ namespace KeraLuaEx.Test
         {
             return Path.GetDirectoryName(callerPath)!;
         }
-        #endregion
-
-        #region Test and debug helpers
-        /// <summary>
-        /// Helper to get a global value. Restores stack.
-        /// </summary>
-        /// <param name="l"></param>
-        /// <param name="name"></param>
-        /// <param name="inclFuncs"></param>
-        /// <returns></returns>
-        public static object? GetGlobalValue(Lua l, string name, bool inclFuncs = false)//TODO0 consolidate with GetTableValue? put these in Lua.cs?
-        {
-            object? val = null;
-
-            LuaType t = l.GetGlobal(name); // push lua value onto stack
-            val = t switch
-            {
-                LuaType.String => l.ToStringL(-1)!, // assign, no pop
-                LuaType.Boolean => l.ToBoolean(-1),
-                LuaType.Number => l.DetermineNumber(-1),
-                LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => l.ToTableEx(99, inclFuncs), //TODO0 depth? inclFuncs? list?
-                _ => null
-            };
-
-            l.Pop(1); // balance stack.
-
-            if (val is null)
-            {
-                throw new ArgumentException($"Unsupported type {t} for {name} in table");
-            }
-
-            return val;
-        }
-
-        /// <summary>
-        /// Helper to get a table value. Assumes it is on the stack top. Restores stack.
-        /// </summary>
-        /// <param name="l"></param>
-        /// <param name="name"></param>
-        /// <param name="inclFuncs"></param>
-        /// <returns></returns>
-        public static object? GetTableValue(Lua l, string name, bool inclFuncs = false)
-        {
-            object? val = null;
-
-            if (!l.IsTable(-1))
-            {
-                throw new ArgumentException($"Not a table on top of stack");
-            }
-
-            LuaType t = l.GetField(-1, name); // push lua value onto stack
-            val = t switch
-            {
-                LuaType.String => l.ToStringL(-1)!, // assign, no pop
-                LuaType.Boolean => l.ToBoolean(-1),
-                LuaType.Number => l.DetermineNumber(-1),
-                LuaType.Function => l.ToCFunction(-1),
-                LuaType.Table => l.ToTableEx(99, inclFuncs), //TODO0 depth? inclFuncs? list/array?
-                _ => null
-            };
-
-            l.Pop(1); // balance stack.
-
-            if (val is null)
-            {
-                throw new ArgumentException($"Unsupported type {t} for {name} in table");
-            }
-
-            return val;
-        }
-
-
-
-
-        //static object ToListOrDictionaryX(Lua l, int index, int depth, bool inclFuncs)
-        //{
-        //    object? res = null;
-
-        //    int n = l.GetTop();
-        //    var s = l.DumpStack();
-        //    n = l.GetTop();
-
-        //    var table = l.GetTable(index);
-        //    n = l.GetTop();
-
-        //    // Take a look at the first key to guess the object type.
-        //    LuaType keyType = l.Type(-1)!;
-
-        //    if (keyType == LuaType.Number)
-        //    {
-        //        return l.ToList();
-        //    }
-        //    else if (keyType == LuaType.String)
-        //    {
-        //        return l.ToDictionary(depth, inclFuncs);
-        //    }
-        //    else
-        //    {
-        //        throw new SyntaxException($"Unsupported key type {keyType} for {l.ToStringL(-2)}");
-        //    }
-        //}
-
-
-
-
-
-
-
 
         /// <summary>
         /// Dump the globals.
@@ -151,20 +42,20 @@ namespace KeraLuaEx.Test
         public static List<string> DumpGlobals(Lua l)
         {
             l.PushGlobalTable();
-            var gl = DumpRawTable(l, "globals", 0, false);
+            var gl = DumpTable(l, "globals", 0, false);
             l.Pop(1); // from PushGlobalTable()
             return gl;
         }
 
         /// <summary>
-        /// Dump the table at the top of the stack.
+        /// Dump the lua table at the top of the stack.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="tableName"></param>
         /// <param name="indent"></param>
         /// <param name="all"></param>
         /// <returns></returns>
-        public static List<string> DumpRawTable(Lua l, string tableName, int indent, bool all)
+        public static List<string> DumpTable(Lua l, string tableName, int indent, bool all)
         {
             List<string> ls = new();
             if (indent < 2)
@@ -192,14 +83,12 @@ namespace KeraLuaEx.Test
                     // Get type of value(-1).
                     LuaType valType = l.Type(-1);
                     string st = valType.ToString().ToLower();
-                    object? val = null;
-
-                    val = valType switch
+                    object? val = valType switch
                     {
                         LuaType.String => l.ToStringL(-1)!.Replace("\0", @"\0"), // fix occasional embedded 0
                         LuaType.Boolean => l.ToBoolean(-1),
                         LuaType.Number => l.ToNumber(-1),
-                        LuaType.Table => DumpRawTable(l, key.ToString()!, indent + 1, all), // recursion!
+                        LuaType.Table => DumpTable(l, key.ToString()!, indent + 1, all), // recursion!
                         LuaType.Function => all ? l.ToPointer(-1) : null,
                         _ => all ? l.ToStringL(-1)! : null,
                     };
@@ -224,8 +113,6 @@ namespace KeraLuaEx.Test
             return ls;
         }
 
-
-
         /// <summary>
         /// Check the stack size and log if incorrect.
         /// </summary>
@@ -233,7 +120,7 @@ namespace KeraLuaEx.Test
         /// <param name="expected"></param>
         /// <param name="file">Ignore - compiler use.</param>
         /// <param name="line">Ignore - compiler use.</param>
-        public static void EvalStackSize(Lua l, int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public static void CheckStackSize(Lua l, int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             int num = l.GetTop();
 
@@ -243,6 +130,5 @@ namespace KeraLuaEx.Test
                 Log(serror);
             }
         }
-        #endregion
     }
 }

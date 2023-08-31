@@ -21,8 +21,9 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 - Integers fixed at 32 bit.
 
 ## Functional
-- TODO0 Added a `DataTable` class to simplify passing data back and forth between C# and Lua. Limited to homogenous arrays
-  and string-keyed dictionaries.
+- Added a `TableEx` class to simplify passing data back and forth between C# and Lua. Supports:
+  - Homogenous arrays of ints, doubles, and strings.
+  - Dictionaries of objects with string keys.
 - `ToNumberX()` and `ToIntegerX()` are removed and plain `ToNumber()` and `ToInteger()` now return nullables.
 - Error handling:
   - Option to throw exceptions (default) or return LuaStatus codes. Checking is implemented in these functions:
@@ -31,15 +32,15 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
   - Removed most arg checking - it was kind of sparse. Client will have to handle things like `NullArgumentException` etc.
 
 ## Cosmetic
-- Original term `State` changed to `L`.
+- Variables with `State` changed to `L`.
 - Removed lots of overloaded funcs, using default args instead.
 - Removed expression-bodied members because I prefer to reserve `=>` for lambdas only.
 
 ## Script Structure
-Scripts can be structured as "everything is a global" or a more modular approach (see LuaExTests.cs):
+Scripts can be structured as "everything is a global" or a modular model (see `LuaExTests.cs`):
 - Global: see `ScriptWithGlobal()` in conjunction with the script `luaex.lua`.
 - Modular: see `ScriptWithModule()` in conjunction with the script `luaex_mod.lua`.
 
 In reality the simple global approach makes more sense for plain old scripts but the option is there to mix and match.
 
-The `ApiLib` class demonstrates how either approach integrates with the application (in this case the test suites).
+The `ApiLib` class demonstrates how either approach integrates with the host application (in this case the test suites).
