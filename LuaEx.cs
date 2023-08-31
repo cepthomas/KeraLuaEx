@@ -114,7 +114,7 @@ namespace KeraLuaEx
                 _serror = string.Join(Environment.NewLine, st);
 
                 SetTop(0); // clean up GetGlobal("debug").
-                //Pop(1); // This cores for some reason... TODO1
+                //Pop(1); // This cores for some reason... TODO0
 
                 if (ThrowOnError)
                 {

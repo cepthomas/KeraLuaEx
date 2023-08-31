@@ -82,40 +82,47 @@ namespace KeraLuaEx.Host
             _watcher.Changed += Watcher_Changed;
 
             // Figure out what we are doing today.
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length > 1)
-            {
-                string fn = "";
 
-                switch (args[1])
-                {
-                    case "p":
-                        btnRunTests.Click += (_, __) => RunTests("Play");
-                        fn = "luaex_mod.lua";
-                        break;
 
-                    case "g":
-                        btnRunTests.Click += (_, __) => RunTests("ScriptWithGlobal");
-                        fn = "luaex.lua";
-                        break;
+            btnRunGlobal.Click += (_, __) => RunTests("Global");
+            btnRunModule.Click += (_, __) => RunTests("Module");
+            btnRunPlay.Click += (_, __) => RunTests("Play");
 
-                    case "m":
-                        btnRunTests.Click += (_, __) => RunTests("ScriptWithModule");
-                        fn = "luaex_mod.lua";
-                        break;
-                }
 
-                if (fn != "")
-                {
-                    string srcPath = TestUtils.GetSourcePath();
-                    _scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
-                    OpenScriptFile(Path.Combine(_scriptsPath, fn));
-                }
-                else
-                {
-                    Log(Level.ERR, "Please supply a command argument: p | g | m");
-                }
-            }
+            //var args = Environment.GetCommandLineArgs();
+            //if (args.Length > 1)
+            //{
+            //    string fn = "";
+
+            //    switch (args[1])
+            //    {
+            //        case "p":
+            //            btnRunTests.Click += (_, __) => RunTests("Play");
+            //            fn = "luaex_mod.lua";
+            //            break;
+
+            //        case "g":
+            //            btnRunTests.Click += (_, __) => RunTests("ScriptWithGlobal");
+            //            fn = "luaex.lua";
+            //            break;
+
+            //        case "m":
+            //            btnRunTests.Click += (_, __) => RunTests("ScriptWithModule");
+            //            fn = "luaex_mod.lua";
+            //            break;
+            //    }
+
+            //    if (fn != "")
+            //    {
+            //        string srcPath = TestUtils.GetSourcePath();
+            //        _scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
+            //        OpenScriptFile(Path.Combine(_scriptsPath, fn));
+            //    }
+            //    else
+            //    {
+            //        Log(Level.ERR, "Please supply a command argument: p | g | m");
+            //    }
+            //}
 
             btnClearOnRun.Checked = true;
 
@@ -230,7 +237,7 @@ namespace KeraLuaEx.Host
         /// <summary>
         /// Common script file opener.
         /// </summary>
-        /// <param name="fn">The np file to open.</param>
+        /// <param name="fn">The lua file to open.</param>
         /// <returns>Error string or empty if ok.</returns>
         string OpenScriptFile(string fn)
         {
@@ -305,17 +312,31 @@ namespace KeraLuaEx.Host
             }
 
             Log(Level.INF, $"Starting tests:{which}");
-            LuaExTests tests = new() { ScriptText = rtbScript.Text };
+            LuaExTests tests = new();
 
             try
             {
                 tests.Setup();
 
+                var srcPath = TestUtils.GetSourcePath();
+                var scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
+
                 switch (which)
                 {
-                    case "Play": tests.Play(); break;
-                    case "ScriptWithGlobal": tests.ScriptWithGlobal(); break;
-                    case "ScriptWithModule": tests.ScriptWithModule(); break;
+                    case "Module":
+                        OpenScriptFile(Path.Combine(scriptsPath, "luaex.lua"));
+                        tests.ScriptWithModule();
+                        break;
+
+                    case "Global":
+                        OpenScriptFile(Path.Combine(scriptsPath, "luaex_mod.lua"));
+                        tests.ScriptWithGlobal();
+                        break;
+
+                    case "Play":
+                        OpenScriptFile(Path.Combine(scriptsPath, "luaex.lua"));
+                        tests.Play();
+                        break;
                 }
             }
             catch (Exception ex)

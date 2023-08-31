@@ -15,9 +15,6 @@ namespace KeraLuaEx.Test
         /// <summary>Lua context.</summary>
         Lua? _l;
 
-        /// <summary>Explicit script.</summary>
-        public string ScriptText { get; set; } = "";
-
         [SetUp]
         public void Setup()
         {
@@ -54,12 +51,6 @@ namespace KeraLuaEx.Test
                 Assert.IsInstanceOf<double>(num);
                 Assert.AreEqual(7.654, num);
                 _l.Pop(1); // Clean up from GetGlobal().
-
-
-
-                //var o = GetGlobalValue(_l, "g_number");
-                //Assert.IsInstanceOf<double>(o);
-                //Assert.AreEqual(7.654, o);
             }
 
             CheckStackSize(_l, 0);
@@ -71,11 +62,6 @@ namespace KeraLuaEx.Test
                 Assert.IsInstanceOf<int>(i);
                 Assert.AreEqual(80808, i);
                 _l.Pop(1); // Clean up from GetGlobal().
-
-
-                //var o = GetGlobalValue(_l, "g_int");
-                //Assert.IsInstanceOf<int>(o);
-                //Assert.AreEqual(80808, o);
             }
 
             CheckStackSize(_l, 0);
@@ -212,10 +198,6 @@ namespace KeraLuaEx.Test
                 Assert.IsInstanceOf<int>(i);
                 Assert.AreEqual(71717, i);
                 _l.Pop(1); // Clean up from GetGlobal().
-
-                //var o = GetGlobalValue(_l, "g_int");
-                //Assert.IsInstanceOf<int>(o);
-                //Assert.AreEqual(71717, o);
             }
 
             ///// Look inside module.
@@ -228,12 +210,9 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetField().
                 Assert.IsInstanceOf<string>(s);
                 Assert.AreEqual("Here I am", s);
-
-
-                //var o = GetTableValue(_l, "m_string");
-                //Assert.IsInstanceOf<string>(o);
-                //Assert.AreEqual("Here I am", o);
             }
+
+            CheckStackSize(_l, 1); // luaex_mod is on top of stack
 
             {
                 LuaType t = _l.GetField(-1, "m_bool"); // push lua value onto stack
@@ -242,11 +221,6 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetField().
                 Assert.IsInstanceOf<bool>(b);
                 Assert.AreEqual(false, b);
-
-
-                //var o = GetTableValue(_l, "m_bool");
-                //Assert.IsInstanceOf<bool>(o);
-                //Assert.AreEqual(false, o);
             }
 
             CheckStackSize(_l, 1); // luaex_mod is on top of stack
@@ -256,34 +230,21 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx(99, true);
                 var list = tbl.ToList<int>();
+                _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(98, list[2]);
                 //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
-
-
-
-                //GetTableValue(_l, "m_list_int"); // push lua value onto stack
-                //var tbl = _l.ToTableEx(99, true);
-                //var list = tbl.ToList<int>();
-                //Assert.AreEqual(4, list.Count);
-                //Assert.AreEqual(98, list[2]);
-                ////var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
             }
 
             CheckStackSize(_l, 1); // luaex_mod is on top of stack
 
             {
-                LuaType t = _l.GetField(-1, "m_list_int"); // push lua value onto stack
+                LuaType t = _l.GetField(-1, "m_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx(99, true);
+                _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(3, tbl.Count);
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
-
-
-                //GetTableValue(_l, "m_table"); // push lua value onto stack
-                //var tbl = _l.ToTableEx(99, false);
-                //Assert.AreEqual(3, tbl.Count);
-                //Assert.AreEqual("bing_bong", tbl["dev_type"]);
             }
 
             CheckStackSize(_l, 1); // luaex_mod is on top of stack
@@ -326,10 +287,11 @@ namespace KeraLuaEx.Test
 
                 // Get the results from the stack.
                 var tbl = _l.ToTableEx(4, false);
-                Assert.IsInstanceOf<Dictionary<string, object>>(tbl);
+                Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(2, tbl.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
                 Assert.AreEqual(9295, tbl["sum"]);
+                _l.Pop(1); // Clean up returned value.
 
                 CheckStackSize(_l, 1);
             }
@@ -353,6 +315,7 @@ namespace KeraLuaEx.Test
             //so that after the call the last result is on the top of the stack.
             // Stick module in global.
             //_l.SetGlobal("luaex");
+
             CheckStackSize(_l, 0);
 
 
@@ -404,18 +367,11 @@ namespace KeraLuaEx.Test
         // Helper.
         void LoadScript(string fn)
         {
-            if (ScriptText != "")
-            {
-                _l!.LoadString(ScriptText);
-            }
-            else
-            {
-                string srcPath = GetSourcePath();
-                string scriptsPath = Path.Combine(srcPath, "scripts");
-                _l.SetLuaPath(new() { scriptsPath });
-                string scriptFile = Path.Combine(scriptsPath, fn);
-                _l!.LoadFile(scriptFile);
-            }
+            string srcPath = GetSourcePath();
+            string scriptsPath = Path.Combine(srcPath, "scripts");
+            _l.SetLuaPath(new() { scriptsPath });
+            string scriptFile = Path.Combine(scriptsPath, fn);
+            _l!.LoadFile(scriptFile);
         }
     }
 }
