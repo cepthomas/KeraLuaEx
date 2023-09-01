@@ -23,6 +23,7 @@
             btnClearOnRun = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             btnRunModule = new System.Windows.Forms.ToolStripButton();
+            toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             btnRunGlobal = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             txtPos = new System.Windows.Forms.ToolStripTextBox();
@@ -34,7 +35,6 @@
             splitContainer3 = new System.Windows.Forms.SplitContainer();
             rtbStack = new System.Windows.Forms.RichTextBox();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
-            toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -52,7 +52,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnFile, toolStripSeparator3, btnClearOnRun, toolStripSeparator4, btnRunModule, toolStripSeparator5, btnRunGlobal, toolStripSeparator1, txtPos, btnRunPlay, toolStripSeparator2 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnFile, toolStripSeparator3, btnClearOnRun, toolStripSeparator4, btnRunPlay, toolStripSeparator5, btnRunGlobal, txtPos, toolStripSeparator2, btnRunModule, toolStripSeparator1 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1286, 27);
@@ -109,6 +109,11 @@
             btnRunModule.Name = "btnRunModule";
             btnRunModule.Size = new System.Drawing.Size(93, 24);
             btnRunModule.Text = "Run Module";
+            // 
+            // toolStripSeparator5
+            // 
+            toolStripSeparator5.Name = "toolStripSeparator5";
+            toolStripSeparator5.Size = new System.Drawing.Size(6, 27);
             // 
             // btnRunGlobal
             // 
@@ -226,11 +231,6 @@
             splitContainer2.Size = new System.Drawing.Size(960, 811);
             splitContainer2.SplitterDistance = 385;
             splitContainer2.TabIndex = 0;
-            // 
-            // toolStripSeparator5
-            // 
-            toolStripSeparator5.Name = "toolStripSeparator5";
-            toolStripSeparator5.Size = new System.Drawing.Size(6, 27);
             // 
             // HostForm
             // 

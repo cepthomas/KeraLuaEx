@@ -13,8 +13,21 @@ namespace KeraLuaEx
     /// <summary>
     /// Stuff added for KeraLuaEx.
     /// </summary>
-    public partial class Lua : IDisposable
+    public partial class Lua
     {
+        #region Fields
+        /// <summary>Error info if not throwing on error.</summary>
+        string _serror = "";
+
+        /// <summary>Option for multiple returns in 'lua_pcall' and 'lua_call'</summary>
+        public const int LUA_MULTRET = -1;
+        #endregion
+
+        #region Properties
+        /// <summary>Errors cause exceptions.</summary>
+        public bool ThrowOnError { get; set; } = true;
+        #endregion
+
         /// <summary>
         /// Make a TableEx frin the lua table on the top of the stack.
         /// </summary>
@@ -97,28 +110,48 @@ namespace KeraLuaEx
         public bool EvalLuaStatus(LuaStatus lstat, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             bool hasError = false;
-            _serror = "";
+            var serror = "???";
 
             if (lstat >= LuaStatus.ErrRun)
             {
                 hasError = true;
-                List<string> ls = new() // TODO0 ??
-                {
-                    $"Error:{lstat}",
-                    $"Caller:{Path.GetFileName(file)}({line})"
-                };
-
                 GetGlobal("debug"); // ensures the source file info.
-
                 var st = DumpStack();
-                _serror = string.Join(Environment.NewLine, st);
-
-                SetTop(0); // clean up GetGlobal("debug").
-                //Pop(1); // This cores for some reason... TODO0
+                var sts = string.Join(Environment.NewLine, st);
+                serror = $"{file}({line}): Failed lua status:{lstat}{Environment.NewLine}{sts}";
+                Pop(1); // clean up GetGlobal("debug").
 
                 if (ThrowOnError)
                 {
+                    _serror = serror;
                     throw lstat == LuaStatus.ErrFile ? new FileNotFoundException(_serror) : new LuaException(_serror);
+                }
+            }
+
+            return hasError;
+        }
+
+        /// <summary>
+        /// Check the stack size and log if incorrect.
+        /// </summary>
+        /// <param name="expected"></param>
+        /// <param name="file">Ignore - compiler use.</param>
+        /// <param name="line">Ignore - compiler use.</param>
+        public bool CheckStackSize(int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        {
+            bool hasError = false;
+            var serror = "???";
+
+            int num = GetTop();
+
+            if (num != expected)
+            {
+                serror = $"{file}({line}): Stack size expected:{expected} actual:{num}";
+
+                if (ThrowOnError)
+                {
+                    _serror = serror;
+                    throw new LuaException(_serror);
                 }
             }
 

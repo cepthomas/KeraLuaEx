@@ -21,12 +21,6 @@ namespace KeraLuaEx
 
         /// <summary>Main execution context.</summary>
         readonly Lua? _lMain;
-
-        /// <summary>Error info if not throwing on error.</summary>
-        string _serror = "";
-
-        /// <summary>Option for multiple returns in 'lua_pcall' and 'lua_call'</summary>
-        public const int LUA_MULTRET = -1;
         #endregion
 
         #region Properties
@@ -45,10 +39,7 @@ namespace KeraLuaEx
 
         /// <summary>Get the context on the main thread. Will be this if only one.</summary>
         public Lua LMain { get { return _lMain ?? this; } }
-
-        /// <summary>Errors cause exceptions.</summary>
-        public bool ThrowOnError { get; set; } = true;
-        #endregion        
+        #endregion
 
         #region Lifecycle
         /// <summary>

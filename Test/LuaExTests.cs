@@ -10,7 +10,7 @@ using static KeraLuaEx.Test.TestUtils;
 namespace KeraLuaEx.Test
 {
     [TestFixture]
-    public class LuaExTests // TODO1 clean up all tests and utils.
+    public class LuaExTests
     {
         /// <summary>Lua context.</summary>
         Lua? _l;
@@ -41,7 +41,7 @@ namespace KeraLuaEx.Test
 
             //// Reset stack.
             _l.SetTop(0);
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             ///// Look at globals.
             {
@@ -53,7 +53,7 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetGlobal().
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             {
                 LuaType t = _l.GetGlobal("g_int"); // push lua value onto stack
@@ -64,7 +64,7 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetGlobal().
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             {
                 LuaType t = _l.GetGlobal("g_list_number"); // push lua value onto stack
@@ -76,7 +76,7 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetGlobal().
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             {
                 LuaType t = _l.GetGlobal("g_list_int"); // push lua value onto stack
@@ -89,7 +89,7 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetGlobal().
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             {
                 LuaType t = _l.GetGlobal("g_table"); // push lua value onto stack
@@ -100,7 +100,7 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetGlobal().
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             {
                 LuaType t = _l.GetGlobal("things"); // push lua value onto stack
@@ -122,7 +122,7 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetGlobal().
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             ///// Execute a lua function.
             {
@@ -142,24 +142,24 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up from GetGlobal().
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             ///// Execute a more complex lua function.
             {
                 LuaType t = _l.GetGlobal("calc");
                 Assert.AreEqual(LuaType.Function, t);
-                CheckStackSize(_l, 1);
+                _l.CheckStackSize(1);
 
                 // Push the arguments.
                 var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
                 _l.PushList(addends);
                 var suffix = "__the_end__";
                 _l.PushString(suffix);
-                CheckStackSize(_l, 3);
+                _l.CheckStackSize(3);
 
                 // Do the call.
                 _l.PCall(2, 1, 0); //attempt to call a number value
-                CheckStackSize(_l, 1);
+                _l.CheckStackSize(1);
 
                 // Get the results from the stack.
                 var tbl = _l.ToTableEx(2, false);
@@ -170,7 +170,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(9295, tbl["sum"]);
             }
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
         }
 
         [Test]
@@ -188,7 +188,7 @@ namespace KeraLuaEx.Test
             // Reset stack.
             _l.SetTop(0);
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
 
             ///// Look at globals.
             {
@@ -212,7 +212,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual("Here I am", s);
             }
 
-            CheckStackSize(_l, 1); // luaex_mod is on top of stack
+            _l.CheckStackSize(1); // luaex_mod is on top of stack
 
             {
                 LuaType t = _l.GetField(-1, "m_bool"); // push lua value onto stack
@@ -223,7 +223,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(false, b);
             }
 
-            CheckStackSize(_l, 1); // luaex_mod is on top of stack
+            _l.CheckStackSize(1); // luaex_mod is on top of stack
 
             {
                 LuaType t = _l.GetField(-1, "m_list_int"); // push lua value onto stack
@@ -236,7 +236,7 @@ namespace KeraLuaEx.Test
                 //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
             }
 
-            CheckStackSize(_l, 1); // luaex_mod is on top of stack
+            _l.CheckStackSize(1); // luaex_mod is on top of stack
 
             {
                 LuaType t = _l.GetField(-1, "m_table"); // push lua value onto stack
@@ -247,7 +247,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
             }
 
-            CheckStackSize(_l, 1); // luaex_mod is on top of stack
+            _l.CheckStackSize(1); // luaex_mod is on top of stack
 
             ///// Execute a module lua function.
             {
@@ -257,11 +257,11 @@ namespace KeraLuaEx.Test
                 var s = "az9011 birdie";
                 _l.PushString(s);
 
-                CheckStackSize(_l, 3);
+                _l.CheckStackSize(3);
 
                 // Do the call.
                 _l.PCall(1, 1, 0);
-                CheckStackSize(_l, 2);
+                _l.CheckStackSize(2);
 
                 // Get result.
                 var resi = _l.ToInteger(-1);
@@ -269,12 +269,12 @@ namespace KeraLuaEx.Test
                 _l.Pop(1); // Clean up returned value.
             }
             
-            CheckStackSize(_l, 1);
+            _l.CheckStackSize(1);
 
             ///// Execute a more complex lua function.
             {
                 _l.GetField(-1, "calcmod");
-                CheckStackSize(_l, 2);
+                _l.CheckStackSize(2);
 
                 // Push the arguments.
                 var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
@@ -293,12 +293,12 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(9295, tbl["sum"]);
                 _l.Pop(1); // Clean up returned value.
 
-                CheckStackSize(_l, 1);
+                _l.CheckStackSize(1);
             }
 
             _l.Pop(1); // GetGlobal("luaex_mod")
 
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
         }
 
         [Test]
@@ -309,59 +309,49 @@ namespace KeraLuaEx.Test
 
             // PCall loads the file.
             _l.PCall(0, Lua.LUA_MULTRET, 0);
-            //var sg = _l.DumpStack("PCall return stack:");
-            // [1] is the luaex module, [2] is api_lib
             //The function results are pushed onto the stack in direct order (the first result is pushed first),
             //so that after the call the last result is on the top of the stack.
-            // Stick module in global.
-            //_l.SetGlobal("luaex");
+            // [1] is the luaex module, [2] is api_lib
 
-            CheckStackSize(_l, 0);
+            //// Reset stack.
+            _l.SetTop(0);
+            _l.CheckStackSize(0);
 
-
-
-            ///// Misc stuff.
+            //// Dump globals.
+            //_l.PushGlobalTable();
+            //var gl = DumpTable(_l, "globals", 0, false);
+            //_l.Pop(1); // from PushGlobalTable()
+            //Log(string.Join(Environment.NewLine, gl));
 
             try
             {
                 _l.EvalLuaStatus(LuaStatus.ErrRun);
-
             }
             catch (Exception ex)
             {
-
+                Log(ex.Message);
             }
 
 
+            //_l.DumpStack();
 
-            // TODO0 public bool EvalLuaStatus(LuaStatus lstat, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
-            _l.DumpStack();
+            //if (_l.GetTop() > 0)
+            //{
+            //    var sg1 = DumpTable(_l, "[1]", 0, false);
+            //    Log(Environment.NewLine + string.Join(Environment.NewLine, sg1));
+            //    _l.Pop(1);
+            //}
+            //_l.CheckStackSize(0);
 
+            //if (_l.GetTop() > 0)
+            //{
+            //    var sg2 = DumpTable(_l, "[2]", 0, false);
+            //    Log(Environment.NewLine + string.Join(Environment.NewLine, sg2));
+            //    _l.Pop(1);
+            //}
+            //_l.CheckStackSize(0);
 
-
-
-
-            if (_l.GetTop() > 0)
-            {
-                var sg1 = DumpTable(_l, "[1]", 0, false);
-                Log(Environment.NewLine + string.Join(Environment.NewLine, sg1));
-                _l.Pop(1);
-            }
-            CheckStackSize(_l, 0);
-
-            if (_l.GetTop() > 0)
-            {
-                var sg2 = DumpTable(_l, "[2]", 0, false);
-                Log(Environment.NewLine + string.Join(Environment.NewLine, sg2));
-                _l.Pop(1);
-            }
-            CheckStackSize(_l, 0);
-
-            // Dump globals.
-            var gl = DumpGlobals(_l);
-            Log(Environment.NewLine + string.Join(Environment.NewLine, gl));
-
-            CheckStackSize(_l, 0);
+            _l.CheckStackSize(0);
         }
 
         // Helper.

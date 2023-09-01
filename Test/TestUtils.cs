@@ -35,19 +35,6 @@ namespace KeraLuaEx.Test
         }
 
         /// <summary>
-        /// Dump the globals.
-        /// </summary>
-        /// <param name="l"></param>
-        /// <returns></returns>
-        public static List<string> DumpGlobals(Lua l)
-        {
-            l.PushGlobalTable();
-            var gl = DumpTable(l, "globals", 0, false);
-            l.Pop(1); // from PushGlobalTable()
-            return gl;
-        }
-
-        /// <summary>
         /// Dump the lua table at the top of the stack.
         /// </summary>
         /// <param name="l"></param>
@@ -111,24 +98,6 @@ namespace KeraLuaEx.Test
             }
 
             return ls;
-        }
-
-        /// <summary>
-        /// Check the stack size and log if incorrect.
-        /// </summary>
-        /// <param name="l"></param>
-        /// <param name="expected"></param>
-        /// <param name="file">Ignore - compiler use.</param>
-        /// <param name="line">Ignore - compiler use.</param>
-        public static void CheckStackSize(Lua l, int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
-        {
-            int num = l.GetTop();
-
-            if (num != expected)
-            {
-                string serror = $"{file}({line}): Expected {expected} stack but is {num}";
-                Log(serror);
-            }
         }
     }
 }
