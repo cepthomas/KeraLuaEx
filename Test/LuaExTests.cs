@@ -317,6 +317,16 @@ namespace KeraLuaEx.Test
             _l.SetTop(0);
             _l.CheckStackSize(0);
 
+
+            LuaType t = _l.GetGlobal("things"); // push lua value onto stack
+            Assert.AreEqual(LuaType.Table, t);
+            var tbl = _l.ToTableEx(99, false);
+            _l.Pop(1); // Clean up from GetGlobal().
+            var s = tbl.Dump("things");
+
+
+
+
             //// Dump globals.
             //_l.PushGlobalTable();
             //var gl = DumpTable(_l, "globals", 0, false);

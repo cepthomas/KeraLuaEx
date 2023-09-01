@@ -22,18 +22,17 @@
             toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             btnClearOnRun = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            btnRunModule = new System.Windows.Forms.ToolStripButton();
+            btnRunPlay = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             btnRunGlobal = new System.Windows.Forms.ToolStripButton();
-            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             txtPos = new System.Windows.Forms.ToolStripTextBox();
-            btnRunPlay = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            btnRunModule = new System.Windows.Forms.ToolStripButton();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             rtbScript = new System.Windows.Forms.RichTextBox();
             rtbOutput = new System.Windows.Forms.RichTextBox();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             splitContainer3 = new System.Windows.Forms.SplitContainer();
-            rtbStack = new System.Windows.Forms.RichTextBox();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -41,7 +40,6 @@
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer3).BeginInit();
-            splitContainer3.Panel2.SuspendLayout();
             splitContainer3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
             splitContainer2.Panel1.SuspendLayout();
@@ -102,13 +100,13 @@
             toolStripSeparator4.Name = "toolStripSeparator4";
             toolStripSeparator4.Size = new System.Drawing.Size(6, 27);
             // 
-            // btnRunModule
+            // btnRunPlay
             // 
-            btnRunModule.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            btnRunModule.ImageTransparentColor = System.Drawing.Color.Magenta;
-            btnRunModule.Name = "btnRunModule";
-            btnRunModule.Size = new System.Drawing.Size(93, 24);
-            btnRunModule.Text = "Run Module";
+            btnRunPlay.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnRunPlay.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnRunPlay.Name = "btnRunPlay";
+            btnRunPlay.Size = new System.Drawing.Size(69, 24);
+            btnRunPlay.Text = "Run Play";
             // 
             // toolStripSeparator5
             // 
@@ -123,11 +121,6 @@
             btnRunGlobal.Size = new System.Drawing.Size(86, 24);
             btnRunGlobal.Text = "Run Global";
             // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
-            // 
             // txtPos
             // 
             txtPos.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -137,18 +130,23 @@
             txtPos.ReadOnly = true;
             txtPos.Size = new System.Drawing.Size(70, 20);
             // 
-            // btnRunPlay
-            // 
-            btnRunPlay.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            btnRunPlay.ImageTransparentColor = System.Drawing.Color.Magenta;
-            btnRunPlay.Name = "btnRunPlay";
-            btnRunPlay.Size = new System.Drawing.Size(69, 24);
-            btnRunPlay.Text = "Run Play";
-            // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
             toolStripSeparator2.Size = new System.Drawing.Size(6, 27);
+            // 
+            // btnRunModule
+            // 
+            btnRunModule.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnRunModule.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnRunModule.Name = "btnRunModule";
+            btnRunModule.Size = new System.Drawing.Size(93, 24);
+            btnRunModule.Text = "Run Module";
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
             // 
             // rtbScript
             // 
@@ -157,7 +155,7 @@
             rtbScript.Dock = System.Windows.Forms.DockStyle.Fill;
             rtbScript.Location = new System.Drawing.Point(0, 0);
             rtbScript.Name = "rtbScript";
-            rtbScript.Size = new System.Drawing.Size(960, 385);
+            rtbScript.Size = new System.Drawing.Size(1182, 385);
             rtbScript.TabIndex = 1;
             rtbScript.Text = "";
             // 
@@ -168,7 +166,7 @@
             rtbOutput.Dock = System.Windows.Forms.DockStyle.Fill;
             rtbOutput.Location = new System.Drawing.Point(0, 0);
             rtbOutput.Name = "rtbOutput";
-            rtbOutput.Size = new System.Drawing.Size(960, 422);
+            rtbOutput.Size = new System.Drawing.Size(1182, 422);
             rtbOutput.TabIndex = 2;
             rtbOutput.Text = "";
             // 
@@ -186,7 +184,7 @@
             // 
             splitContainer1.Panel2.Controls.Add(splitContainer2);
             splitContainer1.Size = new System.Drawing.Size(1286, 811);
-            splitContainer1.SplitterDistance = 322;
+            splitContainer1.SplitterDistance = 100;
             splitContainer1.TabIndex = 3;
             // 
             // splitContainer3
@@ -195,24 +193,9 @@
             splitContainer3.Location = new System.Drawing.Point(0, 0);
             splitContainer3.Name = "splitContainer3";
             splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer3.Panel2
-            // 
-            splitContainer3.Panel2.Controls.Add(rtbStack);
-            splitContainer3.Size = new System.Drawing.Size(322, 811);
-            splitContainer3.SplitterDistance = 346;
+            splitContainer3.Size = new System.Drawing.Size(100, 811);
+            splitContainer3.SplitterDistance = 315;
             splitContainer3.TabIndex = 0;
-            // 
-            // rtbStack
-            // 
-            rtbStack.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            rtbStack.Dock = System.Windows.Forms.DockStyle.Fill;
-            rtbStack.Location = new System.Drawing.Point(0, 0);
-            rtbStack.Name = "rtbStack";
-            rtbStack.ReadOnly = true;
-            rtbStack.Size = new System.Drawing.Size(322, 461);
-            rtbStack.TabIndex = 0;
-            rtbStack.Text = "";
             // 
             // splitContainer2
             // 
@@ -228,7 +211,7 @@
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(rtbOutput);
-            splitContainer2.Size = new System.Drawing.Size(960, 811);
+            splitContainer2.Size = new System.Drawing.Size(1182, 811);
             splitContainer2.SplitterDistance = 385;
             splitContainer2.TabIndex = 0;
             // 
@@ -250,7 +233,6 @@
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
-            splitContainer3.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer3).EndInit();
             splitContainer3.ResumeLayout(false);
             splitContainer2.Panel1.ResumeLayout(false);
@@ -268,7 +250,6 @@
         private System.Windows.Forms.RichTextBox rtbOutput;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer3;
-        private System.Windows.Forms.RichTextBox rtbStack;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;

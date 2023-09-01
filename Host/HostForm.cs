@@ -72,7 +72,6 @@ namespace KeraLuaEx.Host
             var font = new Font("Consolas", 10);
             rtbScript.Font = font;
             rtbOutput.Font = font;
-            rtbStack.Font = font;
 
             rtbScript.KeyDown += (_, __) => _dirty = true;
             rtbScript.MouseDown += Script_MouseDown;
@@ -81,49 +80,9 @@ namespace KeraLuaEx.Host
             _watcher.NotifyFilter = NotifyFilters.LastWrite;
             _watcher.Changed += Watcher_Changed;
 
-            // Figure out what we are doing today.
-
-
             btnRunGlobal.Click += (_, __) => RunTests("Global");
             btnRunModule.Click += (_, __) => RunTests("Module");
             btnRunPlay.Click += (_, __) => RunTests("Play");
-
-
-            //var args = Environment.GetCommandLineArgs();
-            //if (args.Length > 1)
-            //{
-            //    string fn = "";
-
-            //    switch (args[1])
-            //    {
-            //        case "p":
-            //            btnRunTests.Click += (_, __) => RunTests("Play");
-            //            fn = "luaex_mod.lua";
-            //            break;
-
-            //        case "g":
-            //            btnRunTests.Click += (_, __) => RunTests("ScriptWithGlobal");
-            //            fn = "luaex.lua";
-            //            break;
-
-            //        case "m":
-            //            btnRunTests.Click += (_, __) => RunTests("ScriptWithModule");
-            //            fn = "luaex_mod.lua";
-            //            break;
-            //    }
-
-            //    if (fn != "")
-            //    {
-            //        string srcPath = TestUtils.GetSourcePath();
-            //        _scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
-            //        OpenScriptFile(Path.Combine(_scriptsPath, fn));
-            //    }
-            //    else
-            //    {
-            //        Log(Level.ERR, "Please supply a command argument: p | g | m");
-            //    }
-            //}
-
             btnClearOnRun.Checked = true;
 
             base.OnLoad(e);
@@ -318,25 +277,15 @@ namespace KeraLuaEx.Host
             {
                 tests.Setup();
 
-                var srcPath = TestUtils.GetSourcePath();
-                var scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
+                //var srcPath = TestUtils.GetSourcePath();
+                //var scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
+                //OpenScriptFile(Path.Combine(scriptsPath, "luaex_mod.lua"));
 
                 switch (which)
                 {
-                    case "Module":
-                        OpenScriptFile(Path.Combine(scriptsPath, "luaex.lua"));
-                        tests.ScriptWithModule();
-                        break;
-
-                    case "Global":
-                        OpenScriptFile(Path.Combine(scriptsPath, "luaex_mod.lua"));
-                        tests.ScriptWithGlobal();
-                        break;
-
-                    case "Play":
-                        OpenScriptFile(Path.Combine(scriptsPath, "luaex.lua"));
-                        tests.Play();
-                        break;
+                    case "Module": tests.ScriptWithModule(); break;
+                    case "Global": tests.ScriptWithGlobal(); break;
+                    case "Play": tests.Play(); break;
                 }
             }
             catch (Exception ex)
@@ -372,15 +321,6 @@ namespace KeraLuaEx.Host
             rtbOutput.AppendText(text);
             rtbOutput.ScrollToCaret();
         }
-
-        // /// <summary>
-        // /// Show the contents of the stack.
-        // /// </summary>
-        // void ShowStack()
-        // {
-        //     var ls = _l.DumpStack();
-        //     rtbStack.Text = string.Join(Environment.NewLine, ls);
-        // }
         #endregion
     }
 

@@ -18,8 +18,6 @@ namespace KeraLuaEx
         #endregion
 
         #region Properties
-        ///// <summary>Value type for list. If null this is a dictionary.</summary>
-        //public Type? ListType { get; private set; }
         /// <summary>What this represents.</summary>
         public TableType Type { get; private set; }
 
@@ -27,12 +25,7 @@ namespace KeraLuaEx
         public int Count { get { return _elements.Count; } }
 
         /// <summary>Indexer.</summary>
-        /// <param name="key"></param>
-        /// <returns>Element at key</returns>
-        public object this[string key]
-        {
-            get { return _elements[key]; }
-        }
+        public object this[string key] { get { return _elements[key]; } }
         #endregion
 
         #region Public api.
@@ -42,12 +35,9 @@ namespace KeraLuaEx
         /// <param name="l"></param>
         /// <param name="depth"></param>
         /// <param name="inclFuncs"></param>
-        public void Create(Lua l, int depth, bool inclFuncs)//TODO0 refactor this
+        /// <exception cref="SyntaxException"></exception>
+        public void Create(Lua l, int depth, bool inclFuncs) // TODO1 refactor this, remove args?
         {
-            // Default assumes a list.
-            //bool keysAreInt = true;
-            //bool valsAreHomogenous = true;
-
             if (depth > 0)
             {
                 // Put a nil key on stack to mark end of iteration.
@@ -188,53 +178,10 @@ namespace KeraLuaEx
 
                     // Remove value(-1), now key on top at(-1).
                     l.Pop(1);
-
-
-                    /////////////////////// old below ///////////////////
-
-                    //keysAreInt &= l.IsInteger(-2);
-                    //// TODO0 check/enforce consecutive values - all flavors.
-                    //var key = l.ToStringL(-2); // coerce to string keys for plain dictionary.
-
-                    //// Get type of value(-1).
-                    //LuaType valType = l.Type(-1)!;
-                    //// Save first.
-                    ////_valType ??= valType;
-                    ////_valsAreHomogenous &= valType == this.valType;
-
-                    //// Save the data.
-                    //object? val = valType switch
-                    //{
-                    //    LuaType.Nil => null,
-                    //    LuaType.String => l.ToStringL(-1),
-                    //    LuaType.Number => l.DetermineNumber(-1),
-                    //    LuaType.Boolean => l.ToBoolean(-1),
-                    //    LuaType.Table => l.ToTableEx(depth - 1, inclFuncs), // recursion!
-                    //    LuaType.Function => inclFuncs ? l.ToCFunction(-1) : null,
-                    //    _ => null // ignore others
-                    //};
-
-                    //if (val is not null)
-                    //{
-                    //    var t = val.GetType();
-                    //    ListType ??= t; // init
-                    //    valsAreHomogenous &= t == ListType;
-                    //    _elements.Add(key!, val);
-                    //}
-
-                    //// Remove value(-1), now key on top at(-1).
-                    //l.Pop(1);
                 }
-
-                //// Patch up type info.
-                //if (!keysAreInt || !valsAreHomogenous)
-                //{
-                //    // Not an array.
-                //    ListType = null;
-                //}
             }
 
-            // Local function
+            // Local function.
             void AddToDict()
             {
                 object? val = l.Type(-1)! switch
@@ -288,11 +235,10 @@ namespace KeraLuaEx
             List<string> ls = new();
             var sindent = indent > 0 ? new(' ', 4 * indent) : "";
 
-
             switch (Type)
             {
                 case TableType.Dictionary:
-                    ls.Add($"{sindent}{tableName}(dict):");
+                    ls.Add($"{sindent}{tableName}(Dictionary):");
                     sindent += "    ";
 
                     foreach (var f in _elements)
@@ -313,13 +259,13 @@ namespace KeraLuaEx
                 case TableType.IntList:
                 case TableType.DoubleList:
                 case TableType.StringList:
-                    var sname = Type.ToString().Replace("TableType.", "");//.Replace("KeraLuaEx.", "").ToLower();
+                    var sname = Type.ToString().Replace("TableType.", "");
                     List<string> lvals = new();
                     foreach (var f in _elements)
                     {
                         lvals.Add(f.Value.ToString()!);
                     }
-                    ls.Add($"{sindent}{tableName}(list of {sname}):[ {string.Join(", ", lvals)} ]");
+                    ls.Add($"{sindent}{tableName}({sname}):[ {string.Join(", ", lvals)} ]");
                     break;
 
                 case TableType.Unknown:
@@ -327,56 +273,18 @@ namespace KeraLuaEx
                     break;
             }
 
-
-            //if (ListType is null) // dictionary
-            //{
-            //    ls.Add($"{sindent}{tableName}(dict):");
-            //    sindent += "    ";
-
-            //    foreach (var f in _elements)
-            //    {
-            //        switch (f.Value)
-            //        {
-            //            case null: ls.Add($"{sindent}{f.Key}(null):"); break;
-            //            case string s: ls.Add($"{sindent}{f.Key}(string):{s}"); break;
-            //            case bool b: ls.Add($"{sindent}{f.Key}(bool):{b}"); break;
-            //            case int l: ls.Add($"{sindent}{f.Key}(int):{l}"); break;
-            //            case double d: ls.Add($"{sindent}{f.Key}(double):{d}"); break;
-            //            case TableEx t: ls.Add($"{t.Dump($"{f.Key}", indent + 1)}"); break; // recursion!
-            //            default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
-            //        }
-            //    }
-            //}
-            //else // simple list of int/double/string
-            //{
-            //    var sname = ListType.ToString().Replace("System.", "").Replace("KeraLuaEx.", "").ToLower();
-            //    List<string> lvals = new();
-            //    foreach(var f in _elements)
-            //    {
-            //        lvals.Add(f.Value.ToString()!);
-            //    }
-            //    ls.Add($"{sindent}{tableName}(list of {sname}):[ {string.Join(", ", lvals)} ]");
-            //}
-
             return string.Join(Environment.NewLine, ls);
         }
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //public override string ToString() TDO1??
-        //{
-        //    StringBuilder sb = new("TableEx");
-        //    foreach (var kv in _elements)
-        //    {
-        //        sb.Append(kv.ToString());
-        //    }
-        //    var s = _elements.ToString();
-        //    s = string.Join(Environment.NewLine, sb.ToString());
-        //    s = $"TableEx:{_elements}";
-        //    return s;
-        //}
+        /// <summary>
+        /// Readable.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return "TableEx";
+            //return Dump("TableEx");
+        }
         #endregion
     }
 }
