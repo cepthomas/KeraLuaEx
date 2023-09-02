@@ -65,7 +65,7 @@ namespace KeraLuaEx.Host
                 { Level.DBG, Color.LightGreen },
                 { Level.SCR, Color.LightBlue },
             };
-            TestUtils.LogMessage += (object? _, string e) => Log(Level.SCR, e);
+            Lua.LogMessage += (object? _, string e) => Log(Level.SCR, e);
 
             Log(Level.INF, "============================ Starting up ===========================");
 

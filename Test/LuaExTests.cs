@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using NUnit.Framework;
-using static KeraLuaEx.Test.TestUtils;
+
 
 
 namespace KeraLuaEx.Test
@@ -30,6 +31,7 @@ namespace KeraLuaEx.Test
             _l = null;
         }
 
+        /// <summary>Test script-as-globals.</summary>
         [Test]
         public void ScriptWithGlobal()
         {
@@ -37,7 +39,7 @@ namespace KeraLuaEx.Test
             LoadScript("luaex.lua");
 
             // PCall loads the file.
-            _l.PCall(0, Lua.LUA_MULTRET, 0);
+            _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
             //// Reset stack.
             _l.SetTop(0);
@@ -69,7 +71,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_list_number"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(99, true);
+                var tbl = _l.ToTableEx();
                 var list = tbl.ToList<double>();
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(2.303, list[3]);
@@ -81,7 +83,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(99, true);
+                var tbl = _l.ToTableEx();
                 var list = tbl.ToList<int>();
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(98, list[2]);
@@ -94,7 +96,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(99, false);
+                var tbl = _l.ToTableEx();
                 Assert.AreEqual(3, tbl.Count);
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
                 _l.Pop(1); // Clean up from GetGlobal().
@@ -105,18 +107,18 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("things"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(99, false);
+                var tbl = _l.ToTableEx();
                 Assert.AreEqual(4, tbl.Count);
 
                 var whiz = tbl["whiz"] as TableEx;
                 Assert.IsInstanceOf<TableEx>(whiz);
-                Assert.AreEqual(3, whiz.Count);
+                Assert.AreEqual(3, whiz!.Count);
                 Assert.AreEqual(99, whiz["channel"]);
                 //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = whiz["booga"]; });
 
                 var dtbl = whiz["double_table"] as TableEx;
                 Assert.IsInstanceOf<TableEx>(dtbl);
-                var list = dtbl.ToList<double>();
+                var list = dtbl!.ToList<double>();
                 Assert.AreEqual(3, list.Count);
                 Assert.AreEqual(909.555, list[2]);
                 _l.Pop(1); // Clean up from GetGlobal().
@@ -162,7 +164,7 @@ namespace KeraLuaEx.Test
                 _l.CheckStackSize(1);
 
                 // Get the results from the stack.
-                var tbl = _l.ToTableEx(2, false);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx> (tbl);
                 _l.Pop(1);
                 Assert.AreEqual(2, tbl.Count);
@@ -173,6 +175,7 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(0);
         }
 
+        /// <summary>Test script-as-a-module.</summary>
         [Test]
         public void ScriptWithModule()
         {
@@ -180,7 +183,7 @@ namespace KeraLuaEx.Test
             LoadScript("luaex_mod.lua");
 
             // PCall loads the file.
-            _l.PCall(0, Lua.LUA_MULTRET, 0);
+            _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
             // Top of the stack is the module itself. Saves it for later.
             _l.SetGlobal("luaex_mod");
@@ -228,7 +231,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetField(-1, "m_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(99, true);
+                var tbl = _l.ToTableEx();
                 var list = tbl.ToList<int>();
                 _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(4, list.Count);
@@ -241,7 +244,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetField(-1, "m_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(99, true);
+                var tbl = _l.ToTableEx();
                 _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(3, tbl.Count);
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
@@ -286,7 +289,7 @@ namespace KeraLuaEx.Test
                 _l.PCall(2, 1, 0);
 
                 // Get the results from the stack.
-                var tbl = _l.ToTableEx(4, false);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(2, tbl.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
@@ -301,6 +304,7 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(0);
         }
 
+        /// <summary>General playground for testing.</summary>
         [Test]
         public void Play()
         {
@@ -308,7 +312,7 @@ namespace KeraLuaEx.Test
             LoadScript("luaex.lua");
 
             // PCall loads the file.
-            _l.PCall(0, Lua.LUA_MULTRET, 0);
+            _l!.PCall(0, Lua.LUA_MULTRET, 0);
             //The function results are pushed onto the stack in direct order (the first result is pushed first),
             //so that after the call the last result is on the top of the stack.
             // [1] is the luaex module, [2] is api_lib
@@ -320,12 +324,11 @@ namespace KeraLuaEx.Test
 
             LuaType t = _l.GetGlobal("things"); // push lua value onto stack
             Assert.AreEqual(LuaType.Table, t);
-            var tbl = _l.ToTableEx(99, false);
+            var tbl = _l.ToTableEx();
             _l.Pop(1); // Clean up from GetGlobal().
             var s = tbl.Dump("things");
-
-
-
+            Lua.Log("==== dump of things ====");
+            Lua.Log(s);
 
             //// Dump globals.
             //_l.PushGlobalTable();
@@ -333,13 +336,15 @@ namespace KeraLuaEx.Test
             //_l.Pop(1); // from PushGlobalTable()
             //Log(string.Join(Environment.NewLine, gl));
 
+            // Force error.
+            Lua.Log("==== lua status check ====");
             try
             {
                 _l.EvalLuaStatus(LuaStatus.ErrRun);
             }
             catch (Exception ex)
             {
-                Log(ex.Message);
+                Lua.Log(ex.Message);
             }
 
 
@@ -369,9 +374,15 @@ namespace KeraLuaEx.Test
         {
             string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            _l.SetLuaPath(new() { scriptsPath });
+            _l!.SetLuaPath(new() { scriptsPath });
             string scriptFile = Path.Combine(scriptsPath, fn);
             _l!.LoadFile(scriptFile);
+        }
+
+        // Get the dir name of the caller's source file.
+        string GetSourcePath([CallerFilePath] string callerPath = "")
+        {
+            return Path.GetDirectoryName(callerPath)!;
         }
     }
 }

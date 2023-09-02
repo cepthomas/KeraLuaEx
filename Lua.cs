@@ -21,6 +21,9 @@ namespace KeraLuaEx
 
         /// <summary>Main execution context.</summary>
         readonly Lua? _lMain;
+
+        /// <summary>Option for multiple returns.</summary>
+        public const int LUA_MULTRET = -1;
         #endregion
 
         #region Properties
@@ -168,10 +171,10 @@ namespace KeraLuaEx
             bool err;
 
             LuaStatus lstat = LoadFile(file);
-            err = EvalLuaStatus(lstat);
+            err = EvalLuaStatus(lstat, true);
 
             lstat = PCall(0, LUA_MULTRET, 0);
-            err |= EvalLuaStatus(lstat);
+            err |= EvalLuaStatus(lstat, true);
 
             return err;
         }
@@ -186,10 +189,10 @@ namespace KeraLuaEx
             bool err;
 
             LuaStatus lstat = LoadString(chunk);
-            err = EvalLuaStatus(lstat);
+            err = EvalLuaStatus(lstat, true);
 
             lstat = PCall(0, LUA_MULTRET, 0);
-            err |= EvalLuaStatus(lstat);
+            err |= EvalLuaStatus(lstat, true);
 
             return err;
         }

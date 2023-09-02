@@ -74,7 +74,7 @@ namespace KeraLuaEx.Test
             var s = l.ToStringL(-1);
 
             // Do the work.
-            TestUtils.Log($"printex:{s}");
+            Lua.Log($"printex:{s}");
 
             // Return results.
             return 0;

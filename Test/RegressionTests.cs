@@ -8,7 +8,6 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
-using static KeraLuaEx.Test.TestUtils;
 
 
 namespace KeraLuaEx.Test
@@ -20,6 +19,12 @@ namespace KeraLuaEx.Test
         static LuaHookFunction _funcHookCallback = HookCallback;
 
         static readonly StringBuilder _hookLog = new();
+
+        // Get the dir name of the caller's source file.
+        string GetSourcePath([CallerFilePath] string callerPath = "")
+        {
+            return Path.GetDirectoryName(callerPath)!;
+        }
 
         [SetUp]
         public void SetUp()
@@ -439,7 +444,6 @@ main.lua-main.lua:11 (main)
             Assert.IsTrue(check, "#1");
             Assert.AreEqual("bar", s, "#2");
         }
-
 
         static readonly LuaRegister[] fooReg =
         {

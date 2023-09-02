@@ -33,152 +33,155 @@ namespace KeraLuaEx
         /// Manufacture contents from a lua table on the top of the stack.
         /// </summary>
         /// <param name="l"></param>
-        /// <param name="depth"></param>
-        /// <param name="inclFuncs"></param>
-        /// <exception cref="SyntaxException"></exception>
-        public void Create(Lua l, int depth, bool inclFuncs) // TODO1 refactor this, remove args?
+        /// <param name="indent"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void Create(Lua l, int indent) // TODO0 refactor/simplify
         {
-            if (depth > 0)
+            // Check for valid value.
+            if (l.Type(-1)! != LuaType.Table)
             {
-                // Put a nil key on stack to mark end of iteration.
-                l.PushNil();
+                throw new InvalidOperationException($"Top of stack expected table but is [{l.Type(-1)}]");
+            }
 
-                // Key(-1) is replaced by the next key(-1) in table(-2).
-                while (l.Next(-2))
+            // Put a nil key on stack to mark end of iteration.
+            l.PushNil();
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (l.Next(-2))
+            {
+                // Get key info (-2).
+                LuaType keyType = l.Type(-2)!;
+                var skey = l.ToStringL(-2);
+                var ikey = l.ToInteger(-2);
+
+                // Get val info (-1).
+                LuaType valType = l.Type(-1)!;
+                //var sval = l.ToStringL(-1);
+                //var val = l.ToInteger(-1);
+
+                switch (Type)
                 {
-                    // Get key info (-2).
-                    LuaType keyType = l.Type(-2)!;
-                    var skey = l.ToStringL(-2);
-                    var ikey = l.ToInteger(-2);
-
-                    // Get val info (-1).
-                    LuaType valType = l.Type(-1)!;
-                    //var sval = l.ToStringL(-1);
-                    //var val = l.ToInteger(-1);
-
-                    switch (Type)
-                    {
-                        case TableType.Unknown: // first element has special processing
-                            if (l.IsInteger(-2))
+                    case TableType.Unknown: // first element has special processing
+                        if (l.IsInteger(-2))
+                        {
+                            if (ikey == 1)
                             {
-                                if (ikey == 1)
+                                // Assume start of a list.
+                                // Get type of value(-1).
+                                switch (valType!)
                                 {
-                                    // Assume start of a list.
-                                    // Get type of value(-1).
-                                    switch (valType!)
-                                    {
-                                        case LuaType.Number:
-                                            if (l.IsInteger(-1))
-                                            {
-                                                Type = TableType.IntList;
-                                                _elements.Add(ikey.ToString()!, l.ToInteger(-1)!);
-                                            }
-                                            else
-                                            {
-                                                Type = TableType.DoubleList;
-                                                _elements.Add(ikey.ToString()!, l.ToNumber(-1)!);
-                                            }
-                                            break;
+                                    case LuaType.Number:
+                                        if (l.IsInteger(-1))
+                                        {
+                                            Type = TableType.IntList;
+                                            _elements.Add(ikey.ToString()!, l.ToInteger(-1)!);
+                                        }
+                                        else
+                                        {
+                                            Type = TableType.DoubleList;
+                                            _elements.Add(ikey.ToString()!, l.ToNumber(-1)!);
+                                        }
+                                        break;
 
-                                        case LuaType.String:
-                                            Type = TableType.StringList;
-                                            _elements.Add(ikey.ToString()!, l.ToStringL(-1)!);
-                                            break;
+                                    case LuaType.String:
+                                        Type = TableType.StringList;
+                                        _elements.Add(ikey.ToString()!, l.ToStringL(-1)!);
+                                        break;
 
-                                        default:
-                                            throw new SyntaxException($"Unsupported list type {l.Type(-1)}");
-                                    }
+                                    default:
+                                        throw new Lua.SyntaxException($"Unsupported list type [{l.Type(-1)}]");
                                 }
-                                else
-                                {
-                                    // Must be a dictionary.
-                                    Type = TableType.Dictionary;
-                                    AddToDict();
-                                }
-                            }
-                            else if (l.IsString(-2))
-                            {
-                                Type = TableType.Dictionary;
-                                AddToDict();
                             }
                             else
                             {
-                                throw new SyntaxException($"Invalid key type {l.Type(-2)}");
-
+                                // Must be a dictionary.
+                                Type = TableType.Dictionary;
+                                AddToDict();
                             }
-                            break;
-
-                        case TableType.Dictionary:
+                        }
+                        else if (l.IsString(-2))
+                        {
+                            Type = TableType.Dictionary;
                             AddToDict();
-                            break;
+                        }
+                        else
+                        {
+                            throw new Lua.SyntaxException($"Invalid key type [{l.Type(-2)}]");
 
-                        case TableType.IntList:
-                            // Lists must have consecutive integer keys.
-                            if (l.IsInteger(-2) && l.ToInteger(-2) == _elements.Count + 1)
+                        }
+                        break;
+
+                    case TableType.IntList:
+                        // Lists must have consecutive integer keys.
+                        if (l.IsInteger(-2) && l.ToInteger(-2) == _elements.Count + 1)
+                        {
+                            if (l.IsInteger(-1))
                             {
-                                if (l.IsInteger(-1))
-                                {
-                                    _elements.Add(ikey.ToString()!, l.ToInteger(-1)!);
-                                }
-                                else
-                                {
-                                    throw new SyntaxException($"Inconsistent value type {l.Type(-1)}");
-                                }
+                                _elements.Add(ikey.ToString()!, l.ToInteger(-1)!);
                             }
                             else
                             {
-                                // Assume it must be a dictionary after all.
-                                Type = TableType.Dictionary;
-                                AddToDict();
+                                throw new Lua.SyntaxException($"Inconsistent value type [{l.Type(-1)}]");
                             }
-                            break;
+                        }
+                        else
+                        {
+                            // Assume it must be a dictionary after all.
+                            Type = TableType.Dictionary;
+                            AddToDict();
+                        }
+                        break;
 
-                        case TableType.DoubleList:
-                            // Lists must have consecutive integer keys.
-                            if (l.IsInteger(-2) && l.ToInteger(-2) == _elements.Count + 1)
+                    case TableType.DoubleList:
+                        // Lists must have consecutive integer keys.
+                        if (l.IsInteger(-2) && l.ToInteger(-2) == _elements.Count + 1)
+                        {
+                            if (l.IsNumber(-1))
                             {
-                                if (l.IsNumber(-1))
-                                {
-                                    _elements.Add(ikey.ToString()!, l.ToNumber(-1)!);
-                                }
-                                else
-                                {
-                                    throw new SyntaxException($"Inconsistent value type {l.Type(-1)}");
-                                }
+                                _elements.Add(ikey.ToString()!, l.ToNumber(-1)!);
                             }
                             else
                             {
-                                // Assume it must be a dictionary after all.
-                                Type = TableType.Dictionary;
-                                AddToDict();
+                                throw new Lua.SyntaxException($"Inconsistent value type [{l.Type(-1)}]");
                             }
-                            break;
+                        }
+                        else
+                        {
+                            // Assume it must be a dictionary after all.
+                            Type = TableType.Dictionary;
+                            AddToDict();
+                        }
+                        break;
 
-                        case TableType.StringList:
-                            // Lists must have consecutive integer keys.
-                            if (l.IsInteger(-2) && l.ToInteger(-2) == _elements.Count + 1)
+                    case TableType.StringList:
+                        // Lists must have consecutive integer keys.
+                        if (l.IsInteger(-2) && l.ToInteger(-2) == _elements.Count + 1)
+                        {
+                            if (l.IsString(-1))
                             {
-                                if (l.IsString(-1))
-                                {
-                                    _elements.Add(ikey.ToString()!, l.ToStringL(-1)!);
-                                }
-                                else
-                                {
-                                    throw new SyntaxException($"Inconsistent value type {l.Type(-1)}");
-                                }
+                                _elements.Add(ikey.ToString()!, l.ToStringL(-1)!);
                             }
                             else
                             {
-                                // Assume it must be a dictionary after all.
-                                Type = TableType.Dictionary;
-                                AddToDict();
+                                throw new Lua.SyntaxException($"Inconsistent value type [{l.Type(-1)}]");
                             }
-                            break;
-                    }
+                        }
+                        else
+                        {
+                            // Assume it must be a dictionary after all.
+                            Type = TableType.Dictionary;
+                            AddToDict();
+                        }
+                        break;
 
-                    // Remove value(-1), now key on top at(-1).
-                    l.Pop(1);
+                    case TableType.Dictionary:
+                        // Dictionaries are straightforward.
+                        AddToDict();
+                        break;
                 }
+
+                // Remove value(-1), now key on top at(-1).
+                l.Pop(1);
             }
 
             // Local function.
@@ -190,9 +193,9 @@ namespace KeraLuaEx
                     LuaType.String => l.ToStringL(-1),
                     LuaType.Number => l.DetermineNumber(-1),
                     LuaType.Boolean => l.ToBoolean(-1),
-                    LuaType.Table => l.ToTableEx(depth - 1, inclFuncs), // recursion!
-                    LuaType.Function => inclFuncs ? l.ToCFunction(-1) : null,
-                    _ => throw new SyntaxException($"Unsupported value type {l.Type(-1)}") // invalid others
+                    LuaType.Table => l.ToTableEx(indent - 1), // recursion!
+                    LuaType.Function => l.ToCFunction(-1),
+                    _ => throw new Lua.SyntaxException($"Unsupported value type [{l.Type(-1)}]") // others are invalid
                 };
                 var skey = l.ToStringL(-2);
                 _elements.Add(skey!, val!);
@@ -211,7 +214,7 @@ namespace KeraLuaEx
             var tv = typeof(T);
             if ( !(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
             {
-                throw new InvalidOperationException($"Unsupported value type {tv}");
+                throw new InvalidOperationException($"Unsupported value type [{tv}]");
             }
 
             List<T> list = new();
@@ -228,8 +231,7 @@ namespace KeraLuaEx
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="indent">Indent level for table</param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <returns>Formatted string.</returns>
         public string Dump(string tableName, int indent = 0)
         {
             List<string> ls = new();
@@ -251,7 +253,7 @@ namespace KeraLuaEx
                             case int l: ls.Add($"{sindent}{f.Key}(int):{l}"); break;
                             case double d: ls.Add($"{sindent}{f.Key}(double):{d}"); break;
                             case TableEx t: ls.Add($"{t.Dump($"{f.Key}", indent + 1)}"); break; // recursion!
-                            default: throw new InvalidOperationException($"Unsupported type {f.Value.GetType()} for {f.Key}"); // should never happen
+                            default: ls.Add($"Unsupported type {f.Value.GetType()} for {f.Key}"); break; // should never happen
                         }
                     }
                     break;

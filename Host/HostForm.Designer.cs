@@ -32,15 +32,11 @@
             rtbScript = new System.Windows.Forms.RichTextBox();
             rtbOutput = new System.Windows.Forms.RichTextBox();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            splitContainer3 = new System.Windows.Forms.SplitContainer();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)splitContainer3).BeginInit();
-            splitContainer3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
             splitContainer2.Panel1.SuspendLayout();
             splitContainer2.Panel2.SuspendLayout();
@@ -152,10 +148,9 @@
             // 
             rtbScript.BackColor = System.Drawing.Color.LightCyan;
             rtbScript.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            rtbScript.Dock = System.Windows.Forms.DockStyle.Fill;
-            rtbScript.Location = new System.Drawing.Point(0, 0);
+            rtbScript.Location = new System.Drawing.Point(93, 27);
             rtbScript.Name = "rtbScript";
-            rtbScript.Size = new System.Drawing.Size(1182, 385);
+            rtbScript.Size = new System.Drawing.Size(117, 110);
             rtbScript.TabIndex = 1;
             rtbScript.Text = "";
             // 
@@ -163,10 +158,9 @@
             // 
             rtbOutput.BackColor = System.Drawing.Color.Linen;
             rtbOutput.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            rtbOutput.Dock = System.Windows.Forms.DockStyle.Fill;
-            rtbOutput.Location = new System.Drawing.Point(0, 0);
+            rtbOutput.Location = new System.Drawing.Point(262, 43);
             rtbOutput.Name = "rtbOutput";
-            rtbOutput.Size = new System.Drawing.Size(1182, 422);
+            rtbOutput.Size = new System.Drawing.Size(158, 111);
             rtbOutput.TabIndex = 2;
             rtbOutput.Text = "";
             // 
@@ -176,26 +170,12 @@
             splitContainer1.Location = new System.Drawing.Point(0, 27);
             splitContainer1.Name = "splitContainer1";
             // 
-            // splitContainer1.Panel1
-            // 
-            splitContainer1.Panel1.Controls.Add(splitContainer3);
-            // 
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(splitContainer2);
             splitContainer1.Size = new System.Drawing.Size(1286, 811);
             splitContainer1.SplitterDistance = 100;
             splitContainer1.TabIndex = 3;
-            // 
-            // splitContainer3
-            // 
-            splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitContainer3.Location = new System.Drawing.Point(0, 0);
-            splitContainer3.Name = "splitContainer3";
-            splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            splitContainer3.Size = new System.Drawing.Size(100, 811);
-            splitContainer3.SplitterDistance = 315;
-            splitContainer3.TabIndex = 0;
             // 
             // splitContainer2
             // 
@@ -212,7 +192,7 @@
             // 
             splitContainer2.Panel2.Controls.Add(rtbOutput);
             splitContainer2.Size = new System.Drawing.Size(1182, 811);
-            splitContainer2.SplitterDistance = 385;
+            splitContainer2.SplitterDistance = 250;
             splitContainer2.TabIndex = 0;
             // 
             // HostForm
@@ -229,12 +209,9 @@
             Text = "KeraLuaEx Test Host";
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
-            splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitContainer3).EndInit();
-            splitContainer3.ResumeLayout(false);
             splitContainer2.Panel1.ResumeLayout(false);
             splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
@@ -249,7 +226,6 @@
         private System.Windows.Forms.RichTextBox rtbScript;
         private System.Windows.Forms.RichTextBox rtbOutput;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
