@@ -33,7 +33,7 @@ namespace KeraLuaEx
         }
         #endregion
 
-        #region Simple logging for client
+        #region Simple logging
         /// <summary>Log message event.</summary>
         public static event EventHandler<string>? LogMessage;
 

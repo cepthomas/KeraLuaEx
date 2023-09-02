@@ -10,7 +10,9 @@ namespace KeraLuaEx
 {
     public class TableEx
     {
+        #region Types
         public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList };
+        #endregion
 
         #region Fields
         /// <summary>Dictionary used to store the data.</summary>
@@ -40,7 +42,181 @@ namespace KeraLuaEx
             // Check for valid value.
             if (l.Type(-1)! != LuaType.Table)
             {
-                throw new InvalidOperationException($"Top of stack expected table but is [{l.Type(-1)}]");
+                throw new InvalidOperationException($"Expected table at top of stack but is [{l.Type(-1)}]");
+            }
+
+            // Put a nil key on stack to mark end of iteration.
+            l.PushNil();
+
+            // Key(-1) is replaced by the next key(-1) in table(-2).
+            while (l.Next(-2))
+            {
+                // Make the types and values easier to digest.
+
+                // Get key info (-2).
+                LuaType keyType = l.Type(-2);
+                string skey = l.ToStringL(-2)!;
+                int? ikey = l.ToInteger(-2);
+
+                // Get val info (-1).
+                LuaType valType = l.Type(-1);
+
+                int? ival = valType == LuaType.Number && l.IsInteger(-1) ? l.ToInteger(-1) : null;
+                double? nval = valType == LuaType.Number ? l.ToNumber(-1) : null;
+                string? sval = valType == LuaType.String ? l.ToStringL(-1) : null;
+
+                bool isDict = true; // assume default
+
+
+                switch (Type, ikey, ival, nval, sval)
+                {
+                    case (TableType.Unknown, null, null, null, null):
+                        //xxx
+                        break;
+
+
+
+
+
+
+                }
+
+
+
+
+
+
+                switch (Type)
+                {
+                    case TableType.Unknown:
+                        if (ikey is not null)
+                        {
+                            if (ikey == 1) // First element gets special processing - what is this?
+                            {
+                                // Assume start of a list. This will be checked later.
+                                isDict = false;
+                                if (ival is not null)
+                                {
+                                    Type = TableType.IntList;
+                                    _elements.Add(skey, ival);
+                                }
+                                else if (nval is not null)
+                                {
+                                    Type = TableType.DoubleList;
+                                    _elements.Add(skey, nval);
+                                }
+                                else if (sval is not null)
+                                {
+                                    Type = TableType.StringList;
+                                    _elements.Add(skey, sval);
+                                }
+                                else
+                                {
+                                    throw new Lua.SyntaxException($"Unsupported list type [{valType}]");
+                                }
+                            }
+                        }
+                        else if (skey is not null)
+                        {
+                             // It's a dict.
+                        }
+                        else // Bad key type.
+                        {
+                            throw new Lua.SyntaxException($"Unsupported key type [{keyType}]");
+                        }
+                        break;
+
+                    case TableType.IntList://TODO0 flatten these?
+                        // Lists must have consecutive integer keys.
+                        if (ikey is not null && ikey == _elements.Count + 1)
+                        {
+                            isDict = false;
+                            if (ival is null)
+                            {
+                                throw new Lua.SyntaxException($"Inconsistent list value type [{valType}]");
+                            }
+                            _elements.Add(skey, ival);
+                        }
+                        break;
+
+                    case TableType.DoubleList:
+                        // Lists must have consecutive integer keys.
+                        if (ikey is not null && ikey == _elements.Count + 1)
+                        {
+                            isDict = false;
+                            if (nval is null)
+                            {
+                                throw new Lua.SyntaxException($"Inconsistent list value type [{valType}]");
+                            }
+                            _elements.Add(skey, nval);
+                        }
+                        break;
+
+                    case TableType.StringList:
+                        // Lists must have consecutive integer keys.
+                        if (ikey is not null && ikey == _elements.Count + 1)
+                        {
+                            isDict = false;
+                            if (skey is null)
+                            {
+                                throw new Lua.SyntaxException($"Inconsistent list value type [{valType}]");
+                            }
+                            _elements.Add(skey, sval);
+                        }
+                        break;
+
+                    case TableType.Dictionary:
+                        // Take care of this below.
+                        break;
+                }
+
+                // Common dictionary stuffing.
+                if (isDict)
+                {
+                    Type = TableType.Dictionary;
+                    //AddToDict();
+                    object? val = valType switch
+                    {
+                        //LuaType.Nil => null,
+                        LuaType.String => l.ToStringL(-1),
+                        LuaType.Number => l.DetermineNumber(-1),
+                        LuaType.Boolean => l.ToBoolean(-1),
+                        LuaType.Table => l.ToTableEx(indent - 1), // recursion!
+                        LuaType.Function => l.ToCFunction(-1),
+                        _ => throw new Lua.SyntaxException($"Unsupported value type [{l.Type(-1)}]") // others are invalid
+                    };
+                    _elements.Add(skey, val??"Ooopsy daisey");
+                }
+
+                // Remove value(-1), now key on top at(-1).
+                l.Pop(1);
+            }
+
+            //// Local function.
+            //void AddToDict()
+            //{
+            //    object? val = l.Type(-1)! switch
+            //    {
+            //        //LuaType.Nil => null,
+            //        LuaType.String => l.ToStringL(-1),
+            //        LuaType.Number => l.DetermineNumber(-1),
+            //        LuaType.Boolean => l.ToBoolean(-1),
+            //        LuaType.Table => l.ToTableEx(indent - 1), // recursion!
+            //        LuaType.Function => l.ToCFunction(-1),
+            //        _ => throw new Lua.SyntaxException($"Unsupported value type [{l.Type(-1)}]") // others are invalid
+            //    };
+            //    var skey = l.ToStringL(-2);
+            //    _elements.Add(skey!, val!);
+            //}
+        }
+
+
+        public void Create_orig(Lua l, int indent) // TODO0 refactor/simplify
+        {
+            // Check for valid value.
+            if (l.Type(-1)! != LuaType.Table)
+            {
+                throw new InvalidOperationException($"Expected table at top of stack but is [{l.Type(-1)}]");
             }
 
             // Put a nil key on stack to mark end of iteration.
@@ -67,7 +243,6 @@ namespace KeraLuaEx
                             if (ikey == 1)
                             {
                                 // Assume start of a list.
-                                // Get type of value(-1).
                                 switch (valType!)
                                 {
                                     case LuaType.Number:
@@ -96,13 +271,13 @@ namespace KeraLuaEx
                             {
                                 // Must be a dictionary.
                                 Type = TableType.Dictionary;
-                                AddToDict();
+                                AddToDict_x();
                             }
                         }
                         else if (l.IsString(-2))
                         {
                             Type = TableType.Dictionary;
-                            AddToDict();
+                            AddToDict_x();
                         }
                         else
                         {
@@ -128,7 +303,7 @@ namespace KeraLuaEx
                         {
                             // Assume it must be a dictionary after all.
                             Type = TableType.Dictionary;
-                            AddToDict();
+                            AddToDict_x();
                         }
                         break;
 
@@ -149,7 +324,7 @@ namespace KeraLuaEx
                         {
                             // Assume it must be a dictionary after all.
                             Type = TableType.Dictionary;
-                            AddToDict();
+                            AddToDict_x();
                         }
                         break;
 
@@ -170,13 +345,13 @@ namespace KeraLuaEx
                         {
                             // Assume it must be a dictionary after all.
                             Type = TableType.Dictionary;
-                            AddToDict();
+                            AddToDict_x();
                         }
                         break;
 
                     case TableType.Dictionary:
                         // Dictionaries are straightforward.
-                        AddToDict();
+                        AddToDict_x();
                         break;
                 }
 
@@ -185,7 +360,7 @@ namespace KeraLuaEx
             }
 
             // Local function.
-            void AddToDict()
+            void AddToDict_x()
             {
                 object? val = l.Type(-1)! switch
                 {
@@ -201,6 +376,9 @@ namespace KeraLuaEx
                 _elements.Add(skey!, val!);
             }
         }
+
+
+
 
         /// <summary>
         /// Get a typed list - if supported.

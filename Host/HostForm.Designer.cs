@@ -148,9 +148,10 @@
             // 
             rtbScript.BackColor = System.Drawing.Color.LightCyan;
             rtbScript.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            rtbScript.Location = new System.Drawing.Point(93, 27);
+            rtbScript.Dock = System.Windows.Forms.DockStyle.Fill;
+            rtbScript.Location = new System.Drawing.Point(0, 0);
             rtbScript.Name = "rtbScript";
-            rtbScript.Size = new System.Drawing.Size(117, 110);
+            rtbScript.Size = new System.Drawing.Size(1182, 249);
             rtbScript.TabIndex = 1;
             rtbScript.Text = "";
             // 
@@ -158,9 +159,10 @@
             // 
             rtbOutput.BackColor = System.Drawing.Color.Linen;
             rtbOutput.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            rtbOutput.Location = new System.Drawing.Point(262, 43);
+            rtbOutput.Dock = System.Windows.Forms.DockStyle.Fill;
+            rtbOutput.Location = new System.Drawing.Point(0, 0);
             rtbOutput.Name = "rtbOutput";
-            rtbOutput.Size = new System.Drawing.Size(158, 111);
+            rtbOutput.Size = new System.Drawing.Size(1182, 558);
             rtbOutput.TabIndex = 2;
             rtbOutput.Text = "";
             // 
@@ -192,7 +194,7 @@
             // 
             splitContainer2.Panel2.Controls.Add(rtbOutput);
             splitContainer2.Size = new System.Drawing.Size(1182, 811);
-            splitContainer2.SplitterDistance = 250;
+            splitContainer2.SplitterDistance = 249;
             splitContainer2.TabIndex = 0;
             // 
             // HostForm
