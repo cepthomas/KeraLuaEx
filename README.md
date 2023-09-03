@@ -16,30 +16,18 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 
 ## Innards
 - Uses Lua 5.4.6 x64. Windows only right now.
-- .NET6/C# SDK project only.
+- .NET6/C# SDK project.
 - Turned on nullable.
 - Integers fixed at 32 bit.
 
 ## Functional
 - Added a `TableEx` class to simplify passing data back and forth between C# and Lua. Supports:
-  - Homogenous arrays of ints, doubles, and strings.
+  - Homogenous arrays of ints, doubles, or strings.
   - Dictionaries of objects with string keys.
 - `ToNumberX()` and `ToIntegerX()` are removed and plain `ToNumber()` and `ToInteger()` now return nullables.
 
-## Error handling: TODO0
-
-        // /// a runtime error. FATAL
-        // ErrRun = 2,
-        // /// syntax error during precompilation
-        // ErrSyntax = 3,
-        // /// memory allocation error. For such errors, Lua does not call the message handler. 
-        // ErrMem = 4,
-        // /// error while running the message handler. 
-        // ErrErr = 5,
-        // /// extra error code for luaL_loadfilex.
-        // ErrFile = 6
-
-- things that are recoverable return LStat. Things that aren't - throw (or optional?).
+## Error Handling TODO0
+- Things that are recoverable return LuaStatus. Things that aren't - throw (or optional?).
 - Original lib (Lua.cs) does not throw. New ones (LuaEx, TableEx) do.  
   - Option to throw exceptions (default) or return LuaStatus codes. Checking is implemented in these functions:
         `Load()`, `LoadBuffer()`, `LoadFile()`, `LoadString()`, `PCall()`, `PCallK()`, `Resume()`.

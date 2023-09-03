@@ -1,11 +1,14 @@
 
-local api = require( "api_lib") -- C# module
+local api = require("api_lib") -- C# module
 
 
 -- Functions implemented in C#.
 api.printex("Loading luaex.lua!")
 api.timer(true)
 
+-- Seed the randomizer.
+local seed = os.time()
+math.randomseed(seed)
 
 -- Local vars.
 local tune_string = "tune" 
@@ -56,14 +59,15 @@ function calc(addends, suffix)
     return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
 end
 
+function force_error()
+    return 9 / 0
+    end
+
+
+
+
+
 -- How long is it?
 local msec = api.timer(false)
 api.printex("this took " .. msec .. " msec")
 
-
-----------------------------------------------------------------------------
--- Module initialization.
-
--- Seed the randomizer.
-local seed = os.time()
-math.randomseed(seed)

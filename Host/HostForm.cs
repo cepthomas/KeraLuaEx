@@ -65,7 +65,7 @@ namespace KeraLuaEx.Host
                 { Level.DBG, Color.LightGreen },
                 { Level.SCR, Color.LightBlue },
             };
-            Lua.LogMessage += (object? _, string e) => Log(Level.SCR, e);
+            Lua.LogMessage += (object? _, Lua.LogEventArgs a) => Log(Level.SCR, $"{a.Category} {a.Message}");
 
             Log(Level.INF, "============================ Starting up ===========================");
 
@@ -83,6 +83,7 @@ namespace KeraLuaEx.Host
             btnRunGlobal.Click += (_, __) => RunTests("Global");
             btnRunModule.Click += (_, __) => RunTests("Module");
             btnRunPlay.Click += (_, __) => RunTests("Play");
+            btnRunErrors.Click += (_, __) => RunTests("Errors");
             btnClearOnRun.Checked = true;
 
             base.OnLoad(e);
@@ -283,8 +284,9 @@ namespace KeraLuaEx.Host
 
                 switch (which)
                 {
-                    case "Module": tests.ScriptWithModule(); break;
-                    case "Global": tests.ScriptWithGlobal(); break;
+                    case "Module": tests.ScriptModule(); break;
+                    case "Global": tests.ScriptGlobal(); break;
+                    case "Errors": tests.ScriptErrors(); break;
                     case "Play": tests.Play(); break;
                 }
             }

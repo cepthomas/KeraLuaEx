@@ -171,10 +171,10 @@ namespace KeraLuaEx
             bool err;
 
             LuaStatus lstat = LoadFile(file);
-            err = EvalLuaStatus(lstat, true);
+            err = EvalLuaStatus(lstat);
 
             lstat = PCall(0, LUA_MULTRET, 0);
-            err |= EvalLuaStatus(lstat, true);
+            err |= EvalLuaStatus(lstat);
 
             return err;
         }
@@ -189,10 +189,10 @@ namespace KeraLuaEx
             bool err;
 
             LuaStatus lstat = LoadString(chunk);
-            err = EvalLuaStatus(lstat, true);
+            err = EvalLuaStatus(lstat);
 
             lstat = PCall(0, LUA_MULTRET, 0);
-            err |= EvalLuaStatus(lstat, true);
+            err |= EvalLuaStatus(lstat);
 
             return err;
         }

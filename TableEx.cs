@@ -10,10 +10,6 @@ namespace KeraLuaEx
 {
     public class TableEx
     {
-        #region Types
-        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList };
-        #endregion
-
         #region Fields
         /// <summary>Dictionary used to store the data.</summary>
         readonly Dictionary<string, object> _elements = new();
@@ -22,6 +18,7 @@ namespace KeraLuaEx
         #region Properties
         /// <summary>What this represents.</summary>
         public TableType Type { get; private set; }
+        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList };
 
         /// <summary>Number of values.</summary>
         public int Count { get { return _elements.Count; } }
@@ -30,14 +27,14 @@ namespace KeraLuaEx
         public object this[string key] { get { return _elements[key]; } }
         #endregion
 
-        #region Public api.
+
+        #region Public API
         /// <summary>
         /// Manufacture contents from a lua table on the top of the stack.
         /// </summary>
         /// <param name="l"></param>
-        /// <param name="indent"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public void Create(Lua l, int indent) // TODO0 refactor/simplify
+        public TableEx(Lua l)
         {
             // Check for valid value.
             if (l.Type(-1)! != LuaType.Table)
@@ -67,24 +64,12 @@ namespace KeraLuaEx
 
                 bool isDict = true; // assume default
 
-
-                switch (Type, ikey, ival, nval, sval)
-                {
-                    case (TableType.Unknown, null, null, null, null):
-                        //xxx
-                        break;
-
-
-
-
-
-
-                }
-
-
-
-
-
+                // switch (Type, ikey, ival, nval, sval) // TODO0 refactor/simplify
+                // {
+                //     case (TableType.Unknown, null, null, null, null):
+                //         //xxx
+                //         break;
+                // }
 
                 switch (Type)
                 {
@@ -126,7 +111,7 @@ namespace KeraLuaEx
                         }
                         break;
 
-                    case TableType.IntList://TODO0 flatten these?
+                    case TableType.IntList:
                         // Lists must have consecutive integer keys.
                         if (ikey is not null && ikey == _elements.Count + 1)
                         {
@@ -181,7 +166,7 @@ namespace KeraLuaEx
                         LuaType.String => l.ToStringL(-1),
                         LuaType.Number => l.DetermineNumber(-1),
                         LuaType.Boolean => l.ToBoolean(-1),
-                        LuaType.Table => l.ToTableEx(indent - 1), // recursion!
+                        LuaType.Table => l.ToTableEx(), // recursion!
                         LuaType.Function => l.ToCFunction(-1),
                         _ => throw new Lua.SyntaxException($"Unsupported value type [{l.Type(-1)}]") // others are invalid
                     };
@@ -191,27 +176,10 @@ namespace KeraLuaEx
                 // Remove value(-1), now key on top at(-1).
                 l.Pop(1);
             }
-
-            //// Local function.
-            //void AddToDict()
-            //{
-            //    object? val = l.Type(-1)! switch
-            //    {
-            //        //LuaType.Nil => null,
-            //        LuaType.String => l.ToStringL(-1),
-            //        LuaType.Number => l.DetermineNumber(-1),
-            //        LuaType.Boolean => l.ToBoolean(-1),
-            //        LuaType.Table => l.ToTableEx(indent - 1), // recursion!
-            //        LuaType.Function => l.ToCFunction(-1),
-            //        _ => throw new Lua.SyntaxException($"Unsupported value type [{l.Type(-1)}]") // others are invalid
-            //    };
-            //    var skey = l.ToStringL(-2);
-            //    _elements.Add(skey!, val!);
-            //}
         }
 
-
-        public void Create_orig(Lua l, int indent) // TODO0 refactor/simplify
+        /*
+        public void Create_orig(Lua l, int indent)
         {
             // Check for valid value.
             if (l.Type(-1)! != LuaType.Table)
@@ -350,7 +318,6 @@ namespace KeraLuaEx
                         break;
 
                     case TableType.Dictionary:
-                        // Dictionaries are straightforward.
                         AddToDict_x();
                         break;
                 }
@@ -368,7 +335,8 @@ namespace KeraLuaEx
                     LuaType.String => l.ToStringL(-1),
                     LuaType.Number => l.DetermineNumber(-1),
                     LuaType.Boolean => l.ToBoolean(-1),
-                    LuaType.Table => l.ToTableEx(indent - 1), // recursion!
+                    LuaType.Table => l.ToTableEx(), // recursion!
+                    //LuaType.Table => l.ToTableEx(indent - 1), // recursion!
                     LuaType.Function => l.ToCFunction(-1),
                     _ => throw new Lua.SyntaxException($"Unsupported value type [{l.Type(-1)}]") // others are invalid
                 };
@@ -376,9 +344,7 @@ namespace KeraLuaEx
                 _elements.Add(skey!, val!);
             }
         }
-
-
-
+        */
 
         /// <summary>
         /// Get a typed list - if supported.

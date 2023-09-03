@@ -33,15 +33,29 @@ namespace KeraLuaEx
         }
         #endregion
 
+        #region Properties
+        /// <summary>On error either throw or return error code.</summary>
+        public bool ThrowOnError { get; set; } = true;
+        #endregion
+
         #region Simple logging
-        /// <summary>Log message event.</summary>
-        public static event EventHandler<string>? LogMessage;
+        public enum Category { DBG, INF, ERR };
+
+        public class LogEventArgs : EventArgs
+        {
+            /// <summary>What it be.</summary>
+            public Category Category { get; set; } = Category.ERR;
+            /// <summary>The information.</summary>
+            public string Message { get; set; } = "";
+        }
 
         /// <summary>Client app can listen in.</summary>
-        /// <param name="msg"></param>
-        public static void Log(string msg)
+        public static event EventHandler<LogEventArgs>? LogMessage;
+
+        /// <summary>Log message event.</summary>
+        public static void Log(Category cat, string msg)
         {
-            LogMessage?.Invoke(null, msg);
+            LogMessage?.Invoke(null, new() { Category = cat, Message = msg });
         }
         #endregion
 
@@ -49,12 +63,10 @@ namespace KeraLuaEx
         /// <summary>
         /// Make a TableEx from the lua table on the top of the stack.
         /// </summary>
-        /// <param name="indent">Where to start.</param>
         /// <returns></returns>
-        public TableEx ToTableEx(int indent = 0)
+        public TableEx? ToTableEx()
         {
-            TableEx t = new();
-            t.Create(this, indent);
+            TableEx t = new(this);
             return t;
         }
 
@@ -146,16 +158,15 @@ namespace KeraLuaEx
 
         #region Quality control
         /// <summary>
-        /// Check lua status. If ThrowOnError is true, throws an exception otherwise returns true for error.
+        /// Check lua status and log an error. If ThrowOnError is true, throws an exception.
         /// </summary>
         /// <param name="lstat">Thing to look at.</param>
-        /// <param name="clientHandle">If true don't throw and let caller process it.</param>
         /// <param name="file">Ignore - compiler use.</param>
         /// <param name="line">Ignore - compiler use.</param>
         /// <returns>True means error</returns>
         /// <exception cref="FileNotFoundException"></exception>
         /// <exception cref="LuaException"></exception>
-        public bool EvalLuaStatus(LuaStatus lstat, bool clientHandle = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public bool EvalLuaStatus(LuaStatus lstat, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             bool hasError = false;
             var serror = "???";
@@ -164,13 +175,30 @@ namespace KeraLuaEx
             {
                 hasError = true;
                 // Log the stack so user can determine bad script file.
-                GetGlobal("debug");
-                var st = DumpStack();
-                var sts = string.Join(Environment.NewLine, st);
-                serror = $"{file}({line}): Failed lua status [{lstat}]{Environment.NewLine}{sts}";
-                Pop(1); // clean up GetGlobal("debug").
+                //var st1 = DumpStack(); //[1] is error message
+                //GetGlobal("debug");
 
-                if (!clientHandle)
+                //var st = DumpStack();
+                //var s = string.Join(Environment.NewLine, st);
+                //Pop(1); // clean up GetGlobal("debug").
+
+                // Get error message on stack.
+                string s;
+                if (GetTop() > 0)
+                {
+                    s = ToStringL(-1)!;
+                    Pop(1); // remove
+                }
+                else
+                {
+                    s = "No message!!!";
+                }
+
+                serror = $"{file}({line}) [{lstat}]: {s}";
+
+                //Log(Category.ERR, serror);
+
+                if (ThrowOnError)
                 {
                     throw lstat switch
                     {
@@ -185,13 +213,14 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Check the stack size and throw/log if incorrect.
+        /// Check the stack size and log if incorrect. If ThrowOnError is true, throws an exception.
         /// </summary>
         /// <param name="expected"></param>
-        /// <param name="clientHandle">If true don't throw and let caller process it.</param>
         /// <param name="file">Ignore - compiler use.</param>
         /// <param name="line">Ignore - compiler use.</param>
-        public bool CheckStackSize(int expected, bool clientHandle = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        /// <returns>True means error</returns>
+        /// <exception cref="LuaException"></exception>
+        public bool CheckStackSize(int expected, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             bool hasError = false;
 
@@ -200,14 +229,12 @@ namespace KeraLuaEx
             if (num != expected)
             {
                 hasError = true;
-                var serror = $"{file}({line}): Stack size expected [{expected}] actual [{num}]";
-                if (!clientHandle)
+                var serror = $"{file}({line}) Stack size expected [{expected}] actual [{num}]";
+
+                Lua.Log(Lua.Category.ERR, serror);
+                if (ThrowOnError)
                 {
                     throw new LuaException(serror);
-                }
-                else
-                {
-                    Lua.Log(serror);
                 }
             }
 
@@ -249,8 +276,6 @@ namespace KeraLuaEx
                         _ => $"{tinfo}{ToPointer(i):X}({st})",
                     };
                     ls.Add(s);
-
-                    //Pop(1); // remove the value from stack
                 }
             }
             else
