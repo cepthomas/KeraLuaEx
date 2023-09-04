@@ -27,15 +27,6 @@
       <None Remove="Test\**" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Remove="TableEx_1.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Remove=".gitignore" />
-      <None Remove="klx.sublime-project" />
-      <None Remove="klx.sublime-workspace" />
-      <None Remove="notes.txt" />
-    </ItemGroup>
-    <ItemGroup>
       <None Update="lua54.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
