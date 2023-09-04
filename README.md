@@ -26,11 +26,13 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
   - Dictionaries of objects with string keys.
 - `ToNumberX()` and `ToIntegerX()` are removed and plain `ToNumber()` and `ToInteger()` now return nullables.
 
-## Error Handling TODO0
+## Error Handling
 - Things that are recoverable return LuaStatus. Things that aren't - throw (or optional?).
-- Original lib (Lua.cs) does not throw. New ones (LuaEx, TableEx) do.  
-  - Option to throw exceptions (default) or return LuaStatus codes. Checking is implemented in these functions:
+- Original lib (Lua.cs) does not throw. New ones (LuaEx, TableEx) do.
+  - Option to throw exceptions (default) in class `Lua` or return `LuaStatus` codes. Checking is implemented in these functions:
         `Load()`, `LoadBuffer()`, `LoadFile()`, `LoadString()`, `PCall()`, `PCallK()`, `Resume()`.
+  -  `ToTableEx()` always throws exceptions because the errors (usually script syntax) can be deep in the hierarchy.
+     Capture them by handling `LogMessage` event in your client.
   - `Error()` is not used internally.
   - Removed most arg checking - it was kind of sparse. Client will have to handle things like `NullArgumentException` etc.
 

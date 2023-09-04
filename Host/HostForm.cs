@@ -33,7 +33,7 @@ namespace KeraLuaEx.Host
         string _fn = "";
 
         /// <summary>Where to look.</summary>
-        string _scriptsPath = "";
+        readonly string _scriptsPath = "";
         #endregion
 
         #region Lifecycle
@@ -292,7 +292,16 @@ namespace KeraLuaEx.Host
             }
             catch (Exception ex)
             {
-                Log(Level.ERR, $"{ex}");
+                var st = "???";
+                if (ex.StackTrace is not null)
+                {
+                    var lst = ex.StackTrace.Split(Environment.NewLine);
+                    if (lst.Length >= 2)
+                    {
+                        st = lst[^2];
+                    }
+                }
+                Log(Level.ERR, $"{ex.Message} {st}");
             }
             finally
             {

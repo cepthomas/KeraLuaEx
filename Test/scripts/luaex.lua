@@ -60,7 +60,9 @@ function calc(addends, suffix)
 end
 
 function force_error()
-    return 9 / 0
+    api.printex('>>>')
+    bad = 9 / 0 -- Lua doesn't think this is an error
+    api.printex('>>>' .. bad)
     end
 
 

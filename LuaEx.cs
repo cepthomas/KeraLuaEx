@@ -10,31 +10,31 @@ using System.Diagnostics;
 
 namespace KeraLuaEx
 {
+    #region Exceptions
+    /// <summary>Lua script syntax error.</summary>
+    public class SyntaxException : Exception
+    {
+        public SyntaxException() : base() { }
+        public SyntaxException(string message) : base(message) { }
+        public SyntaxException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    /// <summary>Internal error on lua side.</summary>
+    public class LuaException : Exception
+    {
+        public LuaException() : base() { }
+        public LuaException(string message) : base(message) { }
+        public LuaException(string message, Exception inner) : base(message, inner) { }
+    }
+    #endregion
+
     /// <summary>
     /// Stuff added for KeraLuaEx.
     /// </summary>
     public partial class Lua
     {
-        #region Exceptions
-        /// <summary>Lua script syntax error.</summary>
-        public class SyntaxException : Exception
-        {
-            public SyntaxException() : base() { }
-            public SyntaxException(string message) : base(message) { }
-            public SyntaxException(string message, Exception inner) : base(message, inner) { }
-        }
-
-        /// <summary>Internal error on lua side.</summary>
-        public class LuaException : Exception
-        {
-            public LuaException() : base() { }
-            public LuaException(string message) : base(message) { }
-            public LuaException(string message, Exception inner) : base(message, inner) { }
-        }
-        #endregion
-
         #region Properties
-        /// <summary>On error either throw or return error code.</summary>
+        /// <summary>On LuaStatus error either throw or return error code.</summary>
         public bool ThrowOnError { get; set; } = true;
         #endregion
 
@@ -63,10 +63,21 @@ namespace KeraLuaEx
         /// <summary>
         /// Make a TableEx from the lua table on the top of the stack.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>TableEx object or null if failed, check the log.</returns>
         public TableEx? ToTableEx()
         {
-            TableEx t = new(this);
+            TableEx? t = null;
+            try
+            {
+                t = new(this);
+            }
+            catch (Exception ex)
+            {
+                // Stack is probably a mess so reset it. Implies that this is a fatal event.
+                SetTop(0);
+                Lua.Log(Lua.Category.ERR, ex.Message);
+            }
+
             return t;
         }
 
@@ -78,7 +89,7 @@ namespace KeraLuaEx
         {
             // Check for supported types: int, double, string.
             var tv = typeof(T);
-            if ( !(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
+            if (!(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
             {
                 throw new InvalidOperationException($"Unsupported value type [{tv}]");
             }
@@ -169,34 +180,25 @@ namespace KeraLuaEx
         public bool EvalLuaStatus(LuaStatus lstat, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             bool hasError = false;
-            var serror = "???";
 
             if (lstat >= LuaStatus.ErrRun)
             {
                 hasError = true;
-                // Log the stack so user can determine bad script file.
-                //var st1 = DumpStack(); //[1] is error message
-                //GetGlobal("debug");
-
-                //var st = DumpStack();
-                //var s = string.Join(Environment.NewLine, st);
-                //Pop(1); // clean up GetGlobal("debug").
 
                 // Get error message on stack.
                 string s;
                 if (GetTop() > 0)
                 {
-                    s = ToStringL(-1)!;
+                    s = ToStringL(-1)!.Trim();
                     Pop(1); // remove
                 }
                 else
                 {
-                    s = "No message!!!";
+                    s = "No error message!!!";
                 }
 
-                serror = $"{file}({line}) [{lstat}]: {s}";
-
-                //Log(Category.ERR, serror);
+                var serror = $"{lstat}:{s}";
+                // serror = $"{file}({line}) [{lstat}]: {s}";
 
                 if (ThrowOnError)
                 {
@@ -229,9 +231,9 @@ namespace KeraLuaEx
             if (num != expected)
             {
                 hasError = true;
-                var serror = $"{file}({line}) Stack size expected [{expected}] actual [{num}]";
+                var serror = $"Stack size expected {expected} actual {num} at {file}({line})";
 
-                Lua.Log(Lua.Category.ERR, serror);
+                Log(Category.ERR, serror);
                 if (ThrowOnError)
                 {
                     throw new LuaException(serror);

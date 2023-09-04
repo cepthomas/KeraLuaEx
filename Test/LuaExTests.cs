@@ -70,7 +70,8 @@ namespace KeraLuaEx.Test
                 LuaType t = _l.GetGlobal("g_list_number"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx();
-                var list = tbl.ToList<double>();
+                Assert.IsInstanceOf<TableEx>(tbl);
+                var list = tbl!.ToList<double>();
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(2.303, list[3]);
                 _l.Pop(1); // Clean up from GetGlobal().
@@ -81,10 +82,10 @@ namespace KeraLuaEx.Test
                 LuaType t = _l.GetGlobal("g_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx();
-                var list = tbl.ToList<int>();
+                Assert.IsInstanceOf<TableEx>(tbl);
+                var list = tbl!.ToList<int>();
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(98, list[2]);
-                //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
                 _l.Pop(1); // Clean up from GetGlobal().
             }
             _l.CheckStackSize(0);
@@ -93,7 +94,8 @@ namespace KeraLuaEx.Test
                 LuaType t = _l.GetGlobal("g_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx();
-                Assert.AreEqual(3, tbl.Count);
+                Assert.IsInstanceOf<TableEx>(tbl);
+                Assert.AreEqual(3, tbl!.Count);
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
                 _l.Pop(1); // Clean up from GetGlobal().
             }
@@ -103,13 +105,13 @@ namespace KeraLuaEx.Test
                 LuaType t = _l.GetGlobal("things"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx();
-                Assert.AreEqual(4, tbl.Count);
+                Assert.IsInstanceOf<TableEx>(tbl);
+                Assert.AreEqual(4, tbl!.Count);
 
                 var whiz = tbl["whiz"] as TableEx;
                 Assert.IsInstanceOf<TableEx>(whiz);
                 Assert.AreEqual(3, whiz!.Count);
                 Assert.AreEqual(99, whiz["channel"]);
-                //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = whiz["booga"]; });
 
                 var dtbl = whiz["double_table"] as TableEx;
                 Assert.IsInstanceOf<TableEx>(dtbl);
@@ -159,7 +161,7 @@ namespace KeraLuaEx.Test
                 // Get the results from the stack.
                 var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx> (tbl);
-                Assert.AreEqual(2, tbl.Count);
+                Assert.AreEqual(2, tbl!.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
                 Assert.AreEqual(9295, tbl["sum"]);
 
@@ -223,11 +225,11 @@ namespace KeraLuaEx.Test
                 LuaType t = _l.GetField(-1, "m_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx();
-                var list = tbl.ToList<int>();
+                Assert.IsInstanceOf<TableEx>(tbl);
+                var list = tbl!.ToList<int>();
                 _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(98, list[2]);
-                //var ex = Assert.Throws<KeyNotFoundException>(() => { object _ = ls[22]; });
             }
             _l.CheckStackSize(1); // luaex_mod is on top of stack
 
@@ -235,8 +237,9 @@ namespace KeraLuaEx.Test
                 LuaType t = _l.GetField(-1, "m_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx();
+                Assert.IsInstanceOf<TableEx>(tbl);
                 _l.Pop(1); // Clean up from GetField().
-                Assert.AreEqual(3, tbl.Count);
+                Assert.AreEqual(3, tbl!.Count);
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
             }
             _l.CheckStackSize(1); // luaex_mod is on top of stack
@@ -280,7 +283,7 @@ namespace KeraLuaEx.Test
                 // Get the results from the stack.
                 var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
-                Assert.AreEqual(2, tbl.Count);
+                Assert.AreEqual(2, tbl!.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
                 Assert.AreEqual(9295, tbl["sum"]);
 
@@ -295,88 +298,71 @@ namespace KeraLuaEx.Test
 
         /// <summary>Test generated errors.</summary>
         [Test]
-        public void ScriptErrors() // TODO add some asserts.
+        public void ScriptErrors()
         {
-            // Test LuaStatus error handling from C# side
+            // Test EvalLuaStatus().
             {
-                //Lua.Log(Lua.Category.INF, "==== Test LuaStatus error handling from C# side ====");
-                try
-                {
-                    LoadTestScript("luaex.lua");
-                    _l!.PCall(0, Lua.LUA_MULTRET, 0);
+                LoadTestScript("luaex.lua");
+                _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
-                    // Reset stack.
-                    _l.SetTop(0);
-                    _l.CheckStackSize(0);
-
-                    _l.PushString("Fake lua error message");
-                    _l.EvalLuaStatus(LuaStatus.ErrRun);
-                }
-                catch (Exception ex)
-                {
-                    Lua.Log(Lua.Category.ERR, ex.Message);
-                }
+                // Reset stack.
+                _l.SetTop(0);
                 _l.CheckStackSize(0);
+
+                // Simulate how lua processes internal errors.
+                _l.PushString("Fake lua error message");
+                var ex = Assert.Throws<LuaException>(() => { object _ = _l.EvalLuaStatus(LuaStatus.ErrRun); });
+                Assert.That(ex.Message, Does.Contain("Fake lua error message"));
+                _l!.CheckStackSize(0);
             }
 
-            // Force LuaStatus error from lua side.
+            // Test LuaStatus error handling.
             {
-                //Lua.Log(Lua.Category.INF, "==== Force LuaStatus error from lua side ====");
-                try
-                {
-                    LoadTestScript("luaex.lua");
-                    _l!.PCall(0, Lua.LUA_MULTRET, 0);
+                LoadTestScript("luaex.lua");
+                _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
-                    // Reset stack.
-                    _l.SetTop(0);
-                    _l.CheckStackSize(0);
+                // Reset stack.
+                _l.SetTop(0);
+                _l.CheckStackSize(0);
 
-                    // Call a function that does a bad thing.
-                    _l.GetGlobal("force_error");
+                //TODOF can't do this:
+                //_l.Error("Forced error");
+            }
 
-                    // Push the arguments. none
+            // Force internal error from lua side. TODOF force ErrRun, ErrMem, ErrErr.
+            {
+                LoadTestScript("luaex.lua");
+                _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
-                    _l.CheckStackSize(1);
+                // Reset stack.
+                _l.SetTop(0);
+                _l.CheckStackSize(0);
 
-                    // Do the call.
-                    _l.PCall(0, 0, 0);
+                // Call a function that does a bad thing.
+                _l.GetGlobal("force_error");
 
-                    _l.CheckStackSize(0);
-                }
-                catch (Exception ex)
-                {
-                    Lua.Log(Lua.Category.ERR, ex.Message);
-                }
+                // Push the arguments. none
+
+                _l.CheckStackSize(1);
+
+                // Do the call.
+                _l.PCall(0, 0, 0);
                 _l.CheckStackSize(0);
             }
 
             // Test load invalid file.
             {
-                //Lua.Log(Lua.Category.INF, "==== Test load invalid file ====");
-                try
-                {
-                    LoadTestScript("xxxyyyyzzz.lua");
-                    _l!.PCall(0, Lua.LUA_MULTRET, 0);
-                }
-                catch (Exception ex)
-                {
-                    Lua.Log(Lua.Category.ERR, ex.Message);
-                }
+                var ex = Assert.Throws<FileNotFoundException>(() => { LoadTestScript("xxxyyyyzzz.lua"); });
+                Assert.That(ex.Message, Does.Contain("xxxyyyyzzz.lua: No such file or directory"));
                 _l.CheckStackSize(0);
             }
 
             // Test load file with bad syntax
             {
-                //Lua.Log(Lua.Category.INF, "==== Test load file with bad syntax ====");
-                try
-                {
-                    LoadTestScript("luaex_syntax.lua");
-                    _l!.PCall(0, Lua.LUA_MULTRET, 0);
-                }
-                catch (Exception ex)
-                {
-                    Lua.Log(Lua.Category.ERR, ex.Message);
-                }
+                var ex = Assert.Throws<SyntaxException>(() => { LoadTestScript("luaex_syntax.lua"); });
+                Assert.That(ex.Message, Does.Contain(" syntax error near "));
+                //_l!.PCall(0, Lua.LUA_MULTRET, 0);
+
                 _l.CheckStackSize(0);
             }
         }
@@ -403,7 +389,6 @@ namespace KeraLuaEx.Test
             //var gl = _l.DumpTable("globals", 0, false);
             //_l.Pop(1); // from PushGlobalTable()
             //Lua.Log(string.Join(Environment.NewLine, gl));
-
 
             //_l.DumpStack();
 
