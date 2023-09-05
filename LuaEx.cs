@@ -63,19 +63,20 @@ namespace KeraLuaEx
         /// <summary>
         /// Make a TableEx from the lua table on the top of the stack.
         /// </summary>
+        /// <param name="index">Table is in the stack at index.</param>
         /// <returns>TableEx object or null if failed, check the log.</returns>
-        public TableEx? ToTableEx()
+        public TableEx? ToTableEx(int index)
         {
             TableEx? t = null;
             try
             {
-                t = new(this);
+                t = new(this, index);
             }
             catch (Exception ex)
             {
                 // Stack is probably a mess so reset it. Implies that this is a fatal event.
                 SetTop(0);
-                Lua.Log(Lua.Category.ERR, ex.Message);
+                Log(Category.ERR, ex.Message);
             }
 
             return t;

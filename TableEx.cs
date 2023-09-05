@@ -18,7 +18,7 @@ namespace KeraLuaEx
         #region Properties
         /// <summary>What this represents.</summary>
         public TableType Type { get; private set; }
-        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList };
+        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList }; // TODOF ListTableEx?
 
         /// <summary>Number of values.</summary>
         public int Count { get { return _elements.Count; } }
@@ -28,14 +28,17 @@ namespace KeraLuaEx
         #endregion
 
 
+        static int _depth = 0;
+
         #region Public API
         /// <summary>
-        /// Manufacture contents from a lua table on the top of the stack.
+        /// Manufacture contents from a lua table on the top of the stack. TODOF arbitrary indexes.
         /// </summary>
         /// <param name="l"></param>
-        /// <exception cref="Lua.SyntaxException"></exception>
+        /// <param name="index">Table is in the stack at index.</param>
+        /// <exception cref="SyntaxException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public TableEx(Lua l)
+        public TableEx(Lua l, int index)
         {
             // Check for valid value.
             if (l.Type(-1)! != LuaType.Table)
@@ -43,21 +46,45 @@ namespace KeraLuaEx
                 throw new InvalidOperationException($"Expected table at top of stack but is {l.Type(-1)}");
             }
 
-            // Put a nil key on stack to mark end of iteration.
+            _depth++;
+
+            // https://www.lua.org/manual/5.4/manual.html#lua_next
+            //
+            // int lua_next(lua_State* L, int index);
+            // Pops a key from the stack, and pushes a key–value pair from the table at the given index, the "next" pair after
+            // the given key. If there are no more elements in the table, then lua_next returns 0 and pushes nothing.
+            // A typical table traversal looks like this:
+            //
+            // /* table is in the stack at index 't' */
+            // lua_pushnil(L);  /* first key */
+            // while (lua_next(L, t) != 0)
+            // {
+            //     /* uses 'key' (at index -2) and 'value' (at index -1) */
+            //     printf("%s - %s\n", lua_typename(L, lua_type(L, -2)), lua_typename(L, lua_type(L, -1)));
+            //     /* removes 'value'; keeps 'key' for next iteration */
+            //     lua_pop(L, 1);
+            // }
+            // While traversing a table, avoid calling lua_tolstring directly on a key, unless you know that the key is actually
+            //   a string.Recall that lua_tolstring may change the value at the given index; this confuses the next call to lua_next.
+            // This function may raise an error if the given key is neither nil nor present in the table. See function next for
+            //   the caveats of modifying the table during its traversal.
+
+
+            // First key.
             l.PushNil();
 
             // Key(-1) is replaced by the next key(-1) in table(-2).
             while (l.Next(-2))
             {
-                // Make the types and values easier to digest.
+                // Make the processing easier to digest.
 
                 // Get key info (-2).
                 LuaType keyType = l.Type(-2);
-                string skey = l.ToStringL(-2)!;
-                int? ikey = l.ToInteger(-2);
+                string? skey = keyType == LuaType.String ? l.ToStringL(-2) : null;
+                int? ikey = keyType == LuaType.Number && l.IsInteger(-2) ? l.ToInteger(-2) : null;
 
                 // Get val info (-1).
-                LuaType valType = l.Type(-1);
+                LuaType valType = l.Type(-1); // TODO1 test for nil => invalid
 
                 int? ival = valType == LuaType.Number && l.IsInteger(-1) ? l.ToInteger(-1) : null;
                 double? dval = valType == LuaType.Number ? l.ToNumber(-1) : null;
@@ -68,7 +95,7 @@ namespace KeraLuaEx
                 switch (Type)
                 {
                     case TableType.Unknown:
-                        if (ikey is not null) // Maybe a list.
+                        if (ikey is not null) // Probably a list.
                         {
                             if (ikey == 1) // Assume start of a list - determine value type.
                             {
@@ -76,17 +103,17 @@ namespace KeraLuaEx
                                 if (ival is not null)
                                 {
                                     Type = TableType.IntList;
-                                    _elements.Add(skey, ival);
+                                    _elements.Add(ikey.ToString()!, ival);
                                 }
                                 else if (dval is not null)
                                 {
                                     Type = TableType.DoubleList;
-                                    _elements.Add(skey, dval);
+                                    _elements.Add(ikey.ToString()!, dval);
                                 }
                                 else if (sval is not null)
                                 {
                                     Type = TableType.StringList;
-                                    _elements.Add(skey, sval);
+                                    _elements.Add(ikey.ToString()!, sval);
                                 }
                                 else
                                 {
@@ -96,7 +123,7 @@ namespace KeraLuaEx
                         }
                         else if (skey is not null) // It's a dict.
                         {
-                             // Nothing to do.
+                             // Nothing to do right now - see below.
                         }
                         else // Invalid key type.
                         {
@@ -114,15 +141,15 @@ namespace KeraLuaEx
 
                             if (Type == TableType.IntList && ival is not null)
                             {
-                                _elements.Add(skey, ival);
+                                _elements.Add(ikey.ToString()!, ival);
                             }
                             else if (Type == TableType.DoubleList && dval is not null)
                             {
-                                _elements.Add(skey, dval);
+                                _elements.Add(ikey.ToString()!, dval);
                             }
                             else if (Type == TableType.StringList && sval is not null)
                             {
-                                _elements.Add(skey, sval);
+                                _elements.Add(ikey.ToString()!, sval);
                             }
                             else
                             {
@@ -146,16 +173,25 @@ namespace KeraLuaEx
                         LuaType.String => l.ToStringL(-1),
                         LuaType.Number => l.DetermineNumber(-1),
                         LuaType.Boolean => l.ToBoolean(-1),
-                        LuaType.Table => l.ToTableEx(), // recursion!
-                        LuaType.Function => l.ToCFunction(-1),
-                        _ => throw new SyntaxException($"Unsupported value type {l.Type(-1)}") // others are invalid
+                        LuaType.Table => l.ToTableEx(-1), // recursion!
+                        //LuaType.Function => l.ToCFunction(-1),
+                        _ => null //throw new SyntaxException($"Unsupported value type {l.Type(-1)}") // others are invalid
                     };
-                    _elements.Add(skey, val??"Ooopsy daisey");
+
+
+                    if (val is not null)
+                    {
+                        //Debug.WriteLine($"=== depth:{_depth} key:{skey} valType:{valType} val:{val}");
+                        _elements.Add(skey, val);
+                    }
+                    //_elements.Add(skey, val ?? "Ooopsy daisey");
                 }
 
                 // Remove value(-1), now key on top at(-1).
                 l.Pop(1);
             }
+
+            _depth--;
         }
 
         /// <summary>
@@ -183,7 +219,7 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Dump the table into a readable form.
+        /// Dump the table into a readable string.
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="indent">Indent level for table</param>
@@ -227,7 +263,7 @@ namespace KeraLuaEx
                     break;
 
                 case TableType.Unknown:
-                    ls.Add($"Empty");
+                    ls.Add($"{sindent}{tableName}(Empty)");
                     break;
             }
 
@@ -241,7 +277,15 @@ namespace KeraLuaEx
         public override string ToString()
         {
             //return "TableEx";
+
             return Dump("TableEx");
+
+            //List<string> ls = new() { "TableEx" };
+            //foreach (var f in _elements)
+            //{
+            //    ls.Add($"{f.Key}:{f.Value}");
+            //}
+            //return string.Join (" ", ls);
         }
         #endregion
     }

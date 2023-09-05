@@ -69,7 +69,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_list_number"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 var list = tbl!.ToList<double>();
                 Assert.AreEqual(4, list.Count);
@@ -81,7 +81,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 var list = tbl!.ToList<int>();
                 Assert.AreEqual(4, list.Count);
@@ -93,7 +93,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(3, tbl!.Count);
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
@@ -104,7 +104,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("things"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(4, tbl!.Count);
 
@@ -159,7 +159,7 @@ namespace KeraLuaEx.Test
                 _l.CheckStackSize(1);
 
                 // Get the results from the stack.
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx> (tbl);
                 Assert.AreEqual(2, tbl!.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
@@ -224,7 +224,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetField(-1, "m_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 var list = tbl!.ToList<int>();
                 _l.Pop(1); // Clean up from GetField().
@@ -236,7 +236,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetField(-1, "m_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(3, tbl!.Count);
@@ -281,7 +281,7 @@ namespace KeraLuaEx.Test
                 _l.PCall(2, 1, 0);
 
                 // Get the results from the stack.
-                var tbl = _l.ToTableEx();
+                var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(2, tbl!.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
@@ -373,15 +373,41 @@ namespace KeraLuaEx.Test
         {
             ///// Load everything.
             LoadTestScript("luaex.lua");
+
             // PCall loads the file.
             _l!.PCall(0, Lua.LUA_MULTRET, 0);
             //The function results are pushed onto the stack in direct order (the first result is pushed first),
             //so that after the call the last result is on the top of the stack.
             // [1] is the luaex module, [2] is api_lib
 
+
+            // TODO1 magic way to identify uninitialized variables?
+            //Add a metatable to the tables where undefined access must not be allowed.
+            //a = setmetatable({ ...}, { __index = function(i) error "undefined" end})
+            //is all you need.
+            //Now, you could totally stick a metatable on _G that caused some sort of exception when you tried to
+            //get the value for a key with a nil value.
+
+
             //// Reset stack.
             _l.SetTop(0);
             _l.CheckStackSize(0);
+
+
+            _l.GetGlobal("bad1"); //TODO1 ignores undefined variable like: dev_type=midi_out  http://lua-users.org/wiki/DetectingUndefinedVariables
+            var ooo = _l.ToStringL(-1);
+            _l.Pop(1);
+            _l.CheckStackSize(0);
+
+
+            //LuaType t = _l.GetGlobal("things"); // push lua value onto stack
+            //Assert.AreEqual(LuaType.Table, t);
+            //var tbl = _l.ToTableEx(-1);
+            //var s = tbl.Dump("things");
+
+            //_l.PushGlobalTable(); //TODO1 blows up - why? actually don't do this.
+            //var gl = _l.ToTableEx(-1);
+            //_l.Pop(1);
 
 
             //// Dump globals.

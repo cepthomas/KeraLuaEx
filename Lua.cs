@@ -1421,7 +1421,7 @@ namespace KeraLuaEx
 
         /// <summary>
         /// Converts the Lua value at the given index to the signed integral type lua_Integer. The Lua value must
-        /// be an integer, or a number or string convertible to an integer (see §3.4.3); otherwise, lua_tointegerx returns 0. 
+        /// be an integer, or a number or string convertible to an integer (see §3.4.3); otherwise returns null. 
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -1485,7 +1485,7 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Converts the Lua value at the given index to a C# double?.
+        /// Converts the Lua value at the given index to a C# double?. If not convertible returns null.
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
