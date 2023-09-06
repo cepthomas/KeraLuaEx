@@ -381,7 +381,7 @@ namespace KeraLuaEx.Test
             // [1] is the luaex module, [2] is api_lib
 
 
-            // TODO1 magic way to identify uninitialized variables?
+            // TODO2 magic way to identify uninitialized variables?
             //Add a metatable to the tables where undefined access must not be allowed.
             //a = setmetatable({ ...}, { __index = function(i) error "undefined" end})
             //is all you need.
@@ -394,7 +394,7 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(0);
 
 
-            _l.GetGlobal("bad1"); //TODO1 ignores undefined variable like: dev_type=midi_out  http://lua-users.org/wiki/DetectingUndefinedVariables
+            _l.GetGlobal("bad1"); //TODO2 ignores undefined variable like: dev_type=midi_out  http://lua-users.org/wiki/DetectingUndefinedVariables
             var ooo = _l.ToStringL(-1);
             _l.Pop(1);
             _l.CheckStackSize(0);
@@ -405,9 +405,10 @@ namespace KeraLuaEx.Test
             //var tbl = _l.ToTableEx(-1);
             //var s = tbl.Dump("things");
 
-            //_l.PushGlobalTable(); //TODO1 blows up - why? actually don't do this.
-            //var gl = _l.ToTableEx(-1);
-            //_l.Pop(1);
+            //_l.PushGlobalTable(); // Blows up because globals contains _G causing a stack overflow. Don't do this.
+            _l.GetGlobal("_G");
+            var gl = _l.ToTableEx(-1);
+            _l.Pop(1);
 
 
             //// Dump globals.

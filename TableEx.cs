@@ -5,6 +5,8 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Collections;
+
 
 namespace KeraLuaEx
 {
@@ -15,10 +17,14 @@ namespace KeraLuaEx
         readonly Dictionary<string, object> _elements = new();
         #endregion
 
+
         #region Properties
         /// <summary>What this represents.</summary>
         public TableType Type { get; private set; }
         public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList }; // TODOF ListTableEx?
+
+        /// <summary>All the names.</summary>
+        public List<string> Names { get { var n = _elements.Keys.ToList(); return n; } } 
 
         /// <summary>Number of values.</summary>
         public int Count { get { return _elements.Count; } }
@@ -26,9 +32,6 @@ namespace KeraLuaEx
         /// <summary>Indexer.</summary>
         public object this[string key] { get { return _elements[key]; } }
         #endregion
-
-
-        static int _depth = 0;
 
         #region Public API
         /// <summary>
@@ -46,8 +49,7 @@ namespace KeraLuaEx
                 throw new InvalidOperationException($"Expected table at top of stack but is {l.Type(-1)}");
             }
 
-            _depth++;
-
+            // TODO2 How to detect uninitialized variables?
             // https://www.lua.org/manual/5.4/manual.html#lua_next
             //
             // int lua_next(lua_State* L, int index);
@@ -84,7 +86,7 @@ namespace KeraLuaEx
                 int? ikey = keyType == LuaType.Number && l.IsInteger(-2) ? l.ToInteger(-2) : null;
 
                 // Get val info (-1).
-                LuaType valType = l.Type(-1); // TODO1 test for nil => invalid
+                LuaType valType = l.Type(-1); // TODO2 test for nil => invalid
 
                 int? ival = valType == LuaType.Number && l.IsInteger(-1) ? l.ToInteger(-1) : null;
                 double? dval = valType == LuaType.Number ? l.ToNumber(-1) : null;
@@ -190,8 +192,6 @@ namespace KeraLuaEx
                 // Remove value(-1), now key on top at(-1).
                 l.Pop(1);
             }
-
-            _depth--;
         }
 
         /// <summary>
@@ -270,23 +270,23 @@ namespace KeraLuaEx
             return string.Join(Environment.NewLine, ls);
         }
 
-        /// <summary>
-        /// Readable.
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            //return "TableEx";
+        ///// <summary>
+        ///// Readable. TODO1 or use DebuggerDisplayAttribute?
+        ///// </summary>
+        ///// <returns></returns>
+        //public override string ToString()
+        //{
+        //    //return "TableEx";
 
-            return Dump("TableEx");
+        //    return Dump("TableEx");
 
-            //List<string> ls = new() { "TableEx" };
-            //foreach (var f in _elements)
-            //{
-            //    ls.Add($"{f.Key}:{f.Value}");
-            //}
-            //return string.Join (" ", ls);
-        }
+        //    //List<string> ls = new() { "TableEx" };
+        //    //foreach (var f in _elements)
+        //    //{
+        //    //    ls.Add($"{f.Key}:{f.Value}");
+        //    //}
+        //    //return string.Join (" ", ls);
+        //}
         #endregion
     }
 }
