@@ -27,6 +27,9 @@
       <None Remove="Test\**" />
     </ItemGroup>
     <ItemGroup>
+      <None Remove="api_funcs.txt" />
+    </ItemGroup>
+    <ItemGroup>
       <None Update="lua54.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
