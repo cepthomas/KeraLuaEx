@@ -20,7 +20,7 @@ namespace KeraLuaEx
         IntPtr _luaState;
 
         /// <summary>Main execution context.</summary>
-        readonly Lua? _lMain;
+        readonly Lua? _l;
 
         /// <summary>Option for multiple returns.</summary>
         public const int LUA_MULTRET = -1;
@@ -41,7 +41,7 @@ namespace KeraLuaEx
         public IntPtr ExtraSpace { get { return _luaState - IntPtr.Size; } }
 
         /// <summary>Get the context on the main thread. Will be this if only one.</summary>
-        public Lua LMain { get { return _lMain ?? this; } }
+        public Lua LMain { get { return _l ?? this; } }
         #endregion
 
         #region Lifecycle
@@ -87,7 +87,7 @@ namespace KeraLuaEx
         /// <param name="mainState"></param>
         private Lua(IntPtr luaThread, Lua mainState)
         {
-            _lMain = mainState;
+            _l = mainState;
             _luaState = luaThread;
             Encoding = mainState.Encoding;
 
@@ -142,7 +142,7 @@ namespace KeraLuaEx
         /// </summary>
         public void Close()
         {
-            if (!(_luaState == IntPtr.Zero || _lMain != null))
+            if (!(_luaState == IntPtr.Zero || _l != null))
             {
                 NativeMethods.lua_close(_luaState);
                 _luaState = IntPtr.Zero;

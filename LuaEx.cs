@@ -186,7 +186,8 @@ namespace KeraLuaEx
             {
                 hasError = true;
 
-                // Get error message on stack.
+                // Get error message on stack. TODO capture error stack - see docall()
+
                 string s;
                 if (GetTop() > 0)
                 {
@@ -197,9 +198,27 @@ namespace KeraLuaEx
                 {
                     s = "No error message!!!";
                 }
+                var serror = $"{file}({line}) [{lstat}]: {s}";
+                int num = GetTop();
 
-                var serror = $"{lstat}:{s}";
-                // serror = $"{file}({line}) [{lstat}]: {s}";
+
+                //GetGlobal("debug"); // ensures the source file info.
+                //var st = DumpStack();
+                //var sts = string.Join(Environment.NewLine, st);
+                //var serror = $"{file}({line}): Failed lua status:{lstat}{Environment.NewLine}{sts}";
+                //Pop(1); // clean up GetGlobal("debug").
+                //int num = GetTop();
+
+
+                //int num = GetTop();
+                //Traceback(this, "hooha", 0);
+                //var st = DumpStack();
+                //num = GetTop();
+
+                //Traceback(s,);
+                //luaL_traceback(L, L, NULL, 1);
+                //printf("%s\n", lua_tostring(L, -1));
+
 
                 if (ThrowOnError)
                 {
