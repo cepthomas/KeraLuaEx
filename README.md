@@ -25,9 +25,9 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
   - Homogenous arrays of ints, doubles, or strings.
   - Dictionaries of objects with string keys.
 - `ToNumberX()` and `ToIntegerX()` are removed and plain `ToNumber()` and `ToInteger()` now return nullables.
-
+- Added `DoCall()` similar to the lua C function `docall()`. It captures the stack trace on error so the client can process.
+- 
 ## Error Handling
-- Things that are recoverable return LuaStatus. Things that aren't - throw (or optional?).
 - Original lib (Lua.cs) does not throw. New ones (LuaEx, TableEx) do.
   - Option to throw exceptions (default) in class `Lua` or return `LuaStatus` codes. Checking is implemented in these functions:
         `Load()`, `LoadBuffer()`, `LoadFile()`, `LoadString()`, `PCall()`, `PCallK()`, `Resume()`.

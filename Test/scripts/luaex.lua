@@ -68,9 +68,14 @@ function calc(addends, suffix)
 end
 
 function force_error()
-    api.printex('>>>')
-    bad = 9 / 0 -- Lua doesn't think this is an error
-    api.printex('>>>' .. bad)
+    local s = '>>>'
+    api.printex(s)
+    -- tonumber(s) -- not an error
+    -- bad = 9 / 0 -- Lua doesn't think this is an error
+    -- error(s)
+    -- Runtime error:
+    api.log(LOG_INFO, 'str' .. {'aaa', 'bbb'})
+
     end
 
 

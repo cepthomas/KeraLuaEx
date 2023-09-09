@@ -173,7 +173,7 @@ namespace KeraLuaEx
             LuaStatus lstat = LoadFile(file);
             err = EvalLuaStatus(lstat);
 
-            lstat = PCall(0, LUA_MULTRET, 0);
+            lstat = DoCall(0, LUA_MULTRET);
             err |= EvalLuaStatus(lstat);
 
             return err;
@@ -191,7 +191,7 @@ namespace KeraLuaEx
             LuaStatus lstat = LoadString(chunk);
             err = EvalLuaStatus(lstat);
 
-            lstat = PCall(0, LUA_MULTRET, 0);
+            lstat = DoCall(0, LUA_MULTRET);
             err |= EvalLuaStatus(lstat);
 
             return err;

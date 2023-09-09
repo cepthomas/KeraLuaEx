@@ -168,6 +168,54 @@ namespace KeraLuaEx
         }
         #endregion
 
+        #region Capture error stack trace
+        /// <summary>
+        /// Message handler used to run all chunks.
+        /// </summary>
+        /// <returns></returns>
+        private static int MsgHandler(IntPtr p)
+        {
+            var l = FromIntPtr(p);
+            string? msg = l.ToStringL(1); //, false)!;
+            if (msg is null)  // is error object not a string?
+            {
+                // does it have a metamethod that produces a string?
+                if (l.CallMetaMethod(1, "__tostring") &&   l.Type(-1) == LuaType.String)
+                {
+                    // that is the message
+                    return 1;
+                }
+                else
+                {
+                    msg = $"(error object is a {l.Type(1)} value)";
+                    l.PushString(msg);
+                }
+            }
+
+            // append and return  a standard traceback
+            l.Traceback(l, msg, 1);  
+            return 1;
+        }
+        static readonly LuaFunction _funcMsgHandler = MsgHandler;
+
+        /// <summary>
+        /// Interface to 'lua_pcall', which sets appropriate message function and C-signal handler. Used to run all chunks.
+        /// </summary>
+        /// <param name="narg"></param>
+        /// <param name="nres"></param>
+        /// <returns></returns>
+        public LuaStatus DoCall(int narg, int nres)
+        {
+            LuaStatus lstat;
+            int fbase = GetTop() - narg;  // function index
+            PushCFunction(_funcMsgHandler);  // push message handler
+            Insert(fbase);  // put it under function and args
+            lstat = PCall(narg, nres, fbase);
+            Remove(fbase);  // remove message handler from the stack
+            return lstat;
+        }
+        #endregion
+
         #region Quality control
         /// <summary>
         /// Check lua status and log an error. If ThrowOnError is true, throws an exception.
@@ -186,8 +234,7 @@ namespace KeraLuaEx
             {
                 hasError = true;
 
-                // Get error message on stack. TODO capture error stack - see docall()
-
+                // Get error message on stack.
                 string s;
                 if (GetTop() > 0)
                 {
@@ -200,25 +247,6 @@ namespace KeraLuaEx
                 }
                 var serror = $"{file}({line}) [{lstat}]: {s}";
                 int num = GetTop();
-
-
-                //GetGlobal("debug"); // ensures the source file info.
-                //var st = DumpStack();
-                //var sts = string.Join(Environment.NewLine, st);
-                //var serror = $"{file}({line}): Failed lua status:{lstat}{Environment.NewLine}{sts}";
-                //Pop(1); // clean up GetGlobal("debug").
-                //int num = GetTop();
-
-
-                //int num = GetTop();
-                //Traceback(this, "hooha", 0);
-                //var st = DumpStack();
-                //num = GetTop();
-
-                //Traceback(s,);
-                //luaL_traceback(L, L, NULL, 1);
-                //printf("%s\n", lua_tostring(L, -1));
-
 
                 if (ThrowOnError)
                 {
@@ -302,7 +330,7 @@ namespace KeraLuaEx
             }
             else
             {
-                ls.Add("Empty");
+                ls.Add("Stack is empty");
             }
 
             return ls;

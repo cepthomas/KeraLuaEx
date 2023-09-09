@@ -380,6 +380,18 @@ namespace KeraLuaEx.Test
             //so that after the call the last result is on the top of the stack.
             // [1] is the luaex module, [2] is api_lib
 
+            //// Reset stack.
+            _l.SetTop(0);
+            _l.CheckStackSize(0);
+
+            // Test capture stack trace. Call a function that does a bad thing.
+            _l.GetGlobal("force_error");
+            _l.CheckStackSize(1);
+            // Do the call.
+            var ex = Assert.Throws<LuaException>(() => { _l.DoCall(0, 0); });
+            Assert.That(ex.Message, Does.Contain("attempt to concatenate a table value"));
+            _l.CheckStackSize(1);
+
 
             // TODO How to detect uninitialized variables?
             // http://lua-users.org/wiki/DetectingUndefinedVariables
@@ -389,12 +401,6 @@ namespace KeraLuaEx.Test
             //is all you need.
             //Now, you could totally stick a metatable on _G that caused some sort of exception when you tried to
             //get the value for a key with a nil value.
-
-            //// Reset stack.
-            _l.SetTop(0);
-            _l.CheckStackSize(0);
-
-
             _l.GetGlobal("bad1");
             var ooo = _l.ToStringL(-1);
             _l.Pop(1);
@@ -406,35 +412,17 @@ namespace KeraLuaEx.Test
             //var tbl = _l.ToTableEx(-1);
             //var s = tbl.Dump("things");
 
-            //_l.PushGlobalTable(); // Blows up because globals contains _G causing a stack overflow. Don't do this.
-            _l.GetGlobal("_G");
-            var gl = _l.ToTableEx(-1);
-            _l.Pop(1);
-
-
+            // Blows up because globals contains _G causing a stack overflow. Don't do this.
+            //_l.PushGlobalTable();
+            // _l.GetGlobal("_G");
+            // var gl = _l.ToTableEx(-1);
+            // _l.Pop(1);
             //// Dump globals.
             //_l.PushGlobalTable();
             //var gl = _l.DumpTable("globals", 0, false);
             //_l.Pop(1); // from PushGlobalTable()
             //Lua.Log(string.Join(Environment.NewLine, gl));
 
-            //_l.DumpStack();
-
-            //if (_l.GetTop() > 0)
-            //{
-            //    var sg1 = DumpTable(_l, "[1]", 0, false);
-            //    Log(Environment.NewLine + string.Join(Environment.NewLine, sg1));
-            //    _l.Pop(1);
-            //}
-            //_l.CheckStackSize(0);
-
-            //if (_l.GetTop() > 0)
-            //{
-            //    var sg2 = DumpTable(_l, "[2]", 0, false);
-            //    Log(Environment.NewLine + string.Join(Environment.NewLine, sg2));
-            //    _l.Pop(1);
-            //}
-            //_l.CheckStackSize(0);
 
             _l.CheckStackSize(0);
         }
