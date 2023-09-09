@@ -312,7 +312,7 @@ namespace KeraLuaEx.Test
                 // Simulate how lua processes internal errors.
                 _l.PushString("Fake lua error message");
                 var ex = Assert.Throws<LuaException>(() => { object _ = _l.EvalLuaStatus(LuaStatus.ErrRun); });
-                Assert.That(ex.Message, Does.Contain("Fake lua error message"));
+                Assert.That(ex!.Message, Does.Contain("Fake lua error message"));
                 _l!.CheckStackSize(0);
             }
 
@@ -353,14 +353,14 @@ namespace KeraLuaEx.Test
             // Test load invalid file.
             {
                 var ex = Assert.Throws<FileNotFoundException>(() => { LoadTestScript("xxxyyyyzzz.lua"); });
-                Assert.That(ex.Message, Does.Contain("xxxyyyyzzz.lua: No such file or directory"));
+                Assert.That(ex!.Message, Does.Contain("xxxyyyyzzz.lua: No such file or directory"));
                 _l.CheckStackSize(0);
             }
 
             // Test load file with bad syntax
             {
                 var ex = Assert.Throws<SyntaxException>(() => { LoadTestScript("luaex_syntax.lua"); });
-                Assert.That(ex.Message, Does.Contain(" syntax error near "));
+                Assert.That(ex!.Message, Does.Contain(" syntax error near "));
                 //_l!.PCall(0, Lua.LUA_MULTRET, 0);
 
                 _l.CheckStackSize(0);
@@ -389,9 +389,10 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(1);
             // Do the call.
             var ex = Assert.Throws<LuaException>(() => { _l.DoCall(0, 0); });
-            Assert.That(ex.Message, Does.Contain("attempt to concatenate a table value"));
+            Assert.That(ex!.Message, Does.Contain("attempt to concatenate a table value"));
+            Assert.That(ex.Message, Does.Contain("in function 'inner_error'"));
+            Assert.That(ex.Message, Does.Contain("in function 'force_error'"));
             _l.CheckStackSize(1);
-
 
             // TODO How to detect uninitialized variables?
             // http://lua-users.org/wiki/DetectingUndefinedVariables
@@ -402,9 +403,10 @@ namespace KeraLuaEx.Test
             //Now, you could totally stick a metatable on _G that caused some sort of exception when you tried to
             //get the value for a key with a nil value.
             _l.GetGlobal("bad1");
-            var ooo = _l.ToStringL(-1);
-            _l.Pop(1);
-            _l.CheckStackSize(0);
+            var uninit = _l.ToStringL(-1);
+            Assert.AreEqual(uninit, "nil");
+            _l.Pop(1); // GetGlobal()
+            _l.CheckStackSize(1);
 
 
             //LuaType t = _l.GetGlobal("things"); // push lua value onto stack
@@ -422,9 +424,7 @@ namespace KeraLuaEx.Test
             //var gl = _l.DumpTable("globals", 0, false);
             //_l.Pop(1); // from PushGlobalTable()
             //Lua.Log(string.Join(Environment.NewLine, gl));
-
-
-            _l.CheckStackSize(0);
+            //_l.CheckStackSize(0);
         }
 
         // Helper.

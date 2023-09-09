@@ -175,7 +175,7 @@ namespace KeraLuaEx
         /// <returns></returns>
         private static int MsgHandler(IntPtr p)
         {
-            var l = FromIntPtr(p);
+            var l = FromIntPtr(p)!;
             string? msg = l.ToStringL(1); //, false)!;
             if (msg is null)  // is error object not a string?
             {
@@ -246,7 +246,6 @@ namespace KeraLuaEx
                     s = "No error message!!!";
                 }
                 var serror = $"{file}({line}) [{lstat}]: {s}";
-                int num = GetTop();
 
                 if (ThrowOnError)
                 {

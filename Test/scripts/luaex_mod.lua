@@ -34,7 +34,7 @@ function M.calcmod(addends, suffix)
         api.printex(k .. ":" .. v)
         sum = sum + v
     end
-    return { str=string.format('>>>%d_%s<<<', sum, suffix), sum=sum }
+    return { str = string.format('>>>%d_%s<<<', sum, suffix), sum = sum }
 end
 
 -- How long is it?
