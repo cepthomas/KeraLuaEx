@@ -106,7 +106,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
-                Assert.AreEqual(4, tbl!.Count);
+                Assert.AreEqual(5, tbl!.Count);
 
                 var whiz = tbl["whiz"] as TableEx;
                 Assert.IsInstanceOf<TableEx>(whiz);
@@ -338,15 +338,19 @@ namespace KeraLuaEx.Test
                 _l.SetTop(0);
                 _l.CheckStackSize(0);
 
-                // Call a function that does a bad thing.
+                // Call a function that does a bad thing. Capture stack trace.
                 _l.GetGlobal("force_error");
+                _l.CheckStackSize(1);
 
                 // Push the arguments. none
 
-                _l.CheckStackSize(1);
-
                 // Do the call.
-                _l.PCall(0, 0, 0);
+                var ex = Assert.Throws<LuaException>(() => { _l.DoCall(0, 0); });
+                Assert.That(ex!.Message, Does.Contain("attempt to concatenate a table value"));
+                Assert.That(ex.Message, Does.Contain("in function 'inner_error'"));
+                Assert.That(ex.Message, Does.Contain("in function 'force_error'"));
+                _l.Pop(1); // SetGlobal()
+
                 _l.CheckStackSize(0);
             }
 
@@ -384,15 +388,6 @@ namespace KeraLuaEx.Test
             _l.SetTop(0);
             _l.CheckStackSize(0);
 
-            // Test capture stack trace. Call a function that does a bad thing.
-            _l.GetGlobal("force_error");
-            _l.CheckStackSize(1);
-            // Do the call.
-            var ex = Assert.Throws<LuaException>(() => { _l.DoCall(0, 0); });
-            Assert.That(ex!.Message, Does.Contain("attempt to concatenate a table value"));
-            Assert.That(ex.Message, Does.Contain("in function 'inner_error'"));
-            Assert.That(ex.Message, Does.Contain("in function 'force_error'"));
-            _l.CheckStackSize(1);
 
             // TODO How to detect uninitialized variables?
             // http://lua-users.org/wiki/DetectingUndefinedVariables

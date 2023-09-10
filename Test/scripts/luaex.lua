@@ -36,9 +36,9 @@ bad1 = zzzz
 -- Table of tables.
 things =
 {
-    -- Uninitialized variable
+    -- Uninitialized variable - won't appear in the table.
     bad2=zzzz,
-    -- Uninitialized variable
+    -- Uninitialized variable - will appear but with mil value.
     bad3 = { yyyy = zzzz },
     tune = { dev_type = "midi_in", channel = 1, long_list = { 44, 77, 101 } },
     trig = { dev_type = "virt_key", channel = 2, adouble = 1.234 },
