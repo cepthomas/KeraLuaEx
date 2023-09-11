@@ -17,7 +17,6 @@ namespace KeraLuaEx
         readonly Dictionary<string, object> _elements = new();
         #endregion
 
-
         #region Properties
         /// <summary>What this represents.</summary>
         public TableType Type { get; private set; }

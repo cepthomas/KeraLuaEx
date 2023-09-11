@@ -389,8 +389,9 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(0);
 
 
-            // TODO How to detect uninitialized variables?
+            // TODO How to detect uninitialized variables? luacheck?
             // http://lua-users.org/wiki/DetectingUndefinedVariables
+            // https://stackoverflow.com/a/24285302
             //
             //Add a metatable to the tables where undefined access must not be allowed.
             //a = setmetatable({ ...}, { __index = function(i) error "undefined" end})
