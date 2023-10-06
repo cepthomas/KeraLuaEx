@@ -6,6 +6,10 @@
     public enum LuaType
     {
         /// <summary>
+        /// LUA_TNONE
+        /// </summary>
+        None = -1,
+        /// <summary>
         /// LUA_TNIL
         /// </summary>
         Nil = 0,
