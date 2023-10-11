@@ -34,7 +34,7 @@ namespace KeraLuaEx
 
         #region Public API
         /// <summary>
-        /// Manufacture contents from a lua table on the top of the stack. FUTURE arbitrary indexes.
+        /// Populate from a lua table on the top of the stack. FUTURE arbitrary indexes.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="index">Table is in the stack at index.</param>
@@ -253,9 +253,7 @@ namespace KeraLuaEx
         //public override string ToString()
         //{
         //    //return "TableEx";
-
         //    return Dump("TableEx");
-
         //    //List<string> ls = new() { "TableEx" };
         //    //foreach (var f in _elements)
         //    //{

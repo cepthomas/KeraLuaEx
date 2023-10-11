@@ -28,7 +28,7 @@ namespace KeraLuaEx.Test
         public static void Load(Lua l)
         {
             // Load app stuff. This table gets pushed on the stack and into globals.
-            l.RequireF("api_lib", OpenLib, true);
+            l.RequireF("api_lib", OpenMyLib, true);
 
             // Other inits.
             _startTicks = 0;
@@ -40,7 +40,7 @@ namespace KeraLuaEx.Test
         /// </summary>
         /// <param name="p">Pointer to context.</param>
         /// <returns></returns>
-        static int OpenLib(IntPtr p)
+        static int OpenMyLib(IntPtr p) //TODO1 from generator
         {
             // Open lib into global table.
             var l = Lua.FromIntPtr(p)!;
