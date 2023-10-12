@@ -71,7 +71,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
-                var list = tbl!.ToList<double>();
+                var list = tbl!.AsList<double>();
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(2.303, list[3]);
                 _l.Pop(1); // Clean up from GetGlobal().
@@ -83,7 +83,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
-                var list = tbl!.ToList<int>();
+                var list = tbl!.AsList<int>();
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(98, list[2]);
                 _l.Pop(1); // Clean up from GetGlobal().
@@ -115,7 +115,7 @@ namespace KeraLuaEx.Test
 
                 var dtbl = whiz["double_table"] as TableEx;
                 Assert.IsInstanceOf<TableEx>(dtbl);
-                var list = dtbl!.ToList<double>();
+                var list = dtbl!.AsList<double>();
                 Assert.AreEqual(3, list.Count);
                 Assert.AreEqual(909.555, list[2]);
                 _l.Pop(1); // Clean up from GetGlobal().
@@ -226,7 +226,7 @@ namespace KeraLuaEx.Test
                 Assert.AreEqual(LuaType.Table, t);
                 var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
-                var list = tbl!.ToList<int>();
+                var list = tbl!.AsList<int>();
                 _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(4, list.Count);
                 Assert.AreEqual(98, list[2]);

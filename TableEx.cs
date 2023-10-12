@@ -34,7 +34,7 @@ namespace KeraLuaEx
 
         #region Public API
         /// <summary>
-        /// Populate from a lua table on the top of the stack. FUTURE arbitrary indexes.
+        /// Constructor populates from a lua table on the top of the stack. Does pop. FUTURE arbitrary indexes.
         /// </summary>
         /// <param name="l"></param>
         /// <param name="index">Table is in the stack at index.</param> TODO1 index not used!
@@ -176,7 +176,7 @@ namespace KeraLuaEx
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public List<T> ToList<T>()
+        public List<T> AsList<T>()
         {
             // Check for supported types.
             var tv = typeof(T);
