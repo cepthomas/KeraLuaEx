@@ -69,7 +69,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_list_number"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 var list = tbl!.AsList<double>();
                 Assert.AreEqual(4, list.Count);
@@ -81,7 +81,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 var list = tbl!.AsList<int>();
                 Assert.AreEqual(4, list.Count);
@@ -93,7 +93,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("g_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(3, tbl!.Count);
                 Assert.AreEqual("bing_bong", tbl["dev_type"]);
@@ -104,7 +104,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetGlobal("things"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(5, tbl!.Count);
 
@@ -159,7 +159,7 @@ namespace KeraLuaEx.Test
                 _l.CheckStackSize(1);
 
                 // Get the results from the stack.
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx> (tbl);
                 Assert.AreEqual(2, tbl!.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);
@@ -224,7 +224,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetField(-1, "m_list_int"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 var list = tbl!.AsList<int>();
                 _l.Pop(1); // Clean up from GetField().
@@ -236,7 +236,7 @@ namespace KeraLuaEx.Test
             {
                 LuaType t = _l.GetField(-1, "m_table"); // push lua value onto stack
                 Assert.AreEqual(LuaType.Table, t);
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 _l.Pop(1); // Clean up from GetField().
                 Assert.AreEqual(3, tbl!.Count);
@@ -281,7 +281,7 @@ namespace KeraLuaEx.Test
                 _l.PCall(2, 1, 0);
 
                 // Get the results from the stack.
-                var tbl = _l.ToTableEx(-1);
+                var tbl = _l.ToTableEx();
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(2, tbl!.Count);
                 Assert.AreEqual(">>>9295___the_end__<<<", tbl["str"]);

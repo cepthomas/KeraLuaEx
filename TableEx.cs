@@ -37,10 +37,9 @@ namespace KeraLuaEx
         /// Constructor populates from a lua table on the top of the stack. Does pop. FUTURE arbitrary indexes.
         /// </summary>
         /// <param name="l"></param>
-        /// <param name="index">Table is in the stack at index.</param> TODO1 index not used!
         /// <exception cref="SyntaxException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public TableEx(Lua l, int index)
+        public TableEx(Lua l)//, int index)
         {
             // Check for valid value.
             if (l.Type(-1)! != LuaType.Table)
@@ -151,7 +150,7 @@ namespace KeraLuaEx
                         LuaType.String => l.ToStringL(-1),
                         LuaType.Number => l.DetermineNumber(-1),
                         LuaType.Boolean => l.ToBoolean(-1),
-                        LuaType.Table => l.ToTableEx(-1), // recursion!
+                        LuaType.Table => l.ToTableEx(), // recursion!
                         //LuaType.Function => l.ToCFunction(-1),
                         _ => null //throw new SyntaxException($"Unsupported value type {l.Type(-1)}") // others are invalid
                     };
