@@ -402,7 +402,7 @@ namespace KeraLuaEx.Test
             var uninit = _l.ToStringL(-1);
             Assert.AreEqual(uninit, "nil");
             _l.Pop(1); // GetGlobal()
-            _l.CheckStackSize(1);
+            _l.CheckStackSize(0);
 
 
             //LuaType t = _l.GetGlobal("things"); // push lua value onto stack

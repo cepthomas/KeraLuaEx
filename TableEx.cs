@@ -37,7 +37,7 @@ namespace KeraLuaEx
         /// Populate from a lua table on the top of the stack. FUTURE arbitrary indexes.
         /// </summary>
         /// <param name="l"></param>
-        /// <param name="index">Table is in the stack at index.</param>
+        /// <param name="index">Table is in the stack at index.</param> TODO1 index not used!
         /// <exception cref="SyntaxException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         public TableEx(Lua l, int index)
