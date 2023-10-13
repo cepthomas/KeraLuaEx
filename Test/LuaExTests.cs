@@ -148,8 +148,9 @@ namespace KeraLuaEx.Test
                 _l.CheckStackSize(1);
 
                 // Push the arguments.
-                var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
-                _l.PushList(addends);
+                var vals = new List<int>() { 3901, 488, 922, 1578, 2406 };
+                var addends = new TableEx(vals);
+                _l.PushTableEx(addends);
                 var suffix = "__the_end__";
                 _l.PushString(suffix);
                 _l.CheckStackSize(3);
@@ -272,9 +273,10 @@ namespace KeraLuaEx.Test
                 _l.CheckStackSize(2);
 
                 // Push the arguments.
-                var addends = new List<int>() { 3901, 488, 922, 1578, 2406 };
+                var vals = new List<int>() { 3901, 488, 922, 1578, 2406 };
+                var addends = new TableEx(vals);
+                _l.PushTableEx(addends);
                 var suffix = "__the_end__";
-                _l.PushList(addends);
                 _l.PushString(suffix);
 
                 // Do the call.

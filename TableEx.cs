@@ -13,14 +13,20 @@ namespace KeraLuaEx
     public class TableEx
     {
         #region Fields
-        /// <summary>Dictionary used to store the data.</summary>
+        /// <summary>Dictionary used to store the data. If it's a list the key is 1-based.</summary>
         readonly Dictionary<string, object> _elements = new();
+
+        /// <summary>Supported list types.</summary>
+        Type[] _validListTypes = { typeof(string), typeof(double), typeof(int) };
+
+        /// <summary>Supported dictionary value types.</summary>
+        Type[] _validDictTypes = { typeof(string), typeof(double), typeof(int), typeof(bool), typeof(TableEx) };
         #endregion
 
         #region Properties
         /// <summary>What this represents.</summary>
         public TableType Type { get; private set; }
-        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList }; // FUTURE ListTableEx?
+        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList }; // FUTURE List of TableEx?
 
         /// <summary>All the names.</summary>
         public List<string> Names { get { var n = _elements.Keys.ToList(); return n; } } 
@@ -34,12 +40,83 @@ namespace KeraLuaEx
 
         #region Public API
         /// <summary>
-        /// Constructor populates from a lua table on the top of the stack. Does pop. FUTURE arbitrary indexes.
+        /// Constructor populates from a typed list.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public TableEx(List<string> list)
+        {
+            Type = TableType.StringList;
+            list.ForEach(v => _elements.Add((_elements.Count + 1).ToString()!, v));
+        }
+
+        /// <summary>
+        /// Constructor populates from a typed list.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public TableEx(List<int> list)
+        {
+            Type = TableType.IntList;
+            list.ForEach(v => _elements.Add((_elements.Count + 1).ToString()!, v));
+        }
+
+        /// <summary>
+        /// Constructor populates from a typed list.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public TableEx(List<double> list)
+        {
+            Type = TableType.DoubleList;
+            list.ForEach(v => _elements.Add((_elements.Count + 1).ToString()!, v));
+        }
+
+        /// <summary>
+        /// Constructor populates deep copy from a dictionary.
+        /// </summary>
+        /// <param name="dict">Copy from this.</param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public TableEx(Dictionary<string, object> dict)
+        {
+            Type = TableType.Dictionary;
+
+            // Deep copy.
+            foreach (var kv in dict)
+            {
+                object? v = null;
+
+                switch (kv.Value)
+                {
+                    case string s: v = s; break;
+                    case bool b: v = b; break;
+                    case int i: v = i; break;
+                    case double d: v = d; break;
+                    case TableEx t: v = new TableEx(t._elements); break; // recursion!
+                    default:
+                        throw new InvalidOperationException($"Unsupported value type for {kv.Key}");
+                }
+
+                if (v is not null)
+                {
+                    _elements.Add(kv.Key, v);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Unsupported value type for {kv.Key}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Constructor populates from a lua table on the top of the stack.
+        /// Does the pop.
+        /// FUTURE arbitrary indexes.
         /// </summary>
         /// <param name="l"></param>
         /// <exception cref="SyntaxException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public TableEx(Lua l)//, int index)
+        public TableEx(Lua l)
         {
             // Check for valid value.
             if (l.Type(-1)! != LuaType.Table)
@@ -146,27 +223,34 @@ namespace KeraLuaEx
                     Type = TableType.Dictionary;
                     object? val = valType switch
                     {
-                        //LuaType.Nil => null,
                         LuaType.String => l.ToStringL(-1),
                         LuaType.Number => l.DetermineNumber(-1),
                         LuaType.Boolean => l.ToBoolean(-1),
                         LuaType.Table => l.ToTableEx(), // recursion!
-                        //LuaType.Function => l.ToCFunction(-1),
                         _ => null //throw new SyntaxException($"Unsupported value type {l.Type(-1)}") // others are invalid
                     };
 
-
-                    if (val is not null)
+                    if (skey is not null && val is not null)
                     {
                         //Debug.WriteLine($"=== depth:{_depth} key:{skey} valType:{valType} val:{val}");
                         _elements.Add(skey, val);
                     }
-                    //_elements.Add(skey, val ?? "Ooopsy daisey");
                 }
 
                 // Remove value(-1), now key on top at(-1).
                 l.Pop(1);
             }
+        }
+
+        /// <summary>
+        /// Get a dict - copy.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public Dictionary<string, object> AsDict()
+        {
+            var table = new TableEx(_elements);
+            return table._elements;
         }
 
         /// <summary>
@@ -179,7 +263,7 @@ namespace KeraLuaEx
         {
             // Check for supported types.
             var tv = typeof(T);
-            if (!(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
+            if (!_validListTypes.Contains(tv))
             {
                 throw new InvalidOperationException($"Unsupported list value type [{tv}]");
             }
@@ -245,21 +329,16 @@ namespace KeraLuaEx
             return string.Join(Environment.NewLine, ls);
         }
 
-        ///// <summary>
-        ///// Readable.
-        ///// </summary>
-        ///// <returns></returns>
-        //public override string ToString()
-        //{
-        //    //return "TableEx";
-        //    return Dump("TableEx");
-        //    //List<string> ls = new() { "TableEx" };
-        //    //foreach (var f in _elements)
-        //    //{
-        //    //    ls.Add($"{f.Key}:{f.Value}");
-        //    //}
-        //    //return string.Join (" ", ls);
-        //}
+        /// <summary>
+        /// Readable.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+           //return "TableEx";
+           // return Dump("TableEx");
+           return base.ToString();
+        }
         #endregion
     }
 }

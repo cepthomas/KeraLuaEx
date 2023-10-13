@@ -61,8 +61,9 @@ namespace KeraLuaEx
 
         #region Added API functions
         /// <summary>
-        /// Make a TableEx from the lua table on the top of the stack. Like other "to" functions but does the pop.
-        /// FUTURE Support index?
+        /// Make a TableEx from the lua table on the top of the stack.
+        /// Like other "to" functions but also does the pop.
+        /// FUTURE Support index other than top?
         /// </summary>
         /// <returns>TableEx object or null if failed, check the log.</returns>
         public TableEx? ToTableEx()
@@ -83,59 +84,77 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Push typed list onto lua stack.
+        /// Push a table onto lua stack.
         /// </summary>
-        /// <param name="list"></param>
-        public void PushList<T>(List<T> list)
+        /// <param name="table"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void PushTableEx(TableEx table)
         {
-            // Check for supported types: int, double, string.
-            var tv = typeof(T);
-            if (!(tv.Equals(typeof(string)) || tv.Equals(typeof(double)) || tv.Equals(typeof(int))))
+            switch (table.Type)
             {
-                throw new InvalidOperationException($"Unsupported value type [{tv}]");
-            }
+                case TableEx.TableType.Dictionary:
+                    var dict = table.AsDict();
+                    // Create a new empty table and push it onto the stack.
+                    NewTable();
+                    // Add the values from the source.
+                    foreach (var f in dict)
+                    {
+                        PushString(f.Key);
+                        switch (f.Value)
+                        {
+                            case string s: PushString(s); break;
+                            case bool b: PushBoolean(b); break;
+                            case int i: PushInteger(i); break;
+                            case double d: PushNumber(d); break;
+                            case TableEx t: PushTableEx(t); break; // recursion!
+                            default: break; // ignore
+                        }
+                        SetTable(-3);
+                    }
+                    break;
 
-            // Create a new empty table and push it onto the stack.
-            NewTable();
+                case TableEx.TableType.StringList:
+                    var slist = table.AsList<string>();
+                    // Create a new empty table and push it onto the stack.
+                    NewTable();
+                    // Add the values from the source.
+                    for (int i = 0; i < slist.Count; i++)
+                    {
+                        PushInteger(i + 1);
+                        PushString(slist[i]);
+                        SetTable(-3);
+                    }
+                    break;
 
-            // Add the values from the source.
-            for (int i = 0; i < list.Count; i++)
-            {
-                PushInteger(i + 1);
-                switch (list[i])
-                {
-                    case string v: PushString(v); break;
-                    case int v: PushInteger(v); break;
-                    case double v: PushNumber(v); break;
-                }
-                SetTable(-3);
-            }
-        }
 
-        /// <summary>
-        /// Push a dictionary onto lua stack. Ignores unsupported value types.
-        /// </summary>
-        /// <param name="dict"></param>
-        public void PushDictionary(Dictionary<string, object> dict)
-        {
-            // Create a new empty table and push it onto the stack.
-            NewTable();
+                case TableEx.TableType.IntList:
+                    var ilist = table.AsList<int>();
+                    // Create a new empty table and push it onto the stack.
+                    NewTable();
+                    // Add the values from the source.
+                    for (int i = 0; i < ilist.Count; i++)
+                    {
+                        PushInteger(i + 1);
+                        PushInteger(ilist[i]);
+                        SetTable(-3);
+                    }
+                    break;
 
-            // Add the values from the source.
-            foreach (var f in dict)
-            {
-                PushString(f.Key);
-                switch (f.Value)
-                {
-                    case null: PushNil(); break;
-                    case string s: PushString(s); break;
-                    case bool b: PushBoolean(b); break;
-                    case int i: PushInteger(i); break;
-                    case double d: PushNumber(d); break;
-                    case Dictionary<string, object> t: PushDictionary(t); break; // recursion!
-                    default: break; // ignore
-                }
-                SetTable(-3);
+                case TableEx.TableType.DoubleList:
+                    var dlist = table.AsList<double>();
+                    // Create a new empty table and push it onto the stack.
+                    NewTable();
+                    // Add the values from the source.
+                    for (int i = 0; i < dlist.Count; i++)
+                    {
+                        PushInteger(i + 1);
+                        PushNumber(dlist[i]);
+                        SetTable(-3);
+                    }
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unsupported table type {table.Type}");
             }
         }
         #endregion
