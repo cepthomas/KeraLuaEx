@@ -7,7 +7,7 @@ using System.Text;
 
 namespace KeraLuaEx.Test
 {
-    /// <summary>An example of how to create a C# library that can be loaded by Lua.</summary>
+    /// <summary>An example of how to create a C# library that can be loaded by Lua. TODO1 update for generator.</summary>
     public class ApiLib
     {
         /// <summary>Bound lua function.</summary>
@@ -40,7 +40,7 @@ namespace KeraLuaEx.Test
         /// </summary>
         /// <param name="p">Pointer to context.</param>
         /// <returns></returns>
-        static int OpenMyLib(IntPtr p) //TODO1 from generator
+        static int OpenMyLib(IntPtr p)
         {
             // Open lib into global table.
             var l = Lua.FromIntPtr(p)!;
