@@ -71,7 +71,7 @@ namespace KeraLuaEx.Test
             var l = Lua.FromIntPtr(p)!;
 
             // Get arguments.
-            var s = l.ToStringL(-1);
+            var s = l.ToString(-1);
 
             // Do the work.
             Lua.Log(Lua.Category.INF, $"printex:{s}");

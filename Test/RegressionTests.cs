@@ -68,7 +68,7 @@ namespace KeraLuaEx.Test
         private static int TestUnicodeString(IntPtr p)
         {
             var l = Lua.FromIntPtr(p);
-            string param = l!.ToStringL(1, false)!;
+            string param = l!.ToString(1, false)!;
 
             Assert.AreEqual(UnicodeString, param, "#1 ToString()");
 
@@ -381,7 +381,7 @@ main.lua-main.lua:11 (main)
 
             int currentTop = l.GetTop();
 
-            string four = l.ToStringL(-1)!;
+            string four = l.ToString(-1)!;
 
             int newTop = l.GetTop();
 
@@ -439,7 +439,7 @@ main.lua-main.lua:11 (main)
             l.GetGlobal("s");
 
             bool check = l.IsString(-1);
-            string s = l.ToStringL(-1, false)!;
+            string s = l.ToString(-1, false)!;
 
             Assert.IsTrue(check, "#1");
             Assert.AreEqual("bar", s, "#2");
@@ -506,7 +506,7 @@ main.lua-main.lua:11 (main)
 
             if (result != LuaStatus.OK)
             {
-                error = l.ToStringL(1, false)!;
+                error = l.ToString(1, false)!;
             }
 
             Assert.True(result == LuaStatus.OK, "Fail loading string: " + chunk + "ERROR:" + error);
@@ -515,7 +515,7 @@ main.lua-main.lua:11 (main)
 
             if (result != 0)
             {
-                error = l.ToStringL(1, false)!;
+                error = l.ToString(1, false)!;
             }
 
             Assert.True(result == 0, "Fail calling chunk: " + chunk + " ERROR: " + error);
