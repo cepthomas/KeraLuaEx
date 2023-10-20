@@ -1473,12 +1473,12 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Converts the Lua value at the given index to a C# string. Renamed to avoid conflict with builtin.
+        /// Converts the Lua value at the given index to a C# string. Watch for conflict with builtin ToString()!
         /// </summary>
         /// <param name="index"></param>
         /// <param name="callMetamethod">Calls __tostring field if present</param>
         /// <returns></returns>
-        public string? ToStringL(int index, bool callMetamethod = true)
+        public string? ToString(int index, bool callMetamethod = true)
         {
             byte[]? buffer = ToBuffer(index, callMetamethod);
             return buffer == null ? null : Encoding.GetString(buffer);

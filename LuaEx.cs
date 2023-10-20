@@ -205,7 +205,7 @@ namespace KeraLuaEx
         private static int MsgHandler(IntPtr p)
         {
             var l = FromIntPtr(p)!;
-            string? msg = l.ToStringL(1); //, false)!;
+            string? msg = l.ToString(1); //, false)!;
             if (msg is null)  // is error object not a string?
             {
                 // does it have a metamethod that produces a string?
@@ -267,7 +267,7 @@ namespace KeraLuaEx
                 string s;
                 if (GetTop() > 0)
                 {
-                    s = ToStringL(-1)!.Trim();
+                    s = ToString(-1)!.Trim();
                     Pop(1); // remove
                 }
                 else
@@ -346,11 +346,11 @@ namespace KeraLuaEx
 
                     string s = t switch
                     {
-                        LuaType.String => $"{tinfo}{ToStringL(i)}({st})",
+                        LuaType.String => $"{tinfo}{ToString(i)}({st})",
                         LuaType.Boolean => $"{tinfo}{ToBoolean(i)}({st})",
                         LuaType.Number => $"{tinfo}{DetermineNumber(i)}({st})",
                         LuaType.Nil => $"{tinfo}nil",
-                        LuaType.Table => $"{tinfo}{ToStringL(i) ?? "null"}({st})",
+                        LuaType.Table => $"{tinfo}{ToString(i) ?? "null"}({st})",
                         _ => $"{tinfo}{ToPointer(i):X}({st})",
                     };
                     ls.Add(s);

@@ -17,16 +17,17 @@ namespace KeraLuaEx
         readonly Dictionary<string, object> _elements = new();
 
         /// <summary>Supported list types.</summary>
-        Type[] _validListTypes = { typeof(string), typeof(double), typeof(int) };
+        readonly Type[] _validListTypes = { typeof(string), typeof(double), typeof(int) };
+        #endregion
 
-        /// <summary>Supported dictionary value types.</summary>
-        Type[] _validDictTypes = { typeof(string), typeof(double), typeof(int), typeof(bool), typeof(TableEx) };
+        #region Types
+        /// <summary>Supported types.</summary>
+        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList }; // FUTURE List of TableEx?
         #endregion
 
         #region Properties
         /// <summary>What this represents.</summary>
         public TableType Type { get; private set; }
-        public enum TableType { Unknown, Dictionary, IntList, DoubleList, StringList }; // FUTURE List of TableEx?
 
         /// <summary>All the names.</summary>
         public List<string> Names { get { var n = _elements.Keys.ToList(); return n; } } 
@@ -86,16 +87,15 @@ namespace KeraLuaEx
             {
                 object? v = null;
 
-                switch (kv.Value)
+                v = kv.Value switch
                 {
-                    case string s: v = s; break;
-                    case bool b: v = b; break;
-                    case int i: v = i; break;
-                    case double d: v = d; break;
-                    case TableEx t: v = new TableEx(t._elements); break; // recursion!
-                    default:
-                        throw new InvalidOperationException($"Unsupported value type for {kv.Key}");
-                }
+                    string s => s,
+                    bool b => b,
+                    int i => i,
+                    double d => d,
+                    TableEx t => new TableEx(t._elements),
+                    _ => throw new InvalidOperationException($"Unsupported value type for {kv.Key}"),
+                };
 
                 if (v is not null)
                 {
@@ -134,7 +134,7 @@ namespace KeraLuaEx
 
                 // Get key info (-2).
                 LuaType keyType = l.Type(-2);
-                string? skey = keyType == LuaType.String ? l.ToStringL(-2) : null;
+                string? skey = keyType == LuaType.String ? l.ToString(-2) : null;
                 int? ikey = keyType == LuaType.Number && l.IsInteger(-2) ? l.ToInteger(-2) : null;
 
                 // Get val info (-1).
@@ -142,7 +142,7 @@ namespace KeraLuaEx
 
                 int? ival = valType == LuaType.Number && l.IsInteger(-1) ? l.ToInteger(-1) : null;
                 double? dval = valType == LuaType.Number ? l.ToNumber(-1) : null;
-                string? sval = valType == LuaType.String ? l.ToStringL(-1) : null;
+                string? sval = valType == LuaType.String ? l.ToString(-1) : null;
 
                 bool isDict = true; // default assumption
 
@@ -223,7 +223,7 @@ namespace KeraLuaEx
                     Type = TableType.Dictionary;
                     object? val = valType switch
                     {
-                        LuaType.String => l.ToStringL(-1),
+                        LuaType.String => l.ToString(-1),
                         LuaType.Number => l.DetermineNumber(-1),
                         LuaType.Boolean => l.ToBoolean(-1),
                         LuaType.Table => l.ToTableEx(-1), // recursion!
@@ -337,7 +337,7 @@ namespace KeraLuaEx
         {
            //return "TableEx";
            // return Dump("TableEx");
-           return base.ToString();
+           return base.ToString() ?? "Invalid";
         }
         #endregion
     }
