@@ -226,7 +226,7 @@ namespace KeraLuaEx
                         LuaType.String => l.ToStringL(-1),
                         LuaType.Number => l.DetermineNumber(-1),
                         LuaType.Boolean => l.ToBoolean(-1),
-                        LuaType.Table => l.ToTableEx(), // recursion!
+                        LuaType.Table => l.ToTableEx(-1), // recursion!
                         _ => null //throw new SyntaxException($"Unsupported value type {l.Type(-1)}") // others are invalid
                     };
 

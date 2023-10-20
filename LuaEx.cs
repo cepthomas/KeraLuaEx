@@ -63,10 +63,10 @@ namespace KeraLuaEx
         /// <summary>
         /// Make a TableEx from the lua table on the top of the stack.
         /// Like other "to" functions but also does the pop.
-        /// FUTURE Support index other than top?
         /// </summary>
+        /// <param name="index">FUTURE Support index other than top?</param>
         /// <returns>TableEx object or null if failed, check the log.</returns>
-        public TableEx? ToTableEx()
+        public TableEx? ToTableEx(int index)
         {
             TableEx? t = null;
             try
@@ -156,6 +156,16 @@ namespace KeraLuaEx
                 default:
                     throw new InvalidOperationException($"Unsupported table type {table.Type}");
             }
+        }
+
+        /// <summary>
+        /// Returns  if the value at the given index is a table. 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public bool IsTableEx(int index)
+        {
+            return IsTable(index);
         }
         #endregion
 
