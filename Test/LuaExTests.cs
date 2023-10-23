@@ -391,7 +391,7 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(0);
 
 
-            // TODO2 How to detect uninitialized variables? luacheck?
+            // TODO How to detect uninitialized variables? luacheck?
             // http://lua-users.org/wiki/DetectingUndefinedVariables
             // https://stackoverflow.com/a/24285302
             //

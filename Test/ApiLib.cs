@@ -7,7 +7,7 @@ using System.Text;
 
 namespace KeraLuaEx.Test
 {
-    /// <summary>An example of how to create a C# library that can be loaded by Lua. TODO1 update for generator.</summary>
+    /// <summary>An example of how to create a C# library that can be loaded by Lua. TODO0 update for gen_interop().</summary>
     public class ApiLib
     {
         /// <summary>Bound lua function.</summary>

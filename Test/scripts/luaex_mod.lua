@@ -1,7 +1,6 @@
 
 local api = require("api_lib") -- C# module
 
--- Create the namespace/module.
 local M = {}
 
 -- Functions implemented in C#.
