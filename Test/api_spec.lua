@@ -8,6 +8,7 @@ M.config =
     lib_name = "api_lib",
     namespace = "KeraLuaEx.Test",
     class = "ApiLibX",
+    add_using = { "System.Diagnostics" },
 }
 
 -- Host calls lua.
@@ -38,7 +39,7 @@ M.host_export_funcs =
         {
             { name = "msg", type = "S", description = "What to tell" },
         },
-        ret = { type = "B", description = "Status" }
+        -- ret = { type = "B", description = "Status" }
     },
     {
         description = "Get current timer value",
