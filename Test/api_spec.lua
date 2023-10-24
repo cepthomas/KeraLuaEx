@@ -1,19 +1,54 @@
--- Spec for generating ApiLib interop.
+-- Spec for generating ApiLib interop. TODO0 fix this
 
 local M = {}
 
 -- Syntax-specific options.
 M.config =
 {
-    lib_name = "api_lib",
+    lua_lib_name = "api_lib",
+    host_lib_name = "Apiib",
     namespace = "KeraLuaEx.Test",
-    class = "ApiLibX",
-    add_using = { "System.Diagnostics" },
+    add_refs =
+    {
+        "System.Diagnostics",
+    },
 }
 
 -- Host calls lua.
 M.lua_export_funcs =
 {
+
+
+    {
+        lua_func_name = "my_lua_func", 
+        host_func_name = "MyLuaFunc", 
+        description = "booga", --OPT
+        args =--OPT
+        {
+            {
+                name = "arg_one", 
+                type = "S", 
+                description = "some strings" --OPT
+            },
+            {
+                name = "arg_two", 
+                type = "I", 
+                description = "a nice integer" --OPT
+            },
+            {
+                name = "arg_three",  
+                type = "T", 
+                description = "3 ddddddddd" --OPT
+            },
+        },
+        ret =
+        {
+            type = "T", 
+            description = "a returned thing" --OPT
+        }
+    },
+
+
     {
         description = "Host calls lua",
         lua_func_name = "host_call_lua",
@@ -30,6 +65,27 @@ M.lua_export_funcs =
 -- Lua calls host.
 M.host_export_funcs = 
 {
+
+        lua_func_name = "my_lua_func",
+        host_func_name = "MyLuaFunc",
+        description = "fooga", --OPT
+        args = --OPT
+        {
+            {
+                name = "arg_one",
+                type = "N",
+                description = "kakakakaka" --OPT
+            },
+        },
+        ret =
+        {
+            type = "B",
+            description = "a returned thing" --OPT
+        }
+
+
+
+    
     {
         description = "Print something for the user",
         lua_func_name = "printex",
