@@ -1,11 +1,4 @@
 
-local api = require("api_lib") -- C# module
-
-
--- Functions implemented in C#.
-api.printex("Loading luaex.lua!")
-api.timer(true)
-
 -- Seed the randomizer.
 local seed = os.time()
 math.randomseed(seed)
@@ -54,14 +47,14 @@ invalid_table = { 2, 3, "ppp", 88.22, 1 }
 -- Functions called from C#.
 function g_func(s)
     index = index + 1
-    api.printex("g_func " .. #s .. " " .. index)
+    print("g_func " .. #s .. " " .. index)
     return #s + 3
 end
 
 function calc(addends, suffix)
     sum = 0
     for k, v in pairs(addends) do
-        api.printex(k .. ":" .. v)
+        print(k .. ":" .. v)
         sum = sum + v
     end
     return { str = string.format('>>>%d_%s<<<', sum, suffix), sum = sum }
@@ -69,19 +62,13 @@ end
 
 function inner_error()
     local s = '>>>'
-    api.printex(s)
+    print(s .. things)
     -- tonumber(s) -- not an error
     -- bad = 9 / 0 -- Lua doesn't think this is an error
     -- error(s)
     -- Runtime error:
-    api.log(LOG_INFO, 'str' .. {'aaa', 'bbb'})
 end
 
 function force_error()
     inner_error()
 end
-
-
--- How long is it?
-local msec = api.timer(false)
-api.printex("this took " .. msec .. " msec")

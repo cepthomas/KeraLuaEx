@@ -7,16 +7,13 @@ using System.Text;
 
 namespace KeraLuaEx.Test
 {
-    /// <summary>An example of how to create a C# library that can be loaded by Lua. TODO0 update for gen_interop().</summary>
-    public class ApiLib
+    /// <summary>An example of how to create a C# library that can be loaded by Lua.</summary>
+    public partial class ApiLib
     {
-        /// <summary>Bound lua function.</summary>
-        readonly static LuaFunction _fPrint = PrintEx;
+        /// <summary>Main execution lua state.</summary>
+        readonly Lua _l;
 
-        /// <summary>Bound lua function.</summary>
-        readonly static LuaFunction _fTimer = Timer;
-
-        /// <summary>Metrics.</summary>
+        /// <summary>Timer stuff.</summary>
         static readonly Stopwatch _sw = new();
         static long _startTicks = 0;
 
@@ -24,77 +21,53 @@ namespace KeraLuaEx.Test
         /// <summary>
         /// Load the lua libs implemented in C#.
         /// </summary>
-        /// <param name="l">Lua context</param>
-        public static void Load(Lua l)
+        public ApiLib(Lua l)
         {
-            // Load app stuff. This table gets pushed on the stack and into globals.
-            l.RequireF("api_lib", OpenMyLib, true);
+            _l = l;
+
+            // Load our lib stuff.
+            LoadInterop();
 
             // Other inits.
             _startTicks = 0;
             _sw.Start();
         }
-
-        /// <summary>
-        /// Internal callback to actually load the libs.
-        /// </summary>
-        /// <param name="p">Pointer to context.</param>
-        /// <returns></returns>
-        static int OpenMyLib(IntPtr p)
-        {
-            // Open lib into global table.
-            var l = Lua.FromIntPtr(p)!;
-            l.NewLib(_libFuncs);
-
-            return 1;
-        }
-
-        /// <summary>
-        /// Bind the C# functions to lua.
-        /// </summary>
-        static readonly LuaRegister[] _libFuncs = new LuaRegister[]
-        {
-            new LuaRegister("printex", _fPrint),
-            new LuaRegister("timer", _fTimer),
-            new LuaRegister(null, null)
-        };
         #endregion
 
-        #region Lua functions implemented in C#
+        #region Bound lua work functions
+        /// <summary>
+        /// Interop error handler. Do something with this - log it or other.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        bool ErrorHandler(Exception e)
+        {
+            Lua.Log(Lua.Category.ERR, e.ToString());
+            return false;
+        }
+
         /// <summary>
         /// Replacement for lua print(), redirects to log.
         /// </summary>
-        /// <param name="p">Pointer to context.</param>
-        /// <returns></returns>
-        static int PrintEx(IntPtr p)
+        /// <param name="msg">What to log.</param>
+        /// <returns>Status - required</returns>
+        bool PrintExWork(string? msg)
         {
-            var l = Lua.FromIntPtr(p)!;
-
-            // Get arguments.
-            var s = l.ToString(-1);
-
             // Do the work.
-            Lua.Log(Lua.Category.INF, $"printex:{s}");
-
-            // Return results.
-            return 0;
+            Lua.Log(Lua.Category.INF, msg ?? "null msg??");
+            return true;
         }
 
         /// <summary>
-        /// Lua script requires a high res timestamp - msec as double.
+        /// Get current msec.
         /// </summary>
-        /// <param name="p">Pointer to context.</param>
-        /// <returns></returns>
-        static int Timer(IntPtr p)
+        /// <param name="on">On or off.</param>
+        /// <returns>Msec</returns>
+        double TimerWork(bool? on)
         {
-            var l = Lua.FromIntPtr(p)!;
-
-            // Get arguments.
-            bool on = l.ToBoolean(-1);
-
             // Do the work.
             double totalMsec = 0;
-            if (on)
+            if ((bool)on!)
             {
                 _startTicks = _sw.ElapsedTicks; // snap
             }
@@ -105,8 +78,7 @@ namespace KeraLuaEx.Test
             }
 
             // Return results.
-            l.PushNumber(totalMsec);
-            return 1;
+            return totalMsec;
         }
         #endregion
     }

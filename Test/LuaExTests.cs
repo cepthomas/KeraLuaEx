@@ -21,7 +21,6 @@ namespace KeraLuaEx.Test
         {
             _l?.Close();
             _l = new Lua();
-            ApiLib.Load(_l);
         }
 
         [TearDown]
@@ -35,13 +34,12 @@ namespace KeraLuaEx.Test
         [Test]
         public void ScriptGlobal()
         {
-            ///// Load everything.
             LoadTestScript("luaex.lua");
 
-            // PCall loads the file.
+            // Run it.
             _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
-            //// Reset stack.
+            // Reset stack.
             _l.SetTop(0);
             _l.CheckStackSize(0);
 
@@ -122,7 +120,7 @@ namespace KeraLuaEx.Test
             }
             _l.CheckStackSize(0);
 
-            ///// Execute a lua function.
+            ///// Execute a raw lua function.
             {
                 LuaType t = _l.GetGlobal("g_func");
                 Assert.AreEqual(LuaType.Function, t);
@@ -141,7 +139,7 @@ namespace KeraLuaEx.Test
             }
             _l.CheckStackSize(0);
 
-            ///// Execute a more complex lua function.
+            ///// Execute a more complex raw lua function.
             {
                 LuaType t = _l.GetGlobal("calc");
                 Assert.AreEqual(LuaType.Function, t);
@@ -156,7 +154,7 @@ namespace KeraLuaEx.Test
                 _l.CheckStackSize(3);
 
                 // Do the call.
-                _l.PCall(2, 1, 0); //attempt to call a number value
+                _l.PCall(2, 1, 0);
                 _l.CheckStackSize(1);
 
                 // Get the results from the stack.
@@ -175,10 +173,9 @@ namespace KeraLuaEx.Test
         [Test]
         public void ScriptModule()
         {
-            ///// Load everything.
             LoadTestScript("luaex_mod.lua");
 
-            // PCall loads the file.
+            // Run it.
             _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
             // Top of the stack is the module itself. Saves it for later.
@@ -245,7 +242,7 @@ namespace KeraLuaEx.Test
             }
             _l.CheckStackSize(1); // luaex_mod is on top of stack
 
-            ///// Execute a module lua function.
+            ///// Execute a module raw lua function.
             {
                 _l.GetField(-1, "funcmod"); // push lua value onto stack
 
@@ -267,7 +264,7 @@ namespace KeraLuaEx.Test
             }
             _l.CheckStackSize(1);
 
-            ///// Execute a more complex lua function.
+            ///// Execute a more complex raw lua function.
             {
                 _l.GetField(-1, "calcmod");
                 _l.CheckStackSize(2);
@@ -298,6 +295,32 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(0);
         }
 
+        /// <summary>Test script api.</summary>
+        [Test]
+        public void ScriptApi()//TODO0 fails the first time through - script doesn't get correct api.
+        {
+            // Create api.
+            var api = new ApiLib(_l);
+
+            LoadTestScript("luaex_api.lua");
+
+            // Run it.
+            _l!.PCall(0, Lua.LUA_MULTRET, 0);
+
+            // Reset stack.
+            _l.SetTop(0);
+            _l.CheckStackSize(0);
+
+            var tbl = api!.HostCallLua("a string", 9876);
+            Assert.IsInstanceOf<TableEx>(tbl);
+            var s = tbl!.Dump("api_ret");
+            Assert.AreEqual(2, tbl!.Count);
+            Assert.AreEqual("gnirts a", tbl["sret"]);
+            Assert.AreEqual(9876 / 2, tbl["iret"]);
+
+            _l.CheckStackSize(0);
+        }
+
         /// <summary>Test generated errors.</summary>
         [Test]
         public void ScriptErrors()
@@ -305,6 +328,8 @@ namespace KeraLuaEx.Test
             // Test EvalLuaStatus().
             {
                 LoadTestScript("luaex.lua");
+
+                // Run it.
                 _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
                 // Reset stack.
@@ -321,6 +346,8 @@ namespace KeraLuaEx.Test
             // Test LuaStatus error handling.
             {
                 LoadTestScript("luaex.lua");
+
+                // Run it.
                 _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
                 // Reset stack.
@@ -334,6 +361,8 @@ namespace KeraLuaEx.Test
             // Force internal error from lua side. FUTURE force ErrRun, ErrMem, ErrErr.
             {
                 LoadTestScript("luaex.lua");
+
+                // Run it.
                 _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
                 // Reset stack.
@@ -377,10 +406,9 @@ namespace KeraLuaEx.Test
         [Test]
         public void Play()
         {
-            ///// Load everything.
             LoadTestScript("luaex.lua");
 
-            // PCall loads the file.
+            // Run it.
             _l!.PCall(0, Lua.LUA_MULTRET, 0);
             //The function results are pushed onto the stack in direct order (the first result is pushed first),
             //so that after the call the last result is on the top of the stack.
@@ -425,7 +453,10 @@ namespace KeraLuaEx.Test
             //_l.CheckStackSize(0);
         }
 
-        // Helper.
+        /// <summary>
+        /// Helper.
+        /// </summary>
+        /// <param name="fn"></param>
         void LoadTestScript(string fn)
         {
             string srcPath = GetSourcePath();
@@ -435,7 +466,11 @@ namespace KeraLuaEx.Test
             _l!.LoadFile(scriptFile);
         }
 
-        // Get the dir name of the caller's source file.
+        /// <summary>
+        /// Get the dir name of the caller's source file.
+        /// </summary>
+        /// <param name="callerPath"></param>
+        /// <returns></returns>
         string GetSourcePath([CallerFilePath] string callerPath = "")
         {
             return Path.GetDirectoryName(callerPath)!;

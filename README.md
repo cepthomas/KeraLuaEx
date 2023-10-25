@@ -9,7 +9,7 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 # Components
 - `KeraLuaEx` is the core standalone library. It has no external dependencies.
 - `Test` is the NUnit project; some of the original tests are carried over for regression.
-- `Host` is a WinForms project which makes it easier for initial development
+- `Host` is a WinForms project which makes it easier for initial development TODO keep/simplify?
   and debugging because NUnit is a bit clumsy for that.
 
 # Significant Changes
@@ -46,6 +46,9 @@ Scripts can be structured as "everything is a global" or a modular model (see `L
 - Global: see `ScriptWithGlobal()` in conjunction with the script `luaex.lua`.
 - Modular: see `ScriptWithModule()` in conjunction with the script `luaex_mod.lua`.
 
+
 In reality the simple global approach makes more sense for plain old scripts but the option is there to mix and match.
 
+## Api Approach
 The `ApiLib` class demonstrates how either approach integrates with the host application (in this case the test suites).
+It also demonstrates the use of interop code generation using [LuaBagOfTricks](https://github.com/cepthomas/LuaBagOfTricks).

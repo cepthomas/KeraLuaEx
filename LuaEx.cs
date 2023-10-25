@@ -62,7 +62,7 @@ namespace KeraLuaEx
         #region Added API functions
         /// <summary>
         /// Make a TableEx from the lua table on the top of the stack.
-        /// Like other "to" functions but also does the pop.
+        /// Like other "to" functions except also does the pop.
         /// </summary>
         /// <param name="index">FUTURE Support index other than top?</param>
         /// <returns>TableEx object or null if failed, check the log.</returns>

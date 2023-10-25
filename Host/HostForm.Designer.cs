@@ -26,15 +26,17 @@
             toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             btnRunGlobal = new System.Windows.Forms.ToolStripButton();
             txtPos = new System.Windows.Forms.ToolStripTextBox();
-            btnRunErrors = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             btnRunModule = new System.Windows.Forms.ToolStripButton();
+            toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            btnRunErrors = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            btnRunApi = new System.Windows.Forms.ToolStripButton();
             rtbScript = new System.Windows.Forms.RichTextBox();
             rtbOutput = new System.Windows.Forms.RichTextBox();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
-            toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel2.SuspendLayout();
@@ -48,7 +50,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnFile, toolStripSeparator3, btnClearOnRun, toolStripSeparator4, btnRunPlay, toolStripSeparator5, btnRunGlobal, txtPos, toolStripSeparator6, btnRunModule, toolStripSeparator7, btnRunErrors, toolStripSeparator1 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { btnFile, toolStripSeparator3, btnClearOnRun, toolStripSeparator4, btnRunPlay, toolStripSeparator5, btnRunGlobal, txtPos, toolStripSeparator6, btnRunModule, toolStripSeparator7, btnRunErrors, toolStripSeparator1, btnRunApi, toolStripSeparator2 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1286, 27);
@@ -128,14 +130,6 @@
             txtPos.ReadOnly = true;
             txtPos.Size = new System.Drawing.Size(70, 20);
             // 
-            // btnRunErrors
-            // 
-            btnRunErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            btnRunErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
-            btnRunErrors.Name = "btnRunErrors";
-            btnRunErrors.Size = new System.Drawing.Size(80, 24);
-            btnRunErrors.Text = "Run Errors";
-            // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
@@ -149,10 +143,31 @@
             btnRunModule.Size = new System.Drawing.Size(93, 24);
             btnRunModule.Text = "Run Module";
             // 
+            // toolStripSeparator7
+            // 
+            toolStripSeparator7.Name = "toolStripSeparator7";
+            toolStripSeparator7.Size = new System.Drawing.Size(6, 27);
+            // 
+            // btnRunErrors
+            // 
+            btnRunErrors.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnRunErrors.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnRunErrors.Name = "btnRunErrors";
+            btnRunErrors.Size = new System.Drawing.Size(80, 24);
+            btnRunErrors.Text = "Run Errors";
+            // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
+            // 
+            // btnRunApi
+            // 
+            btnRunApi.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            btnRunApi.ImageTransparentColor = System.Drawing.Color.Magenta;
+            btnRunApi.Name = "btnRunApi";
+            btnRunApi.Size = new System.Drawing.Size(65, 24);
+            btnRunApi.Text = "Run Api";
             // 
             // rtbScript
             // 
@@ -207,10 +222,10 @@
             splitContainer2.SplitterDistance = 249;
             splitContainer2.TabIndex = 0;
             // 
-            // toolStripSeparator7
+            // toolStripSeparator2
             // 
-            toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new System.Drawing.Size(6, 27);
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(6, 27);
             // 
             // HostForm
             // 
@@ -258,8 +273,10 @@
         private System.Windows.Forms.ToolStripButton btnRunModule;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton btnRunErrors;
+        private System.Windows.Forms.ToolStripButton btnRunApi;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }
 

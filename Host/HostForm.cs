@@ -84,6 +84,7 @@ namespace KeraLuaEx.Host
             btnRunModule.Click += (_, __) => RunTests("Module");
             btnRunPlay.Click += (_, __) => RunTests("Play");
             btnRunErrors.Click += (_, __) => RunTests("Errors");
+            btnRunApi.Click += (_, __) => RunTests("Api");
             btnClearOnRun.Checked = true;
 
             base.OnLoad(e);
@@ -278,15 +279,12 @@ namespace KeraLuaEx.Host
             {
                 tests.Setup();
 
-                //var srcPath = TestUtils.GetSourcePath();
-                //var scriptsPath = Path.Combine(srcPath, "..\\", "Test", "scripts");
-                //OpenScriptFile(Path.Combine(scriptsPath, "luaex_mod.lua"));
-
                 switch (which)
                 {
                     case "Module": tests.ScriptModule(); break;
                     case "Global": tests.ScriptGlobal(); break;
                     case "Errors": tests.ScriptErrors(); break;
+                    case "Api": tests.ScriptApi(); break;
                     case "Play": tests.Play(); break;
                 }
             }

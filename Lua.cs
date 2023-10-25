@@ -1933,7 +1933,7 @@ namespace KeraLuaEx
         }
 
         /// <summary>
-        /// Loads a file as a Lua chunk. This function uses lua_load to load the chunk in the file named filename.
+        /// Loads a file as a Lua chunk without running it. This function uses lua_load to load the chunk in the file named filename.
         /// </summary>
         /// <param name="file"></param>
         /// <param name="mode"></param>
