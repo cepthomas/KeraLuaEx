@@ -94,19 +94,12 @@ namespace KeraLuaEx.Test
         // Bound functions.
         static LuaFunction? _PrintEx;
         static LuaFunction? _Timer;
-
-        readonly LuaRegister[] _libFuncs = new LuaRegister[]
-        {
-            // ALL collected.
-            new LuaRegister("printex", _PrintEx),
-            new LuaRegister("timer", _Timer),
-            new LuaRegister(null, null)
-        };
+        readonly List<LuaRegister> _libFuncs = new();
 
         int OpenInterop(IntPtr p)
         {
             var l = Lua.FromIntPtr(p)!;
-            l.NewLib(_libFuncs);
+            l.NewLib(_libFuncs.ToArray());
             return 1;
         }
 
@@ -114,7 +107,11 @@ namespace KeraLuaEx.Test
         {
             _instance = this;
             _PrintEx = _instance!.PrintEx;
+            _libFuncs.Add(new LuaRegister("printex", _PrintEx));
             _Timer = _instance!.Timer;
+            _libFuncs.Add(new LuaRegister("timer", _Timer));
+
+            _libFuncs.Add(new LuaRegister(null, null));
             _l.RequireF("api_lib", OpenInterop, true);
         }
         #endregion

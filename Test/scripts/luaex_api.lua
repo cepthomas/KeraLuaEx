@@ -2,8 +2,8 @@
 local api = require("api_lib") -- C# module
 
 -- Functions called by lua implemented in C#.
-api.printex("Loading luaex.lua!")
-api.timer(true)
+v = api.printex("Loading luaex.lua!")
+y = api.timer(true)
 
 -- Functions called from C#.
 function host_call_lua(arg_one, arg_two)

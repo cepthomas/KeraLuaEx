@@ -297,7 +297,7 @@ namespace KeraLuaEx.Test
 
         /// <summary>Test script api.</summary>
         [Test]
-        public void ScriptApi()//TODO0 fails the first time through - script doesn't get correct api.
+        public void ScriptApi()
         {
             // Create api.
             var api = new ApiLib(_l);
@@ -309,7 +309,6 @@ namespace KeraLuaEx.Test
 
             // Reset stack.
             _l.SetTop(0);
-            _l.CheckStackSize(0);
 
             var tbl = api!.HostCallLua("a string", 9876);
             Assert.IsInstanceOf<TableEx>(tbl);
@@ -410,47 +409,10 @@ namespace KeraLuaEx.Test
 
             // Run it.
             _l!.PCall(0, Lua.LUA_MULTRET, 0);
-            //The function results are pushed onto the stack in direct order (the first result is pushed first),
-            //so that after the call the last result is on the top of the stack.
-            // [1] is the luaex module, [2] is api_lib
 
             //// Reset stack.
             _l.SetTop(0);
             _l.CheckStackSize(0);
-
-
-            // TODO How to detect uninitialized variables? luacheck?
-            // http://lua-users.org/wiki/DetectingUndefinedVariables
-            // https://stackoverflow.com/a/24285302
-            //
-            //Add a metatable to the tables where undefined access must not be allowed.
-            //a = setmetatable({ ...}, { __index = function(i) error "undefined" end})
-            //is all you need.
-            //Now, you could totally stick a metatable on _G that caused some sort of exception when you tried to
-            //get the value for a key with a nil value.
-            _l.GetGlobal("bad1");
-            var uninit = _l.ToString(-1);
-            Assert.AreEqual(uninit, "nil");
-            _l.Pop(1); // GetGlobal()
-            _l.CheckStackSize(0);
-
-
-            //LuaType t = _l.GetGlobal("things"); // push lua value onto stack
-            //Assert.AreEqual(LuaType.Table, t);
-            //var tbl = _l.ToTableEx(-1);
-            //var s = tbl.Dump("things");
-
-            // Blows up because globals contains _G causing a stack overflow. Don't do this.
-            //_l.PushGlobalTable();
-            // _l.GetGlobal("_G");
-            // var gl = _l.ToTableEx(-1);
-            // _l.Pop(1);
-            //// Dump globals.
-            //_l.PushGlobalTable();
-            //var gl = _l.DumpTable("globals", 0, false);
-            //_l.Pop(1); // from PushGlobalTable()
-            //Lua.Log(string.Join(Environment.NewLine, gl));
-            //_l.CheckStackSize(0);
         }
 
         /// <summary>
@@ -463,7 +425,7 @@ namespace KeraLuaEx.Test
             string scriptsPath = Path.Combine(srcPath, "scripts");
             _l!.SetLuaPath(new() { scriptsPath });
             string scriptFile = Path.Combine(scriptsPath, fn);
-            _l!.LoadFile(scriptFile);
+            var lstat = _l!.LoadFile(scriptFile);
         }
 
         /// <summary>
