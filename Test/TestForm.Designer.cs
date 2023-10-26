@@ -1,6 +1,6 @@
-﻿namespace KeraLuaEx.Host
+﻿namespace KeraLuaEx.Test
 {
-    partial class HostForm
+    partial class TestForm
     {
         /// <summary>
         /// Required designer variable.
@@ -227,7 +227,7 @@
             toolStripSeparator2.Name = "toolStripSeparator2";
             toolStripSeparator2.Size = new System.Drawing.Size(6, 27);
             // 
-            // HostForm
+            // TestForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -237,8 +237,8 @@
             Controls.Add(splitContainer1);
             Controls.Add(toolStrip1);
             Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            Name = "HostForm";
-            Text = "KeraLuaEx Test Host";
+            Name = "TestForm";
+            Text = "KeraLuaEx Test Test";
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             splitContainer1.Panel2.ResumeLayout(false);

@@ -10,9 +10,9 @@ using System.ComponentModel;
 using KeraLuaEx.Test;
 
 
-namespace KeraLuaEx.Host
+namespace KeraLuaEx.Test
 {
-    public partial class HostForm : Form
+    public partial class TestForm : Form
     {
         #region Types
         /// <summary>Log level.</summary>
@@ -40,7 +40,7 @@ namespace KeraLuaEx.Host
         /// <summary>
         /// Constructor.
         /// </summary>
-        public HostForm()
+        public TestForm()
         {
             InitializeComponent();
         }

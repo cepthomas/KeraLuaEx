@@ -9,7 +9,7 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 # Components
 - `KeraLuaEx` is the core standalone library. It has no external dependencies.
 - `Test` is the NUnit project; some of the original tests are carried over for regression.
-- `Host` is a WinForms project which makes it easier for initial development TODO keep/simplify?
+  It also contains a WinForms project which makes it easier for initial development
   and debugging because NUnit is a bit clumsy for that.
 
 # Significant Changes
