@@ -1,6 +1,8 @@
 cls
 echo off
 
+:: Convert spec into interop library.
+
 :: Set the lua path.
 set LUA_PATH=;;^
 C:\Dev\repos\Lua\LuaBagOfTricks\?.lua;^
