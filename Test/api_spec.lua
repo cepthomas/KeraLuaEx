@@ -7,7 +7,7 @@ M.config =
     lua_lib_name = "api_lib",
     host_lib_name = "ApiLib",
     namespace = "KeraLuaEx.Test",
-    add_refs =
+    add_using =
     {
         "System.Diagnostics",
     },
