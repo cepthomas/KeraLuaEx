@@ -15,14 +15,14 @@ namespace KeraLuaEx.Test
         /// <param name="arg_one">some strings</param>
         /// <param name="arg_two">a nice integer</param>
         /// <returns>TableEx a returned thing></returns>
-        public TableEx? HostCallLua(string arg_one, int arg_two)
+        public TableEx? DoOperation(string arg_one, int arg_two)
         {
             int numArgs = 0;
             int numRet = 1;
 
             // Get function.
-            LuaType ltype = _l.GetGlobal("host_call_lua");
-            if (ltype != LuaType.Function) { ErrorHandler(new SyntaxException($"Bad lua function: host_call_lua")); return null; }
+            LuaType ltype = _l.GetGlobal("do_operation");
+            if (ltype != LuaType.Function) { ErrorHandler(new SyntaxException($"Bad lua function: do_operation")); return null; }
 
             // Push arguments
             _l.PushString(arg_one);

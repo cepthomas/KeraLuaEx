@@ -6,8 +6,8 @@ v = api.printex("Loading luaex.lua!")
 y = api.timer(true)
 
 -- Functions called from C#.
-function host_call_lua(arg_one, arg_two)
-    api.printex("host_call_lua(): " .. arg_one .. " " .. arg_two)
+function do_operation(arg_one, arg_two)
+    api.printex("do_operation(): " .. arg_one .. " " .. arg_two)
     ret = { sret = arg_one:reverse(), iret = arg_two / 2 }
     return ret
 end

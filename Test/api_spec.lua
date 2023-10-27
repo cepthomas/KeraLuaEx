@@ -7,7 +7,7 @@ M.config =
     lua_lib_name = "api_lib",
     host_lib_name = "ApiLib",
     namespace = "KeraLuaEx.Test",
-    add_using =
+    add_refs =
     {
         "System.Diagnostics",
     },
@@ -17,26 +17,26 @@ M.config =
 M.lua_export_funcs =
 {
     {
-        lua_func_name = "host_call_lua",
-        host_func_name = "HostCallLua",
-        description = "Host calls lua",
+        lua_func_name = "do_operation",
+        host_func_name = "DoOperation",
+        description = "Host asks script to do something",
         args =--OPT
         {
             {
                 name = "arg_one",
                 type = "S",
-                description = "some strings"
+                description = "a string"
             },
             {
                 name = "arg_two",
                 type = "I",
-                description = "a nice integer"
+                description = "an integer"
             },
         },
         ret =
         {
             type = "T",
-            description = "a returned thing"
+            description = "some calculated values"
         }
     },
 }

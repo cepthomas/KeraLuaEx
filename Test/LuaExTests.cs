@@ -310,7 +310,7 @@ namespace KeraLuaEx.Test
             // Reset stack.
             _l.SetTop(0);
 
-            var tbl = api!.HostCallLua("a string", 9876);
+            var tbl = api!.DoOperation("a string", 9876);
             Assert.IsInstanceOf<TableEx>(tbl);
             var s = tbl!.Dump("api_ret");
             Assert.AreEqual(2, tbl!.Count);
