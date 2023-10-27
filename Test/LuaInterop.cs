@@ -1,4 +1,5 @@
 ///// Warning - this file is created by gen_interop.lua, do not edit. /////
+
 using System;
 using System.IO;
 using System.Text;
@@ -8,13 +9,13 @@ using System.Diagnostics;
 
 namespace KeraLuaEx.Test
 {
-    public partial class ApiLib
+    public partial class LuaInterop
     {
         #region Functions exported from lua for execution by host
-        /// <summary>Lua export function: Host calls lua</summary>
-        /// <param name="arg_one">some strings</param>
-        /// <param name="arg_two">a nice integer</param>
-        /// <returns>TableEx a returned thing></returns>
+        /// <summary>Lua export function: Host asks script to do something</summary>
+        /// <param name="arg_one">a string</param>
+        /// <param name="arg_two">an integer</param>
+        /// <returns>TableEx some calculated values></returns>
         public TableEx? DoOperation(string arg_one, int arg_two)
         {
             int numArgs = 0;
@@ -24,7 +25,7 @@ namespace KeraLuaEx.Test
             LuaType ltype = _l.GetGlobal("do_operation");
             if (ltype != LuaType.Function) { ErrorHandler(new SyntaxException($"Bad lua function: do_operation")); return null; }
 
-            // Push arguments
+            // Push arguments.
             _l.PushString(arg_one);
             numArgs++;
             _l.PushInteger(arg_two);
@@ -90,7 +91,7 @@ namespace KeraLuaEx.Test
 
         #region Infrastructure
         // Bind functions to static instance.
-        static ApiLib? _instance;
+        static LuaInterop? _instance;
         // Bound functions.
         static LuaFunction? _PrintEx;
         static LuaFunction? _Timer;

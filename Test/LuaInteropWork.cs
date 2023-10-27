@@ -8,7 +8,7 @@ using System.Text;
 namespace KeraLuaEx.Test
 {
     /// <summary>An example of how to create a C# library that can be loaded by Lua.</summary>
-    public partial class ApiLib
+    public partial class LuaInterop
     {
         /// <summary>Main execution lua state.</summary>
         readonly Lua _l;
@@ -21,7 +21,7 @@ namespace KeraLuaEx.Test
         /// <summary>
         /// Load the lua libs implemented in C#.
         /// </summary>
-        public ApiLib(Lua l)
+        public LuaInterop(Lua l)
         {
             _l = l;
 
