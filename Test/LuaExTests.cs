@@ -105,6 +105,7 @@ namespace KeraLuaEx.Test
                 var tbl = _l.ToTableEx(-1);
                 Assert.IsInstanceOf<TableEx>(tbl);
                 Assert.AreEqual(5, tbl!.Count);
+                //Debug.WriteLine(tbl!.Dump("things"));
 
                 var whiz = tbl["whiz"] as TableEx;
                 Assert.IsInstanceOf<TableEx>(whiz);
@@ -312,7 +313,7 @@ namespace KeraLuaEx.Test
 
             var tbl = api!.DoOperation("a string", 9876);
             Assert.IsInstanceOf<TableEx>(tbl);
-            var s = tbl!.Dump("api_ret");
+            //Debug.WriteLine(tbl!.Dump("api_ret"));
             Assert.AreEqual(2, tbl!.Count);
             Assert.AreEqual("gnirts a", tbl["sret"]);
             Assert.AreEqual(9876 / 2, tbl["iret"]);
