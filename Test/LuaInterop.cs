@@ -61,7 +61,7 @@ namespace KeraLuaEx.Test
             else { ErrorHandler(new SyntaxException($"Bad arg type for {msg}")); return 0; }
 
             // Do the work. One result.
-            bool ret = PrintExWork(msg);
+            bool ret = PrintEx_Work(msg);
             l.PushBoolean(ret);
             return 1;
         }
@@ -82,7 +82,7 @@ namespace KeraLuaEx.Test
             else { ErrorHandler(new SyntaxException($"Bad arg type for {on}")); return 0; }
 
             // Do the work. One result.
-            double ret = TimerWork(on);
+            double ret = Timer_Work(on);
             l.PushNumber(ret);
             return 1;
         }

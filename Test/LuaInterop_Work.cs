@@ -51,7 +51,7 @@ namespace KeraLuaEx.Test
         /// </summary>
         /// <param name="msg">What to log.</param>
         /// <returns>Status - required</returns>
-        bool PrintExWork(string? msg)
+        bool PrintEx_Work(string? msg)
         {
             // Do the work.
             Lua.Log(Lua.Category.INF, msg ?? "null msg??");
@@ -63,7 +63,7 @@ namespace KeraLuaEx.Test
         /// </summary>
         /// <param name="on">On or off.</param>
         /// <returns>Msec</returns>
-        double TimerWork(bool? on)
+        double Timer_Work(bool? on)
         {
             // Do the work.
             double totalMsec = 0;
