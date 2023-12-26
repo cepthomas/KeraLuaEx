@@ -276,6 +276,7 @@ namespace KeraLuaEx
                 }
                 var serror = $"{file}({line}) [{lstat}]: {s}";
 
+                Log(Category.ERR, serror);
                 if (ThrowOnError)
                 {
                     throw lstat switch
