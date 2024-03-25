@@ -1,14 +1,18 @@
 cls
 echo off
 
-:: Convert spec into interop library.
+:: Convert spec into interop library. TODO1 test
+
+if "%LBOT%"=="" (echo Fail: requires env var LBOT set to LuaBagOfTricks & exit 1)
 
 :: Set the lua path.
-set LUA_PATH=;;^
-C:\Dev\repos\Lua\LuaBagOfTricks\?.lua;^
-C:\Dev\repos\Lua\LuaBagOfTricks\Test\?.lua;
+set LUA_PATH=;;%LBOT%\?.lua;
+rem set LUA_PATH=;;%LBOT%\?.lua;%LBOT%\Test\?.lua;
 
-:: Build the interop. Note: need explicit paths - lua doesn't know file system.
-pushd "C:\Dev\repos\Lua\LuaBagOfTricks"
-lua gen_interop.lua -cs C:\Dev\repos\Lua\KeraLuaEx\Test\api_spec.lua C:\Dev\repos\Lua\KeraLuaEx\Test
+echo %LUA_PATH%
+echo %~dp0
+
+:: Build the interop.
+pushd "%LBOT%"
+lua gen_interop.lua -cs %~dp0\api_spec.lua %~dp0
 popd
