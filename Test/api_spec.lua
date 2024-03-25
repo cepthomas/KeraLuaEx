@@ -14,13 +14,13 @@ M.config =
 }
 
 -- Host calls lua.
-M.lua_export_funcs =
+M.script_funcs =
 {
     {
         lua_func_name = "do_operation",
         host_func_name = "DoOperation",
         description = "Host asks script to do something",
-        args =--OPT
+        args =
         {
             {
                 name = "arg_one",
@@ -42,7 +42,7 @@ M.lua_export_funcs =
 }
 
 -- Lua calls host.
-M.host_export_funcs =
+M.host_funcs =
 {
     {
         lua_func_name = "printex",
@@ -66,7 +66,7 @@ M.host_export_funcs =
         lua_func_name = "timer",
         host_func_name = "Timer",
         description = "Get current timer value",
-        args = --OPT
+        args =
         {
             {
                 name = "on",

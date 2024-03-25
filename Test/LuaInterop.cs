@@ -1,5 +1,6 @@
 ///// Warning - this file is created by gen_interop.lua, do not edit. /////
 
+
 using System;
 using System.IO;
 using System.Text;
@@ -9,7 +10,7 @@ using System.Diagnostics;
 
 namespace KeraLuaEx.Test
 {
-    public partial class LuaInterop
+    public partial class 
     {
         #region Functions exported from lua for execution by host
         /// <summary>Lua export function: Host asks script to do something</summary>
@@ -61,7 +62,7 @@ namespace KeraLuaEx.Test
             else { ErrorHandler(new SyntaxException($"Bad arg type for {msg}")); return 0; }
 
             // Do the work. One result.
-            bool ret = PrintEx_Work(msg);
+            bool ret = PrintExWork(msg);
             l.PushBoolean(ret);
             return 1;
         }
@@ -82,7 +83,7 @@ namespace KeraLuaEx.Test
             else { ErrorHandler(new SyntaxException($"Bad arg type for {on}")); return 0; }
 
             // Do the work. One result.
-            double ret = Timer_Work(on);
+            double ret = TimerWork(on);
             l.PushNumber(ret);
             return 1;
         }
@@ -91,7 +92,7 @@ namespace KeraLuaEx.Test
 
         #region Infrastructure
         // Bind functions to static instance.
-        static LuaInterop? _instance;
+        static ? _instance;
         // Bound functions.
         static LuaFunction? _PrintEx;
         static LuaFunction? _Timer;
@@ -113,7 +114,7 @@ namespace KeraLuaEx.Test
             _libFuncs.Add(new LuaRegister("timer", _Timer));
 
             _libFuncs.Add(new LuaRegister(null, null));
-            _l.RequireF("api_lib", OpenInterop, true);
+            _l.RequireF("", OpenInterop, true);
         }
         #endregion
     }
