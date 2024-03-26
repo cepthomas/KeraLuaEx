@@ -5,12 +5,9 @@ local M = {}
 M.config =
 {
     lua_lib_name = "api_lib",
-    host_lib_name = "ApiLib",
     namespace = "KeraLuaEx.Test",
-    add_refs =
-    {
-        "System.Diagnostics",
-    },
+    class = "LuaInterop",
+    add_refs = { "System.Diagnostics" }
 }
 
 -- Host calls lua.

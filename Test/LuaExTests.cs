@@ -301,7 +301,7 @@ namespace KeraLuaEx.Test
         public void ScriptApi()
         {
             // Create api.
-            var api = new LuaInterop(_l);
+            var api = new LuaInterop(_l!);
 
             LoadTestScript("luaex_api.lua");
 

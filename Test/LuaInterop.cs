@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace KeraLuaEx.Test
 {
-    public partial class 
+    public partial class LuaInterop
     {
         #region Functions exported from lua for execution by host
         /// <summary>Lua export function: Host asks script to do something</summary>
@@ -62,7 +62,7 @@ namespace KeraLuaEx.Test
             else { ErrorHandler(new SyntaxException($"Bad arg type for {msg}")); return 0; }
 
             // Do the work. One result.
-            bool ret = PrintExWork(msg);
+            bool ret = PrintEx_Work(msg);
             l.PushBoolean(ret);
             return 1;
         }
@@ -83,7 +83,7 @@ namespace KeraLuaEx.Test
             else { ErrorHandler(new SyntaxException($"Bad arg type for {on}")); return 0; }
 
             // Do the work. One result.
-            double ret = TimerWork(on);
+            double ret = Timer_Work(on);
             l.PushNumber(ret);
             return 1;
         }
@@ -92,7 +92,7 @@ namespace KeraLuaEx.Test
 
         #region Infrastructure
         // Bind functions to static instance.
-        static ? _instance;
+        static LuaInterop? _instance;
         // Bound functions.
         static LuaFunction? _PrintEx;
         static LuaFunction? _Timer;
@@ -114,7 +114,7 @@ namespace KeraLuaEx.Test
             _libFuncs.Add(new LuaRegister("timer", _Timer));
 
             _libFuncs.Add(new LuaRegister(null, null));
-            _l.RequireF("", OpenInterop, true);
+            _l.RequireF("api_lib", OpenInterop, true);
         }
         #endregion
     }
