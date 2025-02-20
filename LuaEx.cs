@@ -176,7 +176,7 @@ namespace KeraLuaEx
         /// <param name="paths"></param>
         public void SetLuaPath(List<string> paths)
         {
-            List<string> parts = new() { "?", "?.lua" };
+            List<string> parts = ["?", "?.lua"];
             paths.ForEach(p => parts.Add(Path.Join(p, "?.lua").Replace('\\', '/')));
             string s = string.Join(';', parts);
             s = $"package.path = \"{s}\"";
@@ -329,7 +329,7 @@ namespace KeraLuaEx
         /// <returns>List of strings.</returns>
         public List<string> DumpStack(string info = "")
         {
-            List<string> ls = new();
+            List<string> ls = [];
             if (info != "")
             {
                 ls.Add(info);

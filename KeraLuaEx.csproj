@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <AssemblyName>KeraLuaEx</AssemblyName>
         <RootNamespace>KeraLuaEx</RootNamespace>
         <Deterministic>False</Deterministic>
@@ -19,15 +19,9 @@
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
     </PropertyGroup>
     <ItemGroup>
-      <Compile Remove="Host\**" />
       <Compile Remove="Test\**" />
-      <EmbeddedResource Remove="Host\**" />
       <EmbeddedResource Remove="Test\**" />
-      <None Remove="Host\**" />
       <None Remove="Test\**" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Remove="api_funcs.txt" />
     </ItemGroup>
     <ItemGroup>
       <None Update="lua54.dll">

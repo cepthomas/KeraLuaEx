@@ -1462,7 +1462,7 @@ namespace KeraLuaEx
             int length = (int)len;
             if (length == 0)
             {
-                return Array.Empty<byte>();
+                return [];
             }
             else
             {
@@ -1728,7 +1728,7 @@ namespace KeraLuaEx
             int length = (int)len;
             if (length == 0)
             {
-                return Array.Empty<byte>();
+                return [];
             }
 
             byte[] output = new byte[length];
