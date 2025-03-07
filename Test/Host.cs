@@ -39,16 +39,17 @@ namespace KeraLuaEx.Test
             }
             catch (Exception ex)
             {
-                var st = "???";
-                if (ex.StackTrace is not null)
-                {
-                    var lst = ex.StackTrace.Split(Environment.NewLine);
-                    if (lst.Length >= 2)
-                    {
-                        st = lst[^2];
-                    }
-                }
-                Console.WriteLine($"{ex.Message} {st}");
+                Console.WriteLine($"{ex.Message}");
+                //var st = "???";
+                //if (ex.StackTrace is not null)
+                //{
+                //    var lst = ex.StackTrace.Split(Environment.NewLine);
+                //    if (lst.Length >= 2)
+                //    {
+                //        st = lst[^2];
+                //    }
+                //}
+                //Console.WriteLine($"{ex.Message} {st}");
             }
             finally
             {

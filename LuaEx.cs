@@ -202,7 +202,8 @@ namespace KeraLuaEx
             }
 
             // append and return  a standard traceback
-            l.Traceback(l, msg, 1);  
+            //l.Traceback(l, msg, 1);
+            
             return 1;
         }
         static readonly LuaFunction _funcMsgHandler = MsgHandler;

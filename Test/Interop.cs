@@ -24,7 +24,7 @@ namespace KeraLuaEx.Test
 
             // Get function.
             LuaType ltype = _l.GetGlobal("do_operation");
-            if (ltype != LuaType.Function) { throw new SyntaxException("TODO", -1, $"Invalid lua function: do_operation"); }
+            if (ltype != LuaType.Function) { throw new SyntaxException("", -1, $"Invalid lua function: do_operation"); }
 
             // Push arguments.
             _l.PushString(arg_one);
@@ -34,11 +34,11 @@ namespace KeraLuaEx.Test
 
             // Do the actual call.
             LuaStatus lstat = _l.DoCall(numArgs, numRet);
-            if (lstat >= LuaStatus.ErrRun) { throw new LuaException("TODO", -1, lstat, "DoCall() failed"); }
+            if (lstat >= LuaStatus.ErrRun) { throw new LuaException("", -1, lstat, "DoCall() failed"); }
 
             // Get the results from the stack.
             TableEx? ret = _l.ToTableEx(-1);
-            if (ret is null) { throw new SyntaxException("TODO", -1, "Return value is not a TableEx"); }
+            if (ret is null) { throw new SyntaxException("", -1, "Return value is not a TableEx"); }
             _l.Pop(1);
             return ret;
         }
@@ -60,7 +60,7 @@ namespace KeraLuaEx.Test
             // Get arguments
             string? msg = null;
             if (l.IsString(1)) { msg = l.ToString(1); }
-            else { throw new SyntaxException("TODO", -1, $"Invalid arg type for {msg}"); }
+            else { throw new SyntaxException("", -1, $"Invalid arg type for {msg}"); }
 
             // Do the work. One result.
             bool ret = PrintExCb(msg);
@@ -81,7 +81,7 @@ namespace KeraLuaEx.Test
             // Get arguments
             bool? on = null;
             if (l.IsBoolean(1)) { on = l.ToBoolean(1); }
-            else { throw new SyntaxException("TODO", -1, $"Invalid arg type for {on}"); }
+            else { throw new SyntaxException("", -1, $"Invalid arg type for {on}"); }
 
             // Do the work. One result.
             double ret = TimerCb(on);
