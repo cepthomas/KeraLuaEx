@@ -20,14 +20,14 @@ M.m_list_int = { 2, 56, 98, 2 }
 
 -- Functions called from C#.
 function M.funcmod(s)
-    print("funcmod " .. #s)
+    print("funcmod "..#s)
     return #s + 3
 end
 
 function M.calcmod(addends, suffix)
-    sum = 0
+    local sum = 0
     for k, v in pairs(addends) do
-        print(k .. ":" .. v)
+        print(k..":"..v)
         sum = sum + v
     end
     return { str = string.format('>>>%d_%s<<<', sum, suffix), sum = sum }

@@ -73,27 +73,27 @@ cf[120] =  49
 
 function round(num) 
     if num >= 0 then 
-    	return math.floor(num+.5) 
+        return math.floor(num+.5) 
     else 
-    	return math.ceil(num-.5) 
+        return math.ceil(num-.5) 
     end
 end
 
 for c0=-20,50-1,10 do
-	io.write("C ")
-	for c=c0,c0+10-1 do
-		io.write(string.format("%3.0f ",c))
-	end
-	io.write("\n")
-	
-	io.write("F ")
-	for c=c0,c0+10-1 do
-		f=(9/5)*c+32
-		x = round(f)
-		celcius = cf [x]
-		assert (celcius == c)
-		io.write(string.format("%3.0f ",f))
-	end
-	
-	io.write("\n\n")
+    io.write("C ")
+    for c=c0,c0+10-1 do
+        io.write(string.format("%3.0f ",c))
+    end
+    io.write("\n")
+
+    io.write("F ")
+    for c=c0,c0+10-1 do
+        f=(9/5)*c+32
+        x = round(f)
+        celcius = cf [x]
+        assert (celcius == c)
+        io.write(string.format("%3.0f ",f))
+    end
+
+    io.write("\n\n")
 end

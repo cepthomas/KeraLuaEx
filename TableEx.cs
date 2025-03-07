@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 
 namespace KeraLuaEx
@@ -114,9 +115,11 @@ namespace KeraLuaEx
         /// FUTURE arbitrary indexes.
         /// </summary>
         /// <param name="l"></param>
+        /// <param name="file">Ignore - compiler use.</param>
+        /// <param name="line">Ignore - compiler use.</param>
         /// <exception cref="SyntaxException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public TableEx(Lua l)
+        public TableEx(Lua l, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             // Check for valid value.
             if (l.Type(-1)! != LuaType.Table)
@@ -171,7 +174,7 @@ namespace KeraLuaEx
                                 }
                                 else
                                 {
-                                    throw new SyntaxException($"Unsupported list type {valType}");
+                                    throw new SyntaxException(file, line, $"Unsupported list type {valType}");
                                 }
                             }
                         }
@@ -181,7 +184,7 @@ namespace KeraLuaEx
                         }
                         else // Invalid key type.
                         {
-                            throw new SyntaxException($"Invalid key type {keyType}");
+                            throw new SyntaxException(file, line, $"Invalid key type {keyType}");
                         }
                         break;
 
@@ -207,7 +210,7 @@ namespace KeraLuaEx
                             }
                             else
                             {
-                                throw new SyntaxException($"Inconsistent list value type {valType}");
+                                throw new SyntaxException(file, line, $"Inconsistent list value type {valType}");
                             }
                         }
                         break;

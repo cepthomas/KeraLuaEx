@@ -4,13 +4,13 @@ local M = {}
 -- Syntax-specific options.
 M.config =
 {
-    lua_lib_name = "api_lib",
-    namespace = "KeraLuaEx.Test",
-    class = "LuaInterop",
-    add_refs = { "System.Diagnostics" }
+    lua_lib_name = "luainterop",        -- for require
+    host_lib_name = "Interop",          -- host filenames
+    host_namespace = "KeraLuaEx.Test",  -- host namespace
+    add_refs = { "System.Diagnostics" } -- for using (optional)
 }
 
--- Host calls lua.
+------------------------ Host => Script ------------------------
 M.script_funcs =
 {
     {
@@ -38,7 +38,7 @@ M.script_funcs =
     },
 }
 
--- Lua calls host.
+------------------------ Script => Host ------------------------
 M.host_funcs =
 {
     {

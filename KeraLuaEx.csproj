@@ -5,7 +5,8 @@
         <AssemblyName>KeraLuaEx</AssemblyName>
         <RootNamespace>KeraLuaEx</RootNamespace>
         <Deterministic>False</Deterministic>
-        <Version>$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version>
+        <Version>1.2.0</Version>
+        <!-- <Version>$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version> -->
         <Description>Enhanced KeraLua</Description>
         <Copyright>MIT License</Copyright>
         <OutputPath>bin\</OutputPath>
@@ -24,7 +25,12 @@
       <None Remove="Test\**" />
     </ItemGroup>
     <ItemGroup>
-      <None Update="lua54.dll">
+      <None Remove=".gitignore" />
+      <None Remove=".gitmodules" />
+      <None Remove="LICENSE" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="..\LBOT\lua54\lua54.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>WinExe</OutputType>
+        <!-- <OutputType>WinExe</OutputType> -->
+        <OutputType>Exe</OutputType>
         <UseWindowsForms>True</UseWindowsForms>
         <TargetFramework>net8.0-windows</TargetFramework>
         <ImplicitUsings>disable</ImplicitUsings>
@@ -9,7 +10,8 @@
         <AssemblyName>KeraLuaEx.Test</AssemblyName>
         <RootNamespace>KeraLuaEx.Test</RootNamespace>
         <Deterministic>False</Deterministic>
-        <Version>$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version>
+        <Version>1.2.0</Version>
+        <!-- <Version>$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version> -->
         <Description>KeraLuaEx test stuff</Description>
         <Copyright>MIT License</Copyright>
         <OutputPath>bin\</OutputPath>

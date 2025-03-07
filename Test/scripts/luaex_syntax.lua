@@ -1,5 +1,5 @@
 
-local api = require("api_lib") -- C# module
+local api = require("luainterop") -- C# module
 
 api.printex("Loading luaex_syntax.lua!")
 

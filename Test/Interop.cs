@@ -1,5 +1,4 @@
-///// Warning - this file is created by gen_interop.lua, do not edit. /////
-
+///// Warning - this file is created by gen_interop.lua - do not edit. /////
 
 using System;
 using System.IO;
@@ -10,9 +9,10 @@ using System.Diagnostics;
 
 namespace KeraLuaEx.Test
 {
-    public partial class LuaInterop
+    public partial class Interop
     {
-        #region Functions exported from lua for execution by host
+        #region ============= C# => KeraLuaEx functions =============
+
         /// <summary>Lua export function: Host asks script to do something</summary>
         /// <param name="arg_one">a string</param>
         /// <param name="arg_two">an integer</param>
@@ -24,7 +24,7 @@ namespace KeraLuaEx.Test
 
             // Get function.
             LuaType ltype = _l.GetGlobal("do_operation");
-            if (ltype != LuaType.Function) { ErrorHandler(new SyntaxException($"Bad lua function: do_operation")); return null; }
+            if (ltype != LuaType.Function) { throw new SyntaxException("TODO", -1, $"Invalid lua function: do_operation"); }
 
             // Push arguments.
             _l.PushString(arg_one);
@@ -34,18 +34,19 @@ namespace KeraLuaEx.Test
 
             // Do the actual call.
             LuaStatus lstat = _l.DoCall(numArgs, numRet);
-            if (lstat >= LuaStatus.ErrRun) { ErrorHandler(new SyntaxException("DoCall() failed")); return null; }
+            if (lstat >= LuaStatus.ErrRun) { throw new LuaException("TODO", -1, lstat, "DoCall() failed"); }
 
             // Get the results from the stack.
             TableEx? ret = _l.ToTableEx(-1);
-            if (ret is null) { ErrorHandler(new SyntaxException("Return value is not a TableEx")); return null; }
+            if (ret is null) { throw new SyntaxException("TODO", -1, "Return value is not a TableEx"); }
             _l.Pop(1);
             return ret;
         }
 
         #endregion
 
-        #region Functions exported from host for execution by lua
+        #region ============= KeraLuaEx => C# callback functions =============s
+        
         /// <summary>Host export function: Print something for the user
         /// Lua arg: "msg">What to tell
         /// Lua return: bool Status>
@@ -59,10 +60,10 @@ namespace KeraLuaEx.Test
             // Get arguments
             string? msg = null;
             if (l.IsString(1)) { msg = l.ToString(1); }
-            else { ErrorHandler(new SyntaxException($"Bad arg type for {msg}")); return 0; }
+            else { throw new SyntaxException("TODO", -1, $"Invalid arg type for {msg}"); }
 
             // Do the work. One result.
-            bool ret = PrintEx_Work(msg);
+            bool ret = PrintExCb(msg);
             l.PushBoolean(ret);
             return 1;
         }
@@ -80,19 +81,19 @@ namespace KeraLuaEx.Test
             // Get arguments
             bool? on = null;
             if (l.IsBoolean(1)) { on = l.ToBoolean(1); }
-            else { ErrorHandler(new SyntaxException($"Bad arg type for {on}")); return 0; }
+            else { throw new SyntaxException("TODO", -1, $"Invalid arg type for {on}"); }
 
             // Do the work. One result.
-            double ret = Timer_Work(on);
+            double ret = TimerCb(on);
             l.PushNumber(ret);
             return 1;
         }
 
         #endregion
 
-        #region Infrastructure
+        #region ============= Infrastructure =============
         // Bind functions to static instance.
-        static LuaInterop? _instance;
+        static Interop? _instance;
         // Bound functions.
         static LuaFunction? _PrintEx;
         static LuaFunction? _Timer;
@@ -114,7 +115,7 @@ namespace KeraLuaEx.Test
             _libFuncs.Add(new LuaRegister("timer", _Timer));
 
             _libFuncs.Add(new LuaRegister(null, null));
-            _l.RequireF("api_lib", OpenInterop, true);
+            _l.RequireF("luainterop", OpenInterop, true);
         }
         #endregion
     }

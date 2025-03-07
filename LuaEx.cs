@@ -10,27 +10,7 @@ using System.Diagnostics;
 
 namespace KeraLuaEx
 {
-    #region Exceptions
-    /// <summary>Lua script syntax error.</summary>
-    public class SyntaxException : Exception
-    {
-        public SyntaxException() : base() { }
-        public SyntaxException(string message) : base(message) { }
-        public SyntaxException(string message, Exception inner) : base(message, inner) { }
-    }
-
-    /// <summary>Internal error on lua side.</summary>
-    public class LuaException : Exception
-    {
-        public LuaException() : base() { }
-        public LuaException(string message) : base(message) { }
-        public LuaException(string message, Exception inner) : base(message, inner) { }
-    }
-    #endregion
-
-    /// <summary>
-    /// Stuff added for KeraLuaEx.
-    /// </summary>
+    /// <summary>Stuff added for KeraLuaEx.</summary>
     public partial class Lua
     {
         #region Properties
@@ -250,12 +230,12 @@ namespace KeraLuaEx
         /// Check lua status and log an error. If ThrowOnError is true, throws an exception.
         /// </summary>
         /// <param name="lstat">Thing to look at.</param>
-        /// <param name="file">Ignore - compiler use.</param>
-        /// <param name="line">Ignore - compiler use.</param>
+        /// <param name="appFile">Ignore - compiler use.</param>
+        /// <param name="appLine">Ignore - compiler use.</param>
         /// <returns>True means error</returns>
         /// <exception cref="FileNotFoundException"></exception>
         /// <exception cref="LuaException"></exception>
-        public bool EvalLuaStatus(LuaStatus lstat, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public bool EvalLuaStatus(LuaStatus lstat, [CallerFilePath] string appFile = "", [CallerLineNumber] int appLine = -1)
         {
             bool hasError = false;
 
@@ -264,27 +244,29 @@ namespace KeraLuaEx
                 hasError = true;
 
                 // Get error message on stack.
-                string s;
+                string luaError;
                 if (GetTop() > 0)
                 {
-                    s = ToString(-1)!.Trim();
+                    luaError = ToString(-1)!.Trim();
                     Pop(1); // remove
                 }
                 else
                 {
-                    s = "No error message!!!";
+                    luaError = "No error message!!!";
                 }
-                var serror = $"{file}({line}) [{lstat}]: {s}";
 
-                Log(Category.ERR, serror);
+                Exception ex = lstat switch
+                {
+                    LuaStatus.ErrFile => new FileException(appFile, appLine, luaError),
+                    LuaStatus.ErrSyntax => new SyntaxException(appFile, appLine, luaError),
+                    _ => new LuaException(appFile, appLine, lstat, luaError),
+                };
+
+                Log(Category.ERR, ex.Message);
+
                 if (ThrowOnError)
                 {
-                    throw lstat switch
-                    {
-                        LuaStatus.ErrFile => new FileNotFoundException(serror),
-                        LuaStatus.ErrSyntax => new SyntaxException(serror),
-                        _ => new LuaException(serror),
-                    };
+                    throw ex;
                 }
             }
 
@@ -313,7 +295,7 @@ namespace KeraLuaEx
                 Log(Category.ERR, serror);
                 if (ThrowOnError)
                 {
-                    throw new LuaException(serror);
+                    throw new LuaException(file, line, LuaStatus.ErrRun, serror);
                 }
             }
 
@@ -366,4 +348,55 @@ namespace KeraLuaEx
         }
         #endregion
     }
+
+    #region Exceptions
+    /// <summary>Lua script syntax error.</summary>
+    public class SyntaxException : LuaExException
+    {
+        public SyntaxException(string appFile, int appLine, string luaError) :
+            base(appFile, appLine, LuaStatus.ErrSyntax, luaError)
+        { }
+    }
+
+    /// <summary>Lua script file error.</summary>
+    public class FileException : LuaExException
+    {
+        public FileException(string appFile, int appLine, string luaError) :
+            base(appFile, appLine, LuaStatus.ErrFile, luaError)
+        { }
+    }
+
+    /// <summary>Internal error on lua side.</summary>
+    public class LuaException : LuaExException
+    {
+        public LuaException(string appFile, int appLine, LuaStatus lstat, string luaError) :
+            base(appFile, appLine, lstat, luaError)
+        { }
+    }
+
+    /// <summary>Base exception class.</summary>
+    public class LuaExException : Exception
+    {
+        public string AppFile { get; private set; }
+        public int AppLine { get; private set; }
+        public LuaStatus Status { get; private set; }
+        public string LuaError { get; private set; }
+        public override string Message { get { return _message; } }
+        readonly string _message = "???";
+
+        public LuaExException(string appFile, int appLine, LuaStatus lstat, string luaError) : base("???")
+        {
+            List<string> ps = [];
+            ps.Add($"[{lstat}]");
+            if (luaError != "") ps.Add(luaError);
+            if (appFile != "") ps.Add($"({appFile}:{appLine})");
+            _message = string.Join(' ', ps);
+
+            AppFile = appFile;
+            AppLine = appLine;
+            LuaError = luaError;
+            Status = lstat;
+        }
+    }
+    #endregion
 }

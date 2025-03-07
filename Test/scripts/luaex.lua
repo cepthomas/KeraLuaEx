@@ -26,7 +26,7 @@ g_list_string = { "a", "string", "with" }
 bad1 = zzzz
 --ggg = bad1 + 1
 
--- Table of tables.
+-- global table of tables.
 things =
 {
     -- Uninitialized variable - won't appear in the table.
@@ -41,20 +41,20 @@ things =
 }
 
 -- Mixed type array.
-invalid_table = { 2, 3, "ppp", 88.22, 1 }
+local invalid_table = { 2, 3, "ppp", 88.22, 1 }
 
 
 -- Functions called from C#.
 function g_func(s)
     index = index + 1
-    print("g_func " .. #s .. " " .. index)
+    print("g_func "..#s.." "..index)
     return #s + 3
 end
 
 function calc(addends, suffix)
     sum = 0
     for k, v in pairs(addends) do
-        print(k .. ":" .. v)
+        print(k..":"..v)
         sum = sum + v
     end
     return { str = string.format('>>>%d_%s<<<', sum, suffix), sum = sum }
@@ -62,7 +62,7 @@ end
 
 function inner_error()
     local s = '>>>'
-    print(s .. things)
+    print(s..things)
     -- tonumber(s) -- not an error
     -- bad = 9 / 0 -- Lua doesn't think this is an error
     -- error(s)

@@ -1,0 +1,3 @@
+[submodule "LBOT"]
+	path = LBOT
+	url = https://github.com/cepthomas/LuaBagOfTricks.git

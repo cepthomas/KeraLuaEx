@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,7 +8,7 @@ using System.Text;
 namespace KeraLuaEx.Test
 {
     /// <summary>An example of how to create a C# library that can be loaded by Lua.</summary>
-    public partial class LuaInterop
+    public partial class Interop
     {
         /// <summary>Main execution lua state.</summary>
         readonly Lua _l;
@@ -21,7 +21,7 @@ namespace KeraLuaEx.Test
         /// <summary>
         /// Load the lua libs implemented in C#.
         /// </summary>
-        public LuaInterop(Lua l)
+        public Interop(Lua l)
         {
             _l = l;
 
@@ -51,7 +51,7 @@ namespace KeraLuaEx.Test
         /// </summary>
         /// <param name="msg">What to log.</param>
         /// <returns>Status - required</returns>
-        bool PrintEx_Work(string? msg)
+        bool PrintExCb(string? msg)
         {
             // Do the work.
             Lua.Log(Lua.Category.INF, msg ?? "null msg??");
@@ -63,7 +63,7 @@ namespace KeraLuaEx.Test
         /// </summary>
         /// <param name="on">On or off.</param>
         /// <returns>Msec</returns>
-        double Timer_Work(bool? on)
+        double TimerCb(bool? on)
         {
             // Do the work.
             double totalMsec = 0;

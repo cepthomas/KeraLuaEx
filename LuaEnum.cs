@@ -82,7 +82,7 @@ namespace KeraLuaEx
         /// </summary>
         ErrErr = 5,
         /// <summary>
-        /// extra error code for luaL_loadfilex.
+        /// extra error code for luaL_loadfilex - LUA_ERRFILE
         /// </summary>
         ErrFile = 6
     }
