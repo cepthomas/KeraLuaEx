@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace KeraLuaEx.Test
 {
-    public partial class Interop
+    public partial class Host
     {
         #region ============= C# => KeraLuaEx functions =============
 
@@ -38,7 +38,7 @@ namespace KeraLuaEx.Test
 
             // Get the results from the stack.
             TableEx? ret = _l.ToTableEx(-1);
-            if (ret is null) { throw new SyntaxException("", -1, "Return value is not a TableEx"); }
+            if (ret is null) { throw new SyntaxException("", -1, "DoOperation return value is not a TableEx"); }
             _l.Pop(1);
             return ret;
         }
@@ -48,8 +48,8 @@ namespace KeraLuaEx.Test
         #region ============= KeraLuaEx => C# callback functions =============s
         
         /// <summary>Host export function: Print something for the user
-        /// Lua arg: "msg">What to tell
-        /// Lua return: bool Status>
+        /// Lua arg: "msg" What to tell
+        /// Lua return: bool Status
         /// </summary>
         /// <param name="p">Internal lua state</param>
         /// <returns>Number of lua return values></returns>
@@ -60,17 +60,17 @@ namespace KeraLuaEx.Test
             // Get arguments
             string? msg = null;
             if (l.IsString(1)) { msg = l.ToString(1); }
-            else { throw new SyntaxException("", -1, $"Invalid arg type for {msg}"); }
+            else { throw new SyntaxException("", -1, "Invalid arg type: printex(msg)"); }
 
-            // Do the work. One result.
+            // Do the work. Always one result.
             bool ret = PrintExCb(msg);
             l.PushBoolean(ret);
             return 1;
         }
 
         /// <summary>Host export function: Get current timer value
-        /// Lua arg: "on">On or off
-        /// Lua return: double Number of msec>
+        /// Lua arg: "on" On or off
+        /// Lua return: double Number of msec
         /// </summary>
         /// <param name="p">Internal lua state</param>
         /// <returns>Number of lua return values></returns>
@@ -81,9 +81,9 @@ namespace KeraLuaEx.Test
             // Get arguments
             bool? on = null;
             if (l.IsBoolean(1)) { on = l.ToBoolean(1); }
-            else { throw new SyntaxException("", -1, $"Invalid arg type for {on}"); }
+            else { throw new SyntaxException("", -1, "Invalid arg type: timer(on)"); }
 
-            // Do the work. One result.
+            // Do the work. Always one result.
             double ret = TimerCb(on);
             l.PushNumber(ret);
             return 1;
@@ -92,12 +92,9 @@ namespace KeraLuaEx.Test
         #endregion
 
         #region ============= Infrastructure =============
-        // Bind functions to static instance.
-        static Interop? _instance;
-        // Bound functions.
-        static LuaFunction? _PrintEx;
-        static LuaFunction? _Timer;
+
         readonly List<LuaRegister> _libFuncs = new();
+        readonly Lua _l = new ();
 
         int OpenInterop(IntPtr p)
         {
@@ -108,14 +105,21 @@ namespace KeraLuaEx.Test
 
         void LoadInterop()
         {
-            _instance = this;
-            _PrintEx = _instance!.PrintEx;
-            _libFuncs.Add(new LuaRegister("printex", _PrintEx));
-            _Timer = _instance!.Timer;
-            _libFuncs.Add(new LuaRegister("timer", _Timer));
-
+            _libFuncs.Add(new LuaRegister("printex", PrintEx));
+            _libFuncs.Add(new LuaRegister("timer", Timer));
             _libFuncs.Add(new LuaRegister(null, null));
             _l.RequireF("luainterop", OpenInterop, true);
+        }
+
+        void LoadScript(string scriptFn, List<string> lbotDirs)
+        {
+            _l.SetLuaPath(lbotDirs);
+            LuaStatus lstat = _l.LoadFile(scriptFn);
+            if (lstat >= LuaStatus.ErrRun) { throw new LuaException("", -1, lstat, "LoadScript() failed"); }
+            // Run it.
+            _l.PCall(0, Lua.LUA_MULTRET, 0);
+            // Reset stack.
+            _l.SetTop(0);
         }
         #endregion
     }

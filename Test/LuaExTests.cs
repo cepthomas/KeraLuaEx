@@ -301,7 +301,7 @@ namespace KeraLuaEx.Test
         public void ScriptApi()
         {
             // Create api.
-            var api = new Interop(_l!);
+            var h = new Host();
 
             LoadTestScript("luaex_api.lua");
 
@@ -311,7 +311,7 @@ namespace KeraLuaEx.Test
             // Reset stack.
             _l.SetTop(0);
 
-            var tbl = api!.DoOperation("a string", 9876);
+            var tbl = h.DoOperation("a string", 9876);
             Assert.IsInstanceOf<TableEx>(tbl);
             //Debug.WriteLine(tbl!.Dump("api_ret"));
             Assert.AreEqual(2, tbl!.Count);
