@@ -1,5 +1,7 @@
 # KeraLuaEx
 
+============ Relocated to https://github.com/cepthomas/LuaInterop ===============
+
 KeraLuaEx is a modified version of [KeraLua 1.3.4](https://github.com/NLua/KeraLua/tree/v1.3.4)
 with new capabilities and some limitations.
 
