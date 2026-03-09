@@ -5,7 +5,7 @@
         <AssemblyName>KeraLuaEx</AssemblyName>
         <RootNamespace>KeraLuaEx</RootNamespace>
         <Deterministic>False</Deterministic>
-        <Version>1.2.0</Version>
+        <Version>2.0.0</Version>
         <!-- <Version>$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version> -->
         <Description>Enhanced KeraLua</Description>
         <Copyright>MIT License</Copyright>
@@ -19,20 +19,11 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
     </PropertyGroup>
+
     <ItemGroup>
       <Compile Remove="Test\**" />
       <EmbeddedResource Remove="Test\**" />
       <None Remove="Test\**" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Remove=".gitignore" />
-      <None Remove=".gitmodules" />
-      <None Remove="LICENSE" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Update="..\LBOT\lua54\lua54.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
     </ItemGroup>
 
 </Project>

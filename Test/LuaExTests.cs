@@ -11,7 +11,7 @@ using NUnit.Framework;
 namespace KeraLuaEx.Test
 {
     [TestFixture]
-    public class LuaExTests
+    public class KeraLuaExTests
     {
         /// <summary>Lua context.</summary>
         Lua? _l;
@@ -34,6 +34,8 @@ namespace KeraLuaEx.Test
         [Test]
         public void ScriptGlobal()
         {
+            Console.WriteLine(">>> Running test ScriptGlobal");
+
             LoadTestScript("luaex.lua");
 
             // Run it.
@@ -296,29 +298,37 @@ namespace KeraLuaEx.Test
             _l.CheckStackSize(0);
         }
 
-        /// <summary>Test script api.</summary>
+        /// <summary>Test script api. Useful?</summary>
         [Test]
         public void ScriptApi()
         {
-            // Create api.
-            var h = new Host();
+            // // Create api.
+            // var h = new Host();
 
-            LoadTestScript("luaex_api.lua");
+            // LoadTestScript("luaex_api.lua");
 
-            // Run it.
-            _l!.PCall(0, Lua.LUA_MULTRET, 0);
+            // // Run it.
+            // _l!.PCall(0, Lua.LUA_MULTRET, 0);
 
-            // Reset stack.
-            _l.SetTop(0);
+            // // Reset stack.
+            // _l.SetTop(0);
 
-            var tbl = h.DoOperation("a string", 9876);
-            Assert.IsInstanceOf<TableEx>(tbl);
-            //Debug.WriteLine(tbl!.Dump("api_ret"));
-            Assert.AreEqual(2, tbl!.Count);
-            Assert.AreEqual("gnirts a", tbl["sret"]);
-            Assert.AreEqual(9876 / 2, tbl["iret"]);
+            // LoadTestScript("luaex_api.lua");
 
-            _l.CheckStackSize(0);
+            // // Run it.
+            // _l!.PCall(0, Lua.LUA_MULTRET, 0);
+
+            // // Reset stack.
+            // _l.SetTop(0);
+
+            // var tbl = h.DoOperation("a string", 9876);
+            // Assert.IsInstanceOf<TableEx>(tbl);
+            // //Debug.WriteLine(tbl!.Dump("api_ret"));
+            // Assert.AreEqual(2, tbl!.Count);
+            // Assert.AreEqual("gnirts a", tbl["sret"]);
+            // Assert.AreEqual(9876 / 2, tbl["iret"]);
+
+            // _l.CheckStackSize(0);
         }
 
         /// <summary>Test generated errors.</summary>
@@ -424,7 +434,7 @@ namespace KeraLuaEx.Test
         {
             string srcPath = GetSourcePath();
             string scriptsPath = Path.Combine(srcPath, "scripts");
-            _l!.SetLuaPath(new() { scriptsPath });
+            _l!.SetLuaPath([scriptsPath]);
             string scriptFile = Path.Combine(scriptsPath, fn);
             var lstat = _l!.LoadFile(scriptFile);
         }

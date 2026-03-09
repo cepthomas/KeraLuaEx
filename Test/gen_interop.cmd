@@ -6,7 +6,7 @@ cls
 
 set "ODIR=%cd%"
 rem pushd ..\LBOT
-pushd C:\Dev\Lua\LuaBagOfTricks
+pushd C:\Dev\Lib\LuaBagOfTricks
 set LUA_PATH=;;"%ODIR%\?.lua";?.lua;
 lua gen_interop.lua -csh "%ODIR%\interop_spec.lua" "%ODIR%"
 popd

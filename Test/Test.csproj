@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!-- <OutputType>WinExe</OutputType> -->
         <OutputType>Exe</OutputType>
         <UseWindowsForms>True</UseWindowsForms>
         <TargetFramework>net8.0-windows</TargetFramework>
@@ -10,7 +9,7 @@
         <AssemblyName>KeraLuaEx.Test</AssemblyName>
         <RootNamespace>KeraLuaEx.Test</RootNamespace>
         <Deterministic>False</Deterministic>
-        <Version>1.2.0</Version>
+        <Version>2.0.0</Version>
         <!-- <Version>$([System.DateTime]::UtcNow.ToString(yy.MM.dd))</Version> -->
         <Description>KeraLuaEx test stuff</Description>
         <Copyright>MIT License</Copyright>
@@ -20,7 +19,14 @@
         <NoWarn>CA1822;CA1069;CS1591;IDE0059;IDE0051</NoWarn>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
+        <StartupObject></StartupObject>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="_new\**" />
+      <EmbeddedResource Remove="_new\**" />
+      <None Remove="_new\**" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\KeraLuaEx.csproj" />

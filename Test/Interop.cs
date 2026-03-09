@@ -24,7 +24,7 @@ namespace KeraLuaEx.Test
 
             // Get function.
             LuaType ltype = _l.GetGlobal("do_operation");
-            if (ltype != LuaType.Function) { throw new SyntaxException("", -1, $"Invalid lua function: do_operation"); }
+            if (ltype != LuaType.Function) { throw new SyntaxException("", -1, $"Invalid lua function do_operation"); }
 
             // Push arguments.
             _l.PushString(arg_one);
@@ -60,7 +60,7 @@ namespace KeraLuaEx.Test
             // Get arguments
             string? msg = null;
             if (l.IsString(1)) { msg = l.ToString(1); }
-            else { throw new SyntaxException("", -1, "Invalid arg type: printex(msg)"); }
+            else { throw new SyntaxException("", -1, "Invalid arg type printex(msg)"); }
 
             // Do the work. Always one result.
             bool ret = PrintExCb(msg);
@@ -81,7 +81,7 @@ namespace KeraLuaEx.Test
             // Get arguments
             bool? on = null;
             if (l.IsBoolean(1)) { on = l.ToBoolean(1); }
-            else { throw new SyntaxException("", -1, "Invalid arg type: timer(on)"); }
+            else { throw new SyntaxException("", -1, "Invalid arg type timer(on)"); }
 
             // Do the work. Always one result.
             double ret = TimerCb(on);

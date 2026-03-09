@@ -10,10 +10,6 @@ using System.ComponentModel;
 using KeraLuaEx.Test;
     
 
-// Entry.
-var app = new Host();
-app.Dispose();
-
 namespace KeraLuaEx.Test
 {
     public partial class Host : IDisposable
@@ -37,7 +33,7 @@ namespace KeraLuaEx.Test
             Lua.LogMessage += (object? _, Lua.LogEventArgs a) => Console.WriteLine(a.Message);
             //Lua.LogMessage += (object? _, Lua.LogEventArgs a) => Log($"[{a.Category}] {a.Message}");
 
-            LuaExTests tests = new();
+            KeraLuaExTests tests = new();
             try
             {
                 tests.Setup();

@@ -1,6 +1,5 @@
-# KeraLuaEx
 
-============ Relocated to https://github.com/cepthomas/LuaInterop ===============
+# KeraLuaEx
 
 KeraLuaEx is a modified version of [KeraLua 1.3.4](https://github.com/NLua/KeraLua/tree/v1.3.4)
 with new capabilities and some limitations.
@@ -18,7 +17,7 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 
 ## Innards
 - Uses Lua 5.4.6 x64. Windows only right now.
-- .NET6/C# SDK project.
+- .NET8/C# SDK project.
 - Turned on nullable.
 - Integers fixed at 32 bit.
 
@@ -47,7 +46,6 @@ The core KeraLua code is cleaned up but structurally and functionally the same.
 Scripts can be structured as "everything is a global" or a modular model (see `LuaExTests.cs`):
 - Global: see `ScriptWithGlobal()` in conjunction with the script `luaex.lua`.
 - Modular: see `ScriptWithModule()` in conjunction with the script `luaex_mod.lua`.
-
 
 In reality the simple global approach makes more sense for plain old scripts but the option is there to mix and match.
 
