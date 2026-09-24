@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="KeraLuaEx.csproj" />
+  <Project Path="Test/Test.csproj" />
+</Solution>
